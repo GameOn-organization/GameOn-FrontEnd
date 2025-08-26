@@ -1,50 +1,27 @@
-# Welcome to your Expo app 👋
+# GameOn
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is a university project's final assignment of the course Systems Analysis and Development.
+It's still under development so do not mess with the branches.
 
-## Get started
+## Technology
 
-1. Install dependencies
+We chose to use React Native and Expo as framework, our final project needs to run on mobiles both Android and IOS, and we came to the conclusion that Web is a great extra.
 
-   ```bash
-   npm install
-   ```
+## About Execution
 
-2. Start the app
+Run `npm install` to install dependecies if there is a need.
+Run `npx expo start` to start server at localhost port 8081. Use the `-c` flag to clean the cache as starts.
+If Expo Go isn't starting the project, try `npm i -g @expo/ngrok@latest` then `npx expo start -c --tunnel`.
 
-   ```bash
-   npx expo start
-   ```
+## Branches
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- main
+  DO NOT COMMIT if there is no need to fix incompatibilities;
+  DO NOT MERGE or PUSH unless the code is approved;
+ 
+- dev
+  DO NOT COMMIT if the code is in any form of unstable;
+  DO NOT MERGE or PUSH unstable code unless it is fixed and approved;
+  
+- unstable
+  If the code is presenting errors, bugs, or unintentional comportament, THIS BRANCH SHOULD BE USED.
