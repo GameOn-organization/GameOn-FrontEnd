@@ -19,17 +19,14 @@ export default function Index() {
 
         <TextInput
           placeholder="Email ou Telefone"
-          // leftIcon={<Icon source="camera" size={20} />}
-          // containerStyle={styles.inputContainer}
-          // inputStyle={styles.input}
-          // leftIconContainerStyle={styles.iconContainer}
+          style={[styles.input, {marginBottom: 15}]}
+          autoComplete="email"
+          inputMode="email"
         />
         <TextInput
           placeholder="Senha"
           // errorStyle={styles.errorText}
           // errorMessage="Senha inválida"
-          // leftIcon={<Icon source="camera" size={20} />}
-          // leftIconContainerStyle={styles.iconContainer}
           // rightIcon={
           //   <TouchableOpacity
           //     onPress={() => setShowPassword(!showPassword)}
@@ -39,31 +36,28 @@ export default function Index() {
           //     <Icon source="camera" size={20} />
           //   </TouchableOpacity>
           // }
-          // inputStyle={styles.input}
+          style={styles.input}
           autoCapitalize="none"
           autoComplete="password"
           autoCorrect={false}
-          textContentType="password"
+          inputMode="text"
           secureTextEntry={!showPassword}
-          // containerStyle={styles.inputContainer}
         />
 
-          {/* Pressing this button will navigate to the home screen */ }
-        <TouchableOpacity style={styles.button} onPress={() => router.navigate("@/(tabs)/home")}>
-          {/* <Icon name="sign-in" type="font-awesome" color="#fff" /> */}
-          <Icon source="camera" size={20} />
+        <TouchableOpacity style={styles.button} onPress={() => router.navigate("(tabs)/home")}>
+          <Icon source="login" size={20} color="white"/>
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
         <View style={styles.linkContainer}>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.navigate("@/auth/forgot-password")}>
+        <TouchableOpacity onPress={() => router.navigate("auth/forgot-password")}>
           <Text style={styles.linkText}>Esqueci minha senha</Text>
         </TouchableOpacity>
 
           <View style={styles.row}>
             <Text style={styles.text}>Ainda não tem uma conta? </Text>
-            <TouchableOpacity style={styles.button} onPress={() => router.navigate("@/auth/create-account")}>
+            <TouchableOpacity onPress={() => router.navigate("auth/create-account")}>
                 <Text style={styles.linkText}>Cadastre-se</Text>
             </TouchableOpacity>
           </View>
@@ -76,14 +70,12 @@ export default function Index() {
         </View>
 
         <TouchableOpacity style={styles.button} onPress={() => console.log("Entrar com Google pressed")}>
-          {/* <Icon name="logo-google" type="ionicon" color="#fff" /> */}
-          <Icon source="camera" size={20} />
+          <Icon source="google" size={20} color="white" />
           <Text style={styles.buttonText}>Entrar com Google</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => console.log("Entrar com Apple pressed")}>
-          {/* <Icon name="logo-apple" type="ionicon" color="#fff" /> */}
-          <Icon source="camera" size={20} />
+          <Icon source="apple" size={20} color="white" />
           <Text style={styles.buttonText}>Entrar com Apple</Text>
         </TouchableOpacity>
       </View>
@@ -165,6 +157,7 @@ const styles = StyleSheet.create({
   linkText: {
     color: "blue",
     fontSize: 16,
+    textDecorationLine: "underline",
   },
   row: {
     flexDirection: "row",

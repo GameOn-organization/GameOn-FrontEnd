@@ -2,8 +2,10 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { Icon } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 
 export default function ForgotPassword() {
+    const router = useRouter();
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Esqueci minha senha</Text>
@@ -21,13 +23,12 @@ export default function ForgotPassword() {
                 onSubmitEditing={() => console.log("E-mail enviado")}
             />
             <TouchableOpacity style={styles.button} onPress={() => console.log("E-mail enviado")}>
-                {/* <Icon name="envelope" type="font-awesome" color="#fff" /> */}
-                <Icon source="camera" size={20} />
+                <Icon source="email" size={20} color="white" />
                 <Text style={styles.buttonText}>Enviar e-mail de recuperação</Text>
             </TouchableOpacity>
-            <Link href="/" style={styles.link}>
+            <TouchableOpacity style={styles.link} onPress={() => router.navigate("/")}>
                 <Text style={styles.linkText}>Voltar para o login</Text>
-            </Link>
+            </TouchableOpacity>
         </View>
     );
 }
