@@ -5,7 +5,18 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-nativ
 
 export default function Index() {
   const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+
+  const handleLogin = () => {
+        if (password != "1234") {
+            setErrorMessage("As senhas não coincidem");
+        } else {
+            setErrorMessage(""); // Clear error message
+        }
+  };
 
   return (
     <View style={styles.container}>
@@ -22,27 +33,22 @@ export default function Index() {
           style={[styles.input, {marginBottom: 15}]}
           autoComplete="email"
           inputMode="email"
+          placeholderTextColor="gray"
         />
         <TextInput
           placeholder="Senha"
-          // errorStyle={styles.errorText}
-          // errorMessage="Senha inválida"
-          // rightIcon={
-          //   <TouchableOpacity
-          //     onPress={() => setShowPassword(!showPassword)}
-          //     style={styles.iconButton}
-          //   >
-          //     {/* <Icon name={showPassword ? "eye" : "eye-slash"} type="font-awesome" color="#333" /> */}
-          //     <Icon source="camera" size={20} />
-          //   </TouchableOpacity>
-          // }
+          onChangeText={(value) => setPassword(value)}
           style={styles.input}
           autoCapitalize="none"
           autoComplete="password"
           autoCorrect={false}
           inputMode="text"
           secureTextEntry={!showPassword}
+          placeholderTextColor="gray"
         />
+        {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
 
         <TouchableOpacity style={styles.button} onPress={() => router.navigate("(tabs)/home")}>
           <Icon source="login" size={20} color="white"/>
