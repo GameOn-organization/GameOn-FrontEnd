@@ -48,6 +48,7 @@ export default function CreateAccount() {
                         autoCorrect={false}
                         keyboardType="phone-pad"
                         style={styles.input}
+                        placeholderTextColor="gray"
                     />
                     <TextInput
                         placeholder="Email"
@@ -56,6 +57,7 @@ export default function CreateAccount() {
                         autoCorrect={false}
                         keyboardType="email-address"
                         style={styles.input}
+                        placeholderTextColor="gray"
                     />
                     <TextInput
                         placeholder="Senha"
@@ -65,6 +67,7 @@ export default function CreateAccount() {
                         secureTextEntry={true}
                         onChangeText={(value) => setPassword(value)} // Update password state
                         style={styles.input}
+                        placeholderTextColor="gray"
                     />
                     <TextInput
                         placeholder="Confirmar Senha"
@@ -75,6 +78,7 @@ export default function CreateAccount() {
                         secureTextEntry={true}
                         onChangeText={(value) => setConfirmPassword(value)} // Update confirmPassword state
                         style={styles.input}
+                        placeholderTextColor="gray"
                     />
                     {errorMessage ? (
                         <Text style={styles.errorText}>{errorMessage}</Text>

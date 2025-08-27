@@ -17,21 +17,7 @@ export default function Community() {
 
                 <TextInput
                     placeholder="Buscar na comunidade"
-                    // leftIcon={<Icon name="search" type="font-awesome" />}
-                    // leftIcon={<Icon source="camera" size={20} />}
-                    // rightIcon={
-                    //     // <Icon
-                    //     //     name="filter"
-                    //     //     type="font-awesome"
-                    //     //     color="#000"
-                    //     //     onPress={() => console.log()}
-                    //     // />
-                    //     <Icon source="camera" size={20} />
-                    // }
-                    // containerStyle={styles.inputContainer}
-                    // inputStyle={styles.input}
-                    // leftIconContainerStyle={{ marginRight: 10 }}
-                    // rightIconContainerStyle={{ marginLeft: 10 }}
+                    style={styles.input}
                 />
 
             </View>
