@@ -1,20 +1,18 @@
+import { Icon } from 'react-native-paper';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: 'black',
+        tabBarInactiveTintColor: 'gray',
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
@@ -30,35 +28,60 @@ export default function TabLayout() {
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              size={28}
+              source="home"
+              color={focused ? 'black' : 'gray'} />
+          ),
         }}
       />
       <Tabs.Screen
         name="notification"
         options={{
           title: 'Notificações',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              size={28}
+              source="bell"
+              color={focused ? 'black' : 'gray'} />
+          ),
         }}
       />
       <Tabs.Screen
         name="community"
         options={{
           title: 'Comunidade',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              size={28}
+              source="human-greeting"
+              color={focused ? 'black' : 'gray'} />
+          ),
         }}
       />
       <Tabs.Screen
         name="events"
         options={{
           title: 'Eventos',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              size={28}
+              source="calendar-alert"
+              color={focused ? 'black' : 'gray'} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              size={28}
+              source="account"
+              color={focused ? 'black' : 'gray'} />
+          ),
         }}
       />
     </Tabs>
