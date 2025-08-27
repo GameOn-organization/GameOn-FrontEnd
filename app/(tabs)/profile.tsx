@@ -1,4 +1,4 @@
-import { Icon } from "react-native-paper";
+import { Icon, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -34,17 +34,15 @@ export default function Profile() {
               setModalTransparent(!modalTransparent);
           }}
         >
-          {/* <Icon
-            name="arrow-back"
-            type="ionicon"
-            color="black"
+          <IconButton
+            icon="arrow-left"
             size={24}
+            color="black"
             onPress={() => {
               setEditVisible(!editVisible),
                 setModalTransparent(!modalTransparent);
             }}
-          /> */}
-          <Icon source="camera" size={20} />
+          />
           <View style={[styles.background]}>
             <Formulario />
           </View>
@@ -67,17 +65,15 @@ export default function Profile() {
               justifyContent: "center",
             }}
           >
-            {/* <Icon
-              name="arrow-back"
-              type="ionicon"
-              color="black"
+            <IconButton
+              icon="arrow-left"
               size={24}
+              color="black"
               onPress={() => {
                 setSettingsVisible(!settingsVisible),
                   setModalTransparent(!modalTransparent);
               }}
-            /> */}
-            <Icon source="camera" size={20} />
+            />
             <TouchableOpacity style={styles.button}>
               <Text
                 style={styles.buttonText}
@@ -128,22 +124,18 @@ export default function Profile() {
               setSettingsVisible(true), setModalTransparent(false);
             }}
           >
-            {/* <Icon
-              name="settings-outline"
-              type="ionicon"
-              color="white"
-              size={24}
-            /> */}
-            <Icon source="camera" size={20} />
+            <IconButton
+              icon="settings-helper"
+              size={30}
+              iconColor="white"
+            />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.navigate("/")}>
-            {/* <Icon
-              name="log-out-outline"
-              type="ionicon"
-              color="white"
+            <IconButton
+              icon="logout"
               size={24}
-            /> */}
-            <Icon source="camera" size={20} />
+              iconColor="white"
+            />
           </TouchableOpacity>
         </View>
 
@@ -158,23 +150,20 @@ export default function Profile() {
         {/* Bottom Section */}
         <View style={[styles.background, styles.bottomSection]}>
           <View style={styles.actionRow}>
-            <TouchableOpacity onPress={() => console.log("Add pressed")}>
-              {/* <Icon name="add" type="ionicon" color="black" size={24} /> */}
-              <Icon source="camera" size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity
+            <IconButton
+              icon="plus"
+              size={24}
+              color="black"
+              onPress={() => console.log("Add pressed")}
+            />
+            <IconButton
+              icon="pencil-outline"
+              size={24}
+              color="black"
               onPress={() => {
                 setEditVisible(true), setModalTransparent(false);
               }}
-            >
-              {/* <Icon
-                name="pencil-outline"
-                type="ionicon"
-                color="black"
-                size={24}
-              /> */}
-              <Icon source="camera" size={20} />
-            </TouchableOpacity>
+            />
           </View>
 
           <Text style={styles.userName}>Nome do Usuário</Text>
@@ -255,20 +244,16 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   imageContainer: {
-    position: "absolute",
-    top: "30%",
-    left: "50%",
     // transform: [{ translateX: -85 }, { translateY: -75 }],
     width: 175,
     height: 175,
     borderRadius: 100,
-    // overflow: "hidden",
+    overflow: "hidden",
     backgroundColor: "#fff",
     borderWidth: 5,
     borderColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1,
   },
   image: {
     width: "100%",

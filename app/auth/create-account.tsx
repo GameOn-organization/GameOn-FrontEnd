@@ -1,4 +1,4 @@
-import { Icon } from "react-native-paper";
+import { IconButton, Icon } from "react-native-paper";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -28,13 +28,12 @@ export default function CreateAccount() {
     return (
         <View style={styles.container}>
             <View style={styles.form}>
-                <TouchableOpacity
+                <IconButton
+                    icon="arrow-left"
+                    size={20}
+                    iconColor="black"
                     onPress={() => router.navigate("/")}
-                    style={[styles.backLink, {cursor: 'pointer'}]}
-                >
-                    {/* <Icon name="arrow-back" type="ionicon" color="#000" /> */}
-                    <Icon source="camera" size={20} />
-                </TouchableOpacity>
+                    style={styles.backLink} />
                 <View style={{ width: "100%", alignItems: "center" }}>
                     <Text style={styles.header}>
                         Game On
@@ -47,45 +46,25 @@ export default function CreateAccount() {
                         autoCapitalize="none"
                         autoComplete="tel"
                         autoCorrect={false}
-                        textContentType="telephoneNumber"
                         keyboardType="phone-pad"
-                        // leftIcon={<Icon name="phone" type="font-awesome" />}
-                        // leftIcon={<Icon source="camera" size={20} />}
-                        // containerStyle={styles.inputContainer}
-                        // inputStyle={styles.input}
-                        // leftIconContainerStyle={styles.iconContainer}
+                        style={styles.input}
                     />
                     <TextInput
                         placeholder="Email"
                         autoCapitalize="none"
                         autoComplete="email"
                         autoCorrect={false}
-                        textContentType="emailAddress"
                         keyboardType="email-address"
-                        // leftIcon={<Icon name="user" type="font-awesome" />}
-                        // leftIcon={<Icon source="camera" size={20} />}
-                        // containerStyle={styles.inputContainer}
-                        // inputStyle={styles.input}
-                        // leftIconContainerStyle={styles.iconContainer}
+                        style={styles.input}
                     />
                     <TextInput
                         placeholder="Senha"
                         autoCapitalize="none"
                         autoComplete="password"
                         autoCorrect={false}
-                        textContentType="password"
-                        // leftIcon={
-                        //     password === confirmPassword
-                        //         // ? <Icon name="lock" type="entypo" />
-                        //         // : <Icon name="lock-open" type="entypo" />
-                        //         ? <Icon source="camera" size={20} />
-                        //         : <Icon source="camera" size={20} />
-                        // }
                         secureTextEntry={true}
-                        // containerStyle={styles.inputContainer}
-                        // inputStyle={styles.input}
-                        // leftIconContainerStyle={styles.iconContainer}
                         onChangeText={(value) => setPassword(value)} // Update password state
+                        style={styles.input}
                     />
                     <TextInput
                         placeholder="Confirmar Senha"
@@ -93,26 +72,16 @@ export default function CreateAccount() {
                         autoComplete="password"
                         autoCorrect={false}
                         textContentType="password"
-                        // leftIcon={
-                        //     password === confirmPassword
-                        //         // ? <Icon name="lock" type="entypo" />
-                        //         // : <Icon name="lock-open" type="entypo" />
-                        //         ? <Icon source="camera" size={20} />
-                        //         : <Icon source="camera" size={20} />
-                        // }
                         secureTextEntry={true}
-                        // containerStyle={styles.inputContainer}
-                        // inputStyle={styles.input}
-                        // leftIconContainerStyle={styles.iconContainer}
                         onChangeText={(value) => setConfirmPassword(value)} // Update confirmPassword state
+                        style={styles.input}
                     />
                     {errorMessage ? (
                         <Text style={styles.errorText}>{errorMessage}</Text>
                     ) : null}
                 </View>
                 <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
-                    {/* <Icon name="user-plus" type="font-awesome" color="#fff" /> */}
-                    <Icon source="camera" size={20} />
+                    <Icon source="account-plus" size={20} color="#fff" />
                     <Text style={styles.buttonText}>Criar conta</Text>
                 </TouchableOpacity>
             </View>
@@ -170,6 +139,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
         backgroundColor: "#fff",
+        marginBottom: 15,
     },
     iconContainer: {
         marginRight: 10,
