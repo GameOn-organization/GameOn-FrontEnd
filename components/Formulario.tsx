@@ -35,7 +35,9 @@ export default function Formulario() {
     const [selected1, setSelected1] = useState<string[]>([]);
     const [selected2, setSelected2] = useState<string[]>([]);
 
+    const dateMin = new Date(new Date().getFullYear()-100, new Date().getMonth(), new Date().getDate())
     const dateMax = new Date(new Date().getFullYear()-18, new Date().getMonth(), new Date().getDate())
+    
     const [date, setDate] = useState(dateMax);
     const [modeDate, setModeDate] = useState('date');
     const [showDate, setShowDate] = useState(false);
@@ -124,6 +126,18 @@ export default function Formulario() {
         })();
     }, []);
 
+    function calcularIdade(dataNascimento) {
+        const dataAtual = new Date();
+        const dataNasc = new Date(dataNascimento);
+        let idade = dataAtual.getFullYear() - dataNasc.getFullYear();
+        const mesAtual = dataAtual.getMonth()
+        const mesNasc = dataNasc.getMonth();
+        if (mesAtual < mesNasc || (mesAtual === mesNasc && dataAtual.getDate() < dataNasc.getDate())) {
+            idade--;
+        }
+        return idade;
+    }
+
     return (
         <LinearGradient
             colors={["#667eea", "#764ba2"]}
@@ -176,19 +190,22 @@ export default function Formulario() {
                     />
                     {showDate && (
                         <DateTimePicker
-                        testID="dateTimePicker"
+                        minimumDate={dateMin}
                         maximumDate={dateMax}
                         value={date}
                         mode={modeDate}
                         is24Hour={true}
+                        //Android: {default, spinner, calendar, clock}
+                        //iOS: {default, spinner, compact, inline}
                         display="default"
+                        design="default" //default, material
                         onChange={onChange}
-                        />)
-                    }
+                        />
+                    )}
                     <TextInput
                         style={styles.input}
                         onChangeText={setIdade}
-                        value={date.toLocaleDateString()}
+                        value={date.toLocaleDateString() + " - (" + calcularIdade(date) + " anos)"}
                         editable={true}
                         placeholder="Idade"
                         placeholderTextColor="#999"

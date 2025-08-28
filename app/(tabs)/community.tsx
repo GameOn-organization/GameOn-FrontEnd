@@ -1,6 +1,6 @@
 import React from "react";
-import { Dimensions, Text, TextInput, SafeAreaView, StyleSheet } from "react-native";
-import { Icon } from "react-native-paper";
+import { Dimensions, Text, SafeAreaView, StyleSheet } from "react-native";
+import { Icon, IconButton, TextInput } from "react-native-paper";
 import { Stack } from "expo-router";
 
 export default function Community() {
@@ -13,14 +13,27 @@ export default function Community() {
                     headerStyle: styles.header,
                 }}
             />
-            <SafeAreaView>
-
+            <SafeAreaView style={styles.inputContainer}>
                 <TextInput
-                    placeholder="Buscar na comunidade"
+                    placeholder="Buscar na Comunidade"
                     style={styles.input}
+                    left={<TextInput.Icon
+                                icon="search-web"
+                                color="black"
+                                size={30}
+                                style={{ margin: 'auto'}}
+                                onPress={() => console.log('Pesquisar')}
+                            />}
+                    right={<TextInput.Icon
+                                icon="pencil-outline"
+                                color="black"
+                                size={30}
+                                style={{ margin: 'auto', paddingRight: 20 }}
+                                onPress={() => console.log('Editar Local')}
+                            />}
                 />
-
             </SafeAreaView>
+            
         </SafeAreaView>
     );
 }
@@ -53,13 +66,21 @@ const styles = StyleSheet.create({
     inputContainer: {
         width: "100%",
         marginBottom: 20,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
     },
     input: {
+        backgroundColor: "#e0e0e0",
+        width: width * 0.85,
+        height: 30,
         color: "#333",
         borderColor: "#ccc",
         borderWidth: 1,
         padding: 10,
         borderRadius: 5,
+        justifyContent: "center",
+        alignItems: "center",
     },
     iconContainer: {
         marginRight: 10,
