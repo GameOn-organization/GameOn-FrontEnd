@@ -28,7 +28,7 @@ export default function TabLayout() {
         name="home"
         options={{
           name: 'home',
-          title: 'Para Você',
+          title: 'Perto de Você',
           tabBarLabel: 'Home',
           headerTitleAlign: 'center',
           headerTitleStyle: { fontSize: 20, fontWeight: 'bold', decorationLine: 'underline' },

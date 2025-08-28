@@ -11,13 +11,13 @@ import {
   SafeAreaView,
   ScrollView,
 } from "react-native";
-import { Drawer } from 'expo-router/drawer';
+import { Drawer } from "expo-router/drawer";
 import Formulario from "../../components/Formulario";
 import { Switch } from "../../components/Switch";
 
 export default function Profile() {
   const router = useRouter();
-
+  
   const [modalTransparent, setModalTransparent] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
@@ -40,7 +40,7 @@ export default function Profile() {
             icon="arrow-left"
             size={24}
             iconColor="white"
-            style={{backgroundColor: '#667eea'}}
+            style={{ backgroundColor: "#667eea" }}
             onPress={() => {
               setEditVisible(!editVisible),
                 setModalTransparent(!modalTransparent);
@@ -117,83 +117,74 @@ export default function Profile() {
             </TouchableOpacity>
           </SafeAreaView>
         </Modal>
-        
-        <ScrollView>
 
-          {/* Top Section */}
-          <SafeAreaView style={[styles.background, styles.topSection]}>
-            <TouchableOpacity
+        {/* Top Section */}
+        <SafeAreaView style={[styles.background, styles.topSection]}>
+          <TouchableOpacity
+            onPress={() => {
+              setSettingsVisible(true), setModalTransparent(false);
+            }}
+          >
+            <IconButton
+              icon="dots-vertical-circle-outline"
+              size={30}
+              iconColor="white"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.navigate("/")}>
+            <IconButton icon="logout" size={24} iconColor="white" />
+          </TouchableOpacity>
+        </SafeAreaView>
+
+        {/* Profile Image */}
+        <SafeAreaView style={styles.imageContainer}>
+          <Image
+            source={require("../../assets/images/icon.jpeg")}
+            style={styles.image}
+          />
+        </SafeAreaView>
+
+        {/* Bottom Section */}
+        <SafeAreaView style={[styles.background, styles.bottomSection]}>
+          <SafeAreaView style={styles.actionRow}>
+            <IconButton
+              icon="plus"
+              size={24}
+              color="black"
+              onPress={() => console.log("Add pressed")}
+            />
+            <IconButton
+              icon="pencil-outline"
+              size={24}
+              color="black"
               onPress={() => {
-                setSettingsVisible(true), setModalTransparent(false);
+                setEditVisible(true), setModalTransparent(false);
               }}
-            >
-              <IconButton
-                icon="dots-vertical-circle-outline"
-                size={30}
-                iconColor="white"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.navigate("/")}>
-              <IconButton
-                icon="logout"
-                size={24}
-                iconColor="white"
-              />
-            </TouchableOpacity>
-          </SafeAreaView>
-
-          {/* Profile Image */}
-          <SafeAreaView style={styles.imageContainer}>
-            <Image
-              source={require("../../assets/images/icon.jpeg")}
-              style={styles.image}
             />
           </SafeAreaView>
 
-          {/* Bottom Section */}
-          <SafeAreaView style={[styles.background, styles.bottomSection]}>
-            <SafeAreaView style={styles.actionRow}>
-              <IconButton
-                icon="plus"
-                size={24}
-                color="black"
-                onPress={() => console.log("Add pressed")}
-              />
-              <IconButton
-                icon="pencil-outline"
-                size={24}
-                color="black"
-                onPress={() => {
-                  setEditVisible(true), setModalTransparent(false);
-                }}
-              />
-            </SafeAreaView>
+          <Text style={styles.userName}>Nome do Usuário</Text>
+          <Text style={styles.description}>Descrição</Text>
 
-            <Text style={styles.userName}>Nome do Usuário</Text>
-            <Text style={styles.description}>Descrição</Text>
+          <Switch activeTab={activeTab} onChangeTab={setActiveTab} />
 
-            <Switch activeTab={activeTab} onChangeTab={setActiveTab} />
-
-            {/* Conteúdo */}
-            <SafeAreaView
-              style={[
-                styles.form,
-                {
-                  width: "80%",
-                  padding: 20,
-                  borderBottomLeftRadius: 0,
-                  borderBottomRightRadius: 0,
-                },
-              ]}
-            >
-              {activeTab === "posts" ? (
-                <Text style={styles.contentText}>Conteúdo dos Posts</Text>
-              ) : (
-                <Text style={styles.contentText}>Informações do usuário</Text>
-              )}
-            </SafeAreaView>
+          {/* Conteúdo */}
+          <SafeAreaView
+            style={[
+              styles.form,
+              {
+                width: width * 0.8,
+                padding: 20,
+              },
+            ]}
+          >
+            {activeTab === "posts" ? (
+              <Text style={styles.contentText}>Conteúdo dos Posts</Text>
+            ) : (
+              <Text style={styles.contentText}>Informações do usuário</Text>
+            )}
           </SafeAreaView>
-        </ScrollView>
+        </SafeAreaView>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -242,12 +233,12 @@ const styles = StyleSheet.create({
     flex: 0.7,
     backgroundColor: "#fff",
     flexDirection: "column",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
-    paddingTop: 20,
   },
   imageContainer: {
-    // transform: [{ translateX: -85 }, { translateY: -75 }],
+    transform: [{ translateX: width * 0.27 }, { translateY: 175 }],
+    position: "absolute",
     width: 175,
     height: 175,
     borderRadius: 100,
@@ -257,6 +248,7 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1,
   },
   image: {
     width: "100%",
