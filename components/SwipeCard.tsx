@@ -161,7 +161,7 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>(
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width - 40;
-const CARD_HEIGHT = height * 0.8;
+const CARD_HEIGHT = height * 0.75;
 
 const styles = StyleSheet.create({
     container: {

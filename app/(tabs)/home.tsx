@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { Dimensions, View, StyleSheet } from "react-native";
 import { SwipeDeck } from "@/components/SwipeDeck";
 
 type Tag = {
@@ -68,8 +68,12 @@ const Home = () => {
     );
 };
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
     container: {
+        height: height,
+        width: width,
         flex: 1,
         backgroundColor: "#fafafa",
         paddingTop: 50,

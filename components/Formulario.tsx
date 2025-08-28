@@ -1,14 +1,15 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { Icon, IconButton } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import {
+    Dimensions,
     Alert,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    SafeAreaView,
 } from 'react-native';
 import { MultiSelect } from 'react-native-element-dropdown';
 
@@ -28,25 +29,26 @@ export default function Formulario() {
     const [idade, setIdade] = useState('');
     const [sexo, setSexo] = useState('');
     const [localizacao, setLocalizacao] = useState('');
+    const [editaLocal, setEditaLocal] = useState(true);
     const [selected1, setSelected1] = useState<string[]>([]);
     const [selected2, setSelected2] = useState<string[]>([]);
 
     const data: DataItem[] = [
-        { label: 'Item 1', value: '1', icon: 'smileo' },
-        { label: 'Item 2', value: '2', icon: 'meh' },
-        { label: 'Item 3', value: '3', icon: 'frowno' },
-        { label: 'Item 4', value: '4', icon: 'star' },
-        { label: 'Item 5', value: '5', icon: 'like2' },
-        { label: 'Item 6', value: '6', icon: 'dislike2' },
-        { label: 'Item 7', value: '7', icon: 'hearto' },
-        { label: 'Item 8', value: '8', icon: 'checkcircleo' },
+        { label: 'Item 1', value: '1', icon: 'star' },
+        { label: 'Item 2', value: '2', icon: 'star-check-outline' },
+        { label: 'Item 3', value: '3', icon: 'star-circle' },
+        { label: 'Item 4', value: '4', icon: 'star-circle-outline' },
+        { label: 'Item 5', value: '5', icon: 'star-four-points' },
+        { label: 'Item 6', value: '6', icon: 'star-half' },
+        { label: 'Item 7', value: '7', icon: 'star-half-full' },
+        { label: 'Item 8', value: '8', icon: 'star-outline' },
     ];
 
     const renderItem = (item: DataItem) => (
-        <View style={styles.item}>
-            <AntDesign name={item.icon as any} size={20} color="black" style={styles.icon} />
+        <SafeAreaView style={styles.item}>
+            <Icon source={item.icon as any} size={20} color="black" style={styles.icon} />
             <Text style={styles.selectedTextStyle}>{item.label}</Text>
-        </View>
+        </SafeAreaView>
     );
 
     useEffect(() => {
@@ -54,11 +56,13 @@ export default function Formulario() {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permissão negada', 'Não foi possível acessar a localização');
+                console.log('Permissão de localização negada');
                 return;
             }
         
             let location = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = location.coords;
+            console.log('Coordenadas obtidas:', latitude, longitude);
         
             try {
                 const [address] = await Location.reverseGeocodeAsync({ latitude, longitude });
@@ -70,9 +74,10 @@ export default function Formulario() {
                 const pais = address.country || 'País';
         
                 setLocalizacao(`${cidade} - ${estado} - ${pais}`);
-                } else {
+            } else {
                 setLocalizacao(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-                }
+            }
+                setEditaLocal(false);
             } catch (error) {
                 console.log('Erro no reverseGeocodeAsync:', error);
                 setLocalizacao(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
@@ -80,55 +85,17 @@ export default function Formulario() {
         })();
     }, []);      
 
-    // const GOOGLE_API_KEY = '';
-
-    // useEffect(() => {
-    // (async () => {
-    //     try {
-    //     let { status } = await Location.requestForegroundPermissionsAsync();
-    //     if (status !== 'granted') {
-    //         Alert.alert('Permissão negada', 'Não foi possível acessar a localização');
-    //         return;
-    //     }
-
-    //     let { coords } = await Location.getCurrentPositionAsync({});
-    //     console.log('Coordenadas:', coords);
-
-    //     const { latitude, longitude } = coords;
-
-    //     // Chamada manual à API do Google
-    //     const response = await axios.get(
-    //         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
-    //     );
-
-    //     if (response.data.results.length > 0) {
-    //         const components = response.data.results[0].address_components;
-
-    //         const cidade = components.find(c => c.types.includes('locality'))?.long_name;
-    //         const estado = components.find(c => c.types.includes('administrative_area_level_1'))?.short_name;
-    //         const pais = components.find(c => c.types.includes('country'))?.long_name;
-
-    //         const enderecoFormatado = `${cidade || 'Cidade'} - ${estado || 'Estado'} - ${pais || 'País'}`;
-    //         console.log('Endereço formatado:', enderecoFormatado);
-    //         setLocalizacao(enderecoFormatado);
-    //     }
-
-    //     } catch (error) {
-    //     console.error('Erro ao obter localização:', error);
-    //     }
-    // })();
-    // }, []);
-
     return (
         <LinearGradient
             colors={['#667eea', '#764ba2']}
             style={styles.container}
         >
-            <View style={styles.formContainer}>
+            <SafeAreaView style={styles.formContainer}>
                 <Text style={styles.title}>Criar Perfil</Text>
                 
-                <View style={styles.inputContainer}>
-                    <AntDesign name="user" size={20} color="#667eea" style={styles.inputIcon} />
+                <SafeAreaView style={styles.inputContainer}>
+
+                    <Icon source="account" size={20} color="#667eea" style={styles.inputIcon} />
                     <TextInput
                         style={styles.input}
                         onChangeText={setNome}
@@ -137,10 +104,10 @@ export default function Formulario() {
                         placeholderTextColor="#999"
                         keyboardType="default"
                     />
-                </View>
+                </SafeAreaView>
 
-                <View style={styles.inputContainer}>
-                    <AntDesign name="filetext1" size={20} color="#667eea" style={styles.inputIcon} />
+                <SafeAreaView style={styles.inputContainer}>
+                    <Icon source="script-text" size={20} color="#667eea" style={styles.inputIcon} />
                     <TextInput
                         style={styles.input}
                         onChangeText={setDescricao}
@@ -150,10 +117,10 @@ export default function Formulario() {
                         keyboardType="default"
                         multiline
                     />
-                </View>
+                </SafeAreaView>
 
-                <View style={styles.inputContainer}>
-                    <AntDesign name="calendar" size={20} color="#667eea" style={styles.inputIcon} />
+                <SafeAreaView style={styles.inputContainer}>
+                    <Icon source="cake-variant" size={20} color="#667eea" style={styles.inputIcon} />
                     <TextInput
                         style={styles.input}
                         onChangeText={setIdade}
@@ -162,21 +129,22 @@ export default function Formulario() {
                         placeholderTextColor="#999"
                         keyboardType="numeric"
                     />
-                </View>
+                </SafeAreaView>
 
-                <View style={styles.inputContainer}>
-                    <AntDesign name="enviromento" size={20} color="#667eea" style={styles.inputIcon} />
+                <SafeAreaView style={styles.inputContainer}>
+                    <Icon source="map-marker" size={20} color="#667eea" style={styles.inputIcon} />
                     <TextInput
                         style={styles.input}
                         value={localizacao}
+                        editable={editaLocal}
                         onChangeText={setLocalizacao}
                         placeholder="Localização"
                         placeholderTextColor="#999"
                     />
-                </View>
+                </SafeAreaView>
 
-                <View style={styles.pickerContainer}>
-                    <AntDesign name="team" size={20} color="#667eea" style={styles.inputIcon} />
+                <SafeAreaView style={styles.pickerContainer}>
+                    <Icon source="border-color" size={20} color="#667eea" style={styles.inputIcon} />
                     <Picker
                         style={styles.picker}
                         selectedValue={sexo}
@@ -187,7 +155,7 @@ export default function Formulario() {
                         <Picker.Item label="Feminino" value="f" />
                         <Picker.Item label="Não-Binário" value="nb" />
                     </Picker>
-                </View>
+                </SafeAreaView>
 
                 <MultiSelect
                     style={styles.dropdown}
@@ -204,16 +172,16 @@ export default function Formulario() {
                     searchPlaceholder="Buscar..."
                     onChange={setSelected1}
                     renderLeftIcon={() => (
-                        <AntDesign style={styles.icon} color="#667eea" name="Safety" size={20} />
+                        <Icon style={styles.icon} color="#667eea" source="check" size={20} />
                     )}
                     renderItem={renderItem}
                     renderSelectedItem={(item, unSelect) => (
                         <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
-                            <View style={styles.selectedStyle}>
-                                <AntDesign name={item.icon as any} size={17} color="white" style={styles.icon} />
+                            <SafeAreaView style={styles.selectedStyle}>
+                                <Icon source={item.icon as any} size={17} color="white" style={styles.icon} />
                                 <Text style={styles.textSelectedStyle}>{item.label}</Text>
-                                <AntDesign color="white" name="delete" size={17} />
-                            </View>
+                                <Icon color="white" source="delete" size={17} />
+                            </SafeAreaView>
                         </TouchableOpacity>
                     )}
                 />
@@ -233,20 +201,20 @@ export default function Formulario() {
                     searchPlaceholder="Buscar..."
                     onChange={setSelected2}
                     renderLeftIcon={() => (
-                        <AntDesign style={styles.icon} color="#667eea" name="Safety" size={20} />
+                        <Icon style={styles.icon} color="#667eea" source="check" size={20} />
                     )}
                     renderItem={renderItem}
                     renderSelectedItem={(item, unSelect) => (
                         <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
-                            <View style={styles.selectedStyle}>
-                                <AntDesign name={item.icon as any} size={17} color="white" style={styles.icon} />
+                            <SafeAreaView style={styles.selectedStyle}>
+                                <Icon source={item.icon as any} size={17} color="white" style={styles.icon} />
                                 <Text style={styles.textSelectedStyle}>{item.label}</Text>
-                                <AntDesign color="white" name="delete" size={17} />
-                            </View>
+                                <Icon color="white" source="delete" size={17} />
+                            </SafeAreaView>
                         </TouchableOpacity>
                     )}
                 />
-            </View>
+            </SafeAreaView>
         </LinearGradient>
     );
 }

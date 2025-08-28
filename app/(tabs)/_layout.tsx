@@ -1,4 +1,4 @@
-import { Icon } from 'react-native-paper';
+import { Icon, IconButton } from 'react-native-paper';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
@@ -27,7 +27,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          name: 'home',
+          title: 'Para Você',
+          tabBarLabel: 'Home',
+          headerTitleAlign: 'center',
+          headerTitleStyle: { fontSize: 20, fontWeight: 'bold', decorationLine: 'underline' },
+          headerShown: true,
+          headerStyle: { backgroundColor:'#fafafa', borderBottomWidth: 0, shadowOpacity: 0, elevation: 0 },
+          headerRight: () => (
+            <IconButton
+              icon="chat"
+              size={40}
+              onPress={() => console.log('Abrir Chat')} //Drawer ou Tela de Chat
+            />
+          ),
           tabBarIcon: ({ color, focused }) => (
             <Icon
               size={28}

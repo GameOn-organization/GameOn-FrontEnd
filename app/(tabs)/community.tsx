@@ -1,11 +1,11 @@
 import React from "react";
-import { Text, TextInput, View, StyleSheet } from "react-native";
+import { Dimensions, Text, TextInput, SafeAreaView, StyleSheet } from "react-native";
 import { Icon } from "react-native-paper";
 import { Stack } from "expo-router";
 
 export default function Community() {
     return (
-        <View style={[styles.container, { justifyContent: "flex-start" }]}>
+        <SafeAreaView style={[styles.container, { justifyContent: "flex-start" }]}>
             <Stack.Screen
                 options={{
                     headerTitle: "Comunidade",
@@ -13,19 +13,24 @@ export default function Community() {
                     headerStyle: styles.header,
                 }}
             />
-            <View>
+            <SafeAreaView>
 
                 <TextInput
                     placeholder="Buscar na comunidade"
                     style={styles.input}
                 />
 
-            </View>
-        </View>
+            </SafeAreaView>
+        </SafeAreaView>
     );
 }
+
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
     container: {
+        height: height,
+        width: width,
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
