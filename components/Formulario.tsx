@@ -156,6 +156,7 @@ export default function Formulario() {
                     <TextInput
                         style={styles.input}
                         onChangeText={setNome}
+                        maxLength={40}
                         value={nome}
                         placeholder="Nome"
                         placeholderTextColor="#999"
@@ -173,6 +174,7 @@ export default function Formulario() {
                     <TextInput
                         style={styles.input}
                         onChangeText={setDescricao}
+                        maxLength={120}
                         value={descricao}
                         placeholder="Descrição"
                         placeholderTextColor="#999"
