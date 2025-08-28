@@ -2,7 +2,7 @@ import { IconButton, Icon } from "react-native-paper";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Platform,
+    Dimensions,
     StyleSheet,
     Text,
     TextInput,
@@ -93,7 +93,7 @@ export default function CreateAccount() {
     );
 }
 
-const width = "90%";
+const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
     container: {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     form: {
         justifyContent: "space-between",
         width: width,
-        height: "100%",
+        height: height * 0.7,
         maxWidth: 400,
         padding: 20,
         borderColor: "#ccc",

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { Dimensions, SafeAreaView, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 export default function ForgotPassword() {
     const router = useRouter();
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Esqueci minha senha</Text>
             <Text style={styles.description}>
                 Digite seu e-mail para receber instruções de recuperação de senha.
@@ -29,12 +29,16 @@ export default function ForgotPassword() {
             <TouchableOpacity style={styles.link} onPress={() => router.navigate("/")}>
                 <Text style={styles.linkText}>Voltar para o login</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 }
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
     container: {
+        width: width,
+        height: height,
         flex: 1,
         justifyContent: "center",
         alignItems: "center",

@@ -1,12 +1,12 @@
 import React from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Dimensions, Text, SafeAreaView, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { Icon } from "react-native-paper";
 import { Stack } from "expo-router";
 
 export default function Events() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
           headerTitle: "Eventos",
@@ -22,11 +22,16 @@ export default function Events() {
       <Text style={styles.description}>
         Aqui você pode ver os eventos disponíveis e criar novos eventos.
       </Text>
-    </View>
+    </SafeAreaView>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
+    height: height,
+    width: width,
     flex: 1,
     padding: 20,
     backgroundColor: "#f0f0f0",
