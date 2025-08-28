@@ -1,7 +1,7 @@
 import { Icon } from "react-native-paper";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, SafeAreaView } from "react-native";
 
 export default function Index() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,8 +19,8 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.form}>
+    <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.form}>
         <Text style={styles.header}>
           Game On
         </Text>
@@ -55,41 +55,41 @@ export default function Index() {
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
-        <View style={styles.linkContainer}>
+        <SafeAreaView style={styles.linkContainer}>
 
         <TouchableOpacity onPress={() => router.navigate("auth/forgot-password")}>
           <Text style={styles.linkText}>Esqueci minha senha</Text>
         </TouchableOpacity>
 
-          <View style={styles.row}>
+          <SafeAreaView style={styles.row}>
             <Text style={styles.text}>Ainda não tem uma conta? </Text>
             <TouchableOpacity onPress={() => router.navigate("auth/create-account")}>
                 <Text style={styles.linkText}>Cadastre-se</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+          </SafeAreaView>
+        </SafeAreaView>
 
-        <View style={styles.separatorContainer}>
-          <View style={styles.separator} />
+        <SafeAreaView style={styles.separatorContainer}>
+          <SafeAreaView style={styles.separator} />
           <Text style={styles.separatorText}>Ou</Text>
-          <View style={styles.separator} />
-        </View>
+          <SafeAreaView style={styles.separator} />
+        </SafeAreaView>
 
-        <TouchableOpacity style={styles.button} onPress={() => console.log("Entrar com Google pressed")}>
-          <Icon source="google" size={20} color="white" />
+        <TouchableOpacity style={[styles.button, {backgroundColor: '#aaa'}]} onPress={() => console.log("Entrar com Google pressed")}>
+          <Icon source="google" size={20} color="lightgreen" />
           <Text style={styles.buttonText}>Entrar com Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => console.log("Entrar com Apple pressed")}>
-          <Icon source="apple" size={20} color="white" />
+        <TouchableOpacity style={[styles.button, {backgroundColor: '#aaa'}]} onPress={() => console.log("Entrar com Apple pressed")}>
+          <Icon source="apple" size={20} color="black" />
           <Text style={styles.buttonText}>Entrar com Apple</Text>
         </TouchableOpacity>
-      </View>
-    </View>
+      </SafeAreaView>
+    </SafeAreaView>
   );
 }
 
-const width = "90%";
+const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   form: {
     width: width,
-    height: "100%",
+    height: height,
     maxWidth: 400,
     padding: 20,
     borderColor: "#ccc",

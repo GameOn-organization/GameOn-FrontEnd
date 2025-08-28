@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { Dimensions, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { Stack } from "expo-router";
 import { Notification } from "../../components/Notification";
 
@@ -54,7 +54,7 @@ export default function NotificationScreen() {
   };
 
   return (
-    <View style={styles.wrapper}>
+    <SafeAreaView style={styles.wrapper}>
       <Stack.Screen
         options={{
           headerTitle: "Notificações",
@@ -65,7 +65,7 @@ export default function NotificationScreen() {
       <Text style={styles.title}>Notificações</Text>
 
       {/* Filtros */}
-      <View style={styles.filterContainer}>
+      <SafeAreaView style={styles.filterContainer}>
         {filters.map((filter) => (
           <TouchableOpacity
             key={filter}
@@ -93,19 +93,23 @@ export default function NotificationScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </SafeAreaView>
 
       <ScrollView>
         {filteredNotifications.map((n, i) => (
           <Notification key={i} {...n} />
         ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   wrapper: {
+    height: height,
+    width: width,
     flex: 1,
     marginTop: 20,
     backgroundColor: "#fff",
