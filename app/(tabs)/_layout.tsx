@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Dimensions, Platform } from "react-native";
+import { SafeAreaView, Dimensions, Platform } from "react-native";
 import { Icon, IconButton } from "react-native-paper";
 import { Tabs, useRouter, useSegments } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -32,7 +32,6 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const translateX = useSharedValue(0);
     const isGestureActive = useSharedValue(false);
-    const [isChatOpen, setIsChatOpen] = useState(false);
 
     // Atualiza currentTabIndex com base na rota atual do Expo Router
     useEffect(() => {
@@ -40,20 +39,20 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
         const index = TAB_ROUTES.findIndex(
             (tab) => tab.name === currentSegment
         );
-        if (index !== -1 && index !== currentTabIndex) {
+        if (index !== -1 && index !== currentTabIndex && currentSegment !== "chat") {
             setCurrentTabIndex(index);
         }
-    }, [segments]);
+    }, segments);
 
     // Função para navegar para uma tab específica
     const navigateToTab = (index: number) => {
         if (
             index >= 0 &&
-            index < TAB_ROUTES.length - 1 &&
+            index < TAB_ROUTES.length &&
             index !== currentTabIndex
         ) {
             // console.log(`Navegando para a tab: ${TAB_ROUTES[index].name}`);
-            router.replace(TAB_ROUTES[index].path);
+            router.navigate(TAB_ROUTES[index].path);
         }
     };
 
@@ -87,7 +86,7 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                 } else if (
                     event.translationX < 0 &&
                     currentTabIndex < TAB_ROUTES.length - 1 &&
-                    !isChatOpen
+                    segments[segments.length - 1] !== "chat"
                 ) {
                     // Deslizar para a esquerda - próxima tab
                     runOnJS(navigateToTab)(currentTabIndex + 1);
@@ -126,78 +125,15 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
         };
     });
 
-    // Estilo para indicador de direção
-    const leftIndicatorStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(
-            translateX.value,
-            [0, screenWidth * 0.1],
-            [0, currentTabIndex > 0 ? 0.6 : 0],
-            Extrapolate.CLAMP
-        );
-
-        return {
-            opacity,
-            transform: [{ translateX: -20 }],
-        };
-    });
-
-    const rightIndicatorStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(
-            translateX.value,
-            [-screenWidth * 0.1, 0],
-            [currentTabIndex < TAB_ROUTES.length - 1 ? 0.6 : 0, 0],
-            Extrapolate.CLAMP
-        );
-
-        return {
-            opacity,
-            transform: [{ translateX: 20 }],
-        };
-    });
-
     return (
         <GestureDetector gesture={panGesture}>
-            <View style={{ flex: 1 }}>
-                {/* Indicadores de direção */}
-                <Animated.View
-                    style={[
-                        {
-                            position: "absolute",
-                            left: 20,
-                            top: "50%",
-                            zIndex: 1000,
-                            backgroundColor: "rgba(0,0,0,0.3)",
-                            borderRadius: 20,
-                            padding: 8,
-                        },
-                        isChatOpen ? null : leftIndicatorStyle,
-                    ]}
-                >
-                    <Icon source="chevron-left" size={24} color="white" />
-                </Animated.View>
-
-                <Animated.View
-                    style={[
-                        {
-                            position: "absolute",
-                            right: 20,
-                            top: "50%",
-                            zIndex: 1000,
-                            backgroundColor: "rgba(0,0,0,0.3)",
-                            borderRadius: 20,
-                            padding: 8,
-                        },
-                        isChatOpen ? null : rightIndicatorStyle,
-                    ]}
-                >
-                    <Icon source="chevron-right" size={24} color="white" />
-                </Animated.View>
-
+            <SafeAreaView style={{ flex: 1 }}>
                 <Animated.View style={[{ flex: 1 }, animatedStyle]}>
                     <Tabs
                         screenOptions={{
                             tabBarActiveTintColor: "black",
                             tabBarInactiveTintColor: "gray",
+                            animation: "shift",
                             headerShown: false,
                             tabBarButton: HapticTab,
                             tabBarBackground: TabBarBackground,
@@ -233,7 +169,6 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                                         icon="chat"
                                         size={40}
                                         onPress={() => {
-                                            setIsChatOpen(true);
                                             router.push("/(tabs)/chat");
                                         }}
                                     />
@@ -280,6 +215,11 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                             name="notification"
                             options={{
                                 title: "Notificações",
+                                tabBarBadgeStyle: {
+                                    color: "white",
+                                    backgroundColor: "red",
+                                },
+                                tabBarBadge: 4,
                                 tabBarIcon: ({ focused }) => (
                                     <Icon
                                         size={28}
@@ -321,7 +261,7 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                         />
                     </Tabs>
                 </Animated.View>
-            </View>
+            </SafeAreaView>
         </GestureDetector>
     );
 }
