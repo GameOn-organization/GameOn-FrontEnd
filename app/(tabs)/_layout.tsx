@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { SafeAreaView, Dimensions, Platform } from "react-native";
-import { Icon, IconButton } from "react-native-paper";
+import { Icon, IconButton, Badge } from "react-native-paper";
 import { Tabs, useRouter, useSegments } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -28,21 +28,22 @@ const TAB_ROUTES = [
 
 export default function SwipeTabsLayoutWithVisualFeedback() {
     const router = useRouter();
-    const segments = useSegments();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const translateX = useSharedValue(0);
     const isGestureActive = useSharedValue(false);
 
+    const segments = useSegments();
+    const lastSegment = segments[segments.length - 1];
     // Atualiza currentTabIndex com base na rota atual do Expo Router
     useEffect(() => {
-        const currentSegment = segments[segments.length - 1];
-        const index = TAB_ROUTES.findIndex(
-            (tab) => tab.name === currentSegment
-        );
-        if (index !== -1 && index !== currentTabIndex && currentSegment !== "chat") {
+        const index = TAB_ROUTES.findIndex((tab) => tab.name === lastSegment);
+        if (
+            index !== -1 &&
+            index !== currentTabIndex
+        ) {
             setCurrentTabIndex(index);
         }
-    }, segments);
+    }, [lastSegment]);
 
     // Função para navegar para uma tab específica
     const navigateToTab = (index: number) => {
@@ -85,8 +86,9 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                     runOnJS(navigateToTab)(currentTabIndex - 1);
                 } else if (
                     event.translationX < 0 &&
-                    currentTabIndex < TAB_ROUTES.length - 1 &&
-                    segments[segments.length - 1] !== "chat"
+                    currentTabIndex < TAB_ROUTES.length - 1
+                    && segments[segments.length - 1] !== "chat"
+                    && segments[segments.length - 1] !== "message"
                 ) {
                     // Deslizar para a esquerda - próxima tab
                     runOnJS(navigateToTab)(currentTabIndex + 1);
@@ -165,13 +167,25 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                                     elevation: 0,
                                 },
                                 headerRight: () => (
-                                    <IconButton
-                                        icon="chat"
-                                        size={40}
-                                        onPress={() => {
-                                            router.push("/(tabs)/chat");
-                                        }}
-                                    />
+                                    <>
+                                        <IconButton
+                                            icon="chat"
+                                            size={40}
+                                            onPress={() => {
+                                                router.navigate(
+                                                    "/(tabs)/messages/message"
+                                                );
+                                            }}
+                                        />
+                                        <Badge
+                                            size={22} // Tamanho do badge
+                                            style={{
+                                                position: "absolute",
+                                                top: 6,
+                                                right: 10,
+                                            }}
+                                        >33</Badge>
+                                    </>
                                 ),
                                 tabBarIcon: ({ focused }) => (
                                     <Icon
@@ -244,19 +258,12 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                             }}
                         />
 
+                        {/* EXCLUIDOS: */}
                         <Tabs.Screen
-                            name="chat"
+                            name="messages"
                             options={{
-                                title: "Chat",
                                 href: null, // Esconde o Botão da tab bar
-                                tabBarStyle: { display: "none" }, // Esconde a tab bar nesta tela
-                                tabBarIcon: ({ focused }) => (
-                                    <Icon
-                                        size={28}
-                                        source="chat"
-                                        color={focused ? "black" : "gray"}
-                                    />
-                                ),
+                                tabBarStyle: { display: "none" }, //Esconde a Tab Bar
                             }}
                         />
                     </Tabs>
