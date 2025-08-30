@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     StyleSheet,
     Text,
@@ -12,6 +12,7 @@ import {
     Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import * as NavigationBar from "expo-navigation-bar";
 
 export default function App() {
     const [message, setMessage] = useState("");
@@ -108,25 +109,16 @@ export default function App() {
         );
     };
 
+    useEffect(() => {
+        // Define comportamento imersivo (gestos trazem barra de volta, mas some de novo)
+        NavigationBar.setBehaviorAsync("overlay-swipe");
+        // Esconde barra de navegação
+        NavigationBar.setVisibilityAsync("hidden");
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar style="dark" />
-
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>H</Text>
-                    </View>
-                    <View>
-                        <Text style={styles.headerName}>Helena Silva</Text>
-                        <Text style={styles.headerStatus}>Active 10h ago</Text>
-                    </View>
-                </View>
-                <TouchableOpacity style={styles.callButton}>
-                    <Text style={styles.callButtonText}>📞</Text>
-                </TouchableOpacity>
-            </View>
 
             {/* Mensagens */}
             <KeyboardAvoidingView
