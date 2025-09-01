@@ -23,7 +23,9 @@ const TAB_ROUTES = [
     { name: "community", path: "/(tabs)/community" },
     { name: "events", path: "/(tabs)/events" },
     { name: "notification", path: "/(tabs)/notification" },
-    { name: "profile", path: "/(tabs)/profile" },
+    { name: "profile", path: "/(tabs)/profile", disableSwipe: true },
+    { name: "message", path: "messages/message", disableSwipe: true },
+    { name: "chat", path: "messages/chat", disableSwipe: true },
 ];
 
 export default function SwipeTabsLayoutWithVisualFeedback() {
@@ -59,6 +61,7 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
 
     // Gesto de pan (deslizar) com feedback visual melhorado
     const panGesture = Gesture.Pan()
+        .enabled(!TAB_ROUTES[currentTabIndex]?.disableSwipe)
         .onBegin(() => {
             isGestureActive.value = true;
         })
