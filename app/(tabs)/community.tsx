@@ -109,7 +109,7 @@ export default function Community() {
             <View style={styles.header}>
                 <View style={styles.searchContainer}>
                     <IconButton
-                        icon="web-search"
+                        icon="search-web"
                         size={20}
                         color="#666"
                         style={styles.searchIcon}
@@ -174,6 +174,7 @@ export default function Community() {
                 visible={modalVisible}
                 onRequestClose={closeModal}
             >
+                {/* TODO: Adicionar ScrollView */}
                 <View style={styles.modalOverlay}>
                     <TouchableOpacity
                         style={styles.modalBackdrop}
