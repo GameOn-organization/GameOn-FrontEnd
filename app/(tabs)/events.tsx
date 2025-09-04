@@ -1,60 +1,200 @@
-import React from "react";
-import { Dimensions, Text, SafeAreaView, StyleSheet } from "react-native";
-import { Link } from "expo-router";
-import { Icon } from "react-native-paper";
-import { Stack } from "expo-router";
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  Dimensions,
+} from 'react-native';
 
-export default function Events() {
+const { width } = Dimensions.get('window');
+
+export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerTitle: "Eventos",
-        //   headerRight: () => (
-        //     <Link href="/events/create" style={styles.createEventLink}>
-        //       <Icon name="plus" type="font-awesome" color="#fff" />
-        //       <Icon source="camera" size={20} />
-        //     </Link>
-        //   ),
-        }}
-      />
-      <Text style={styles.title}>Eventos</Text>
-      <Text style={styles.description}>
-        Aqui você pode ver os eventos disponíveis e criar novos eventos.
-      </Text>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Imagem principal do evento */}
+        <View style={styles.imageContainer}>
+          <View style={styles.eventImagePlaceholder}>
+            <Text style={styles.imagePlaceholderText}>NBA HOUSE</Text>
+            <Text style={styles.imagePlaceholderSubtext}>Evento em destaque</Text>
+          </View>
+        </View>
+
+        {/* Informações do evento */}
+        <View style={styles.eventInfo}>
+          <Text style={styles.eventTitle}>NBA HOUSE</Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.rating}>⭐ 4.8 (500 avaliações)</Text>
+            <Text style={styles.distance}>📍 1.2 km</Text>
+          </View>
+          
+          <View style={styles.priceContainer}>
+            <View style={styles.priceSection}>
+              <Text style={styles.price}>R$200</Text>
+              <Text style={styles.priceNote}>p/ Late</Text>
+            </View>
+            <TouchableOpacity style={styles.subscribeButton}>
+              <Text style={styles.subscribeText}>Inscrever-se</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Separador */}
+        <View style={styles.separator} />
+
+        {/* Descrição */}
+        <View style={styles.descriptionContainer}>
+          <Text style={styles.descriptionTitle}>Descrição</Text>
+          <Text style={styles.descriptionText}>
+            Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-const { width, height } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
   container: {
-    height: height,
-    width: width,
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#000',
   },
-  description: {
+  timeText: {
+    color: '#fff',
     fontSize: 16,
-    color: "#666",
+    fontWeight: 'bold',
   },
-  createEventLink: {
-    padding: 10,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
-    marginRight: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 40,
-    height: 40,
+  statusIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  signalText: {
+    color: '#fff',
+    marginRight: 5,
+  },
+  wifiText: {
+    marginRight: 5,
+  },
+  batteryText: {
+    // Ícone da bateria
+  },
+  scrollView: {
+    flex: 1,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 250,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  eventImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1a1a2e',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  imagePlaceholderText: {
+    color: '#ff4757',
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  imagePlaceholderSubtext: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  eventInfo: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  eventTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 8,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  rating: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 15,
+  },
+  distance: {
+    fontSize: 14,
+    color: '#666',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  priceSection: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    flex: 1,
+  },
+  price: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  priceNote: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 5,
+  },
+  subscribeButton: {
+    backgroundColor: '#000',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  subscribeText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  descriptionContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 30,
+  },
+  descriptionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 10,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
   },
 });
