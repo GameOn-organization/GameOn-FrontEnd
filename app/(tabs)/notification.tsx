@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Dimensions, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { Stack } from "expo-router";
+import React, { useState } from "react";
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { Notification } from "../../components/Notification";
 
 export default function NotificationScreen() {
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     height: height,
     width: width,
     flex: 1,
-    marginTop: 20,
+    paddingTop: 50,
     backgroundColor: "#fff",
   },
   title: {

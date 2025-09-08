@@ -1,17 +1,17 @@
-import { Icon, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
     Dimensions,
     Image,
     Modal,
+    SafeAreaView,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    SafeAreaView,
-    ScrollView,
 } from "react-native";
-import { Drawer } from "expo-router/drawer";
+import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
 import MenuProfile from "../../components/MenuProfile";
 import { Switch } from "../../components/Switch";
@@ -22,7 +22,22 @@ export default function Profile() {
     const [modalTransparent, setModalTransparent] = useState(false);
     const [editVisible, setEditVisible] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
-    const [activeTab, setActiveTab] = useState<"posts" | "info">("posts");
+    const [activeTab, setActiveTab] = useState("posts");
+    
+    // Estado para controlar o estilo do statusbar
+    const [statusBarStyle, setStatusBarStyle] = useState("light");
+
+    // Função para lidar com o scroll
+    const handleScroll = (event) => {
+        const scrollY = event.nativeEvent.contentOffset.y;
+        
+        // Se o scroll passou da seção preta (200px), muda para dark
+        if (scrollY > 150) {
+            setStatusBarStyle("dark");
+        } else {
+            setStatusBarStyle("light");
+        }
+    };
 
     // Dados de exemplo para demonstrar o scroll
     const examplePosts = Array.from({ length: 30 }, (_, i) => ({
@@ -42,6 +57,9 @@ export default function Profile() {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* StatusBar com estilo dinâmico */}
+            <StatusBar style={statusBarStyle} />
+            
             {/* Formulário de Editar Perfil - Trocar por Drawer*/}
             <Modal
                 animationType="slide"
@@ -101,6 +119,8 @@ export default function Profile() {
                 contentContainerStyle={styles.scrollContent}
                 scrollEnabled={true}
                 nestedScrollEnabled={true}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
             >
                 {/* Top Section - Seção Superior */}
                 <SafeAreaView style={styles.topSection}>
@@ -200,6 +220,7 @@ export default function Profile() {
     );
 }
 
+// Seus estilos permanecem os mesmos...
 const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
@@ -212,12 +233,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
     },
     scrollContent: {
-        // CHAVE: Sem minHeight ou flexGrow - deixa o conteúdo determinar
         alignItems: 'center',
-        paddingBottom: 100, // Espaço extra no final para garantir scroll
+        paddingBottom: 100,
     },
     topSection: {
-        height: 200, // Altura fixa
+        height: 200,
         backgroundColor: "#000",
         width: width,
     },
@@ -226,7 +246,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "flex-start",
         padding: 20,
-        paddingTop: 50, // Espaço para status bar
+        paddingTop: 50,
     },
     profileSection: {
         backgroundColor: "#fff",
@@ -258,7 +278,6 @@ const styles = StyleSheet.create({
         width: width,
         paddingHorizontal: 20,
         paddingVertical: 20,
-        // IMPORTANTE: Sem altura fixa - deixa o conteúdo crescer
     },
     postItem: {
         backgroundColor: "#f9f9f9",
