@@ -127,6 +127,14 @@ export default function Profile() {
                     </SafeAreaView>
                 </SafeAreaView>
 
+                {/* Profile Image - Posicionada de forma absoluta sobre o ScrollView */}
+                <SafeAreaView style={styles.imageContainer}>
+                    <Image
+                        source={require("../../assets/images/icon.jpeg")}
+                        style={styles.image}
+                    />
+                </SafeAreaView>
+
                 {/* Profile Section - Seção do Perfil */}
                 <SafeAreaView style={styles.profileSection}>
                     <SafeAreaView style={styles.actionRow}>
@@ -158,7 +166,10 @@ export default function Profile() {
                     {activeTab === "posts" ? (
                         <SafeAreaView>
                             {examplePosts.map((post) => (
-                                <SafeAreaView key={post.id} style={styles.postItem}>
+                                <SafeAreaView
+                                    key={post.id}
+                                    style={styles.postItem}
+                                >
                                     <Text style={styles.postTitle}>
                                         {post.title}
                                     </Text>
@@ -174,27 +185,17 @@ export default function Profile() {
                     ) : (
                         <SafeAreaView>
                             {userInfo.map((info, index) => (
-                                <SafeAreaView key={index} style={styles.infoItem}>
+                                <SafeAreaView
+                                    key={index}
+                                    style={styles.infoItem}
+                                >
                                     <Text style={styles.infoText}>{info}</Text>
                                 </SafeAreaView>
                             ))}
                         </SafeAreaView>
                     )}
                 </SafeAreaView>
-
-                {/* Footer para garantir espaço extra */}
-                <SafeAreaView style={styles.footer}>
-                    <Text style={styles.footerText}>Fim do conteúdo</Text>
-                </SafeAreaView>
             </ScrollView>
-
-            {/* Profile Image - Posicionada de forma absoluta sobre o ScrollView */}
-            <SafeAreaView style={styles.imageContainer}>
-                <Image
-                    source={require("../../assets/images/icon.jpeg")}
-                    style={styles.image}
-                />
-            </SafeAreaView>
         </SafeAreaView>
     );
 }
@@ -208,10 +209,11 @@ const styles = StyleSheet.create({
     },
     scrollSafeAreaView: {
         flex: 1,
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#fff",
     },
     scrollContent: {
         // CHAVE: Sem minHeight ou flexGrow - deixa o conteúdo determinar
+        alignItems: 'center',
         paddingBottom: 100, // Espaço extra no final para garantir scroll
     },
     topSection: {
@@ -303,20 +305,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#333",
     },
-    footer: {
-        backgroundColor: "#f5f5f5",
-        padding: 30,
-        alignItems: "center",
-    },
-    footerText: {
-        fontSize: 14,
-        color: "#999",
-        fontStyle: "italic",
-    },
     imageContainer: {
-        position: "absolute",
-        top: 120, // Posição fixa no topo
-        left: width * 0.5 - 75, // Centraliza horizontalmente
+        marginTop: -75,
         width: 150,
         height: 150,
         borderRadius: 75,
@@ -326,15 +316,6 @@ const styles = StyleSheet.create({
         borderColor: "#fff",
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 1000, // Z-index muito alto
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-        elevation: 8,
     },
     image: {
         width: "100%",
