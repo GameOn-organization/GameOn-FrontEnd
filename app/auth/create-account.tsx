@@ -8,11 +8,14 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    SafeAreaView,
 } from "react-native";
 
 export default function CreateAccount() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [viewPsw, setViewPsw] = useState(false);
+    const [viewConPsw, setViewConPsw] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
 
@@ -26,70 +29,112 @@ export default function CreateAccount() {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.form}>
-                <IconButton
-                    icon="arrow-left"
-                    size={20}
-                    iconColor="black"
-                    onPress={() => router.navigate("/")}
-                    style={styles.backLink} />
-                <View style={{ width: "100%", alignItems: "center" }}>
-                    <Text style={styles.header}>
-                        Game On
-                    </Text>
-                    <Text style={styles.subHeader}>
-                        Criar uma conta
-                    </Text>
-                    <TextInput
-                        placeholder="(99) 99999-9999"
-                        autoCapitalize="none"
-                        autoComplete="tel"
-                        autoCorrect={false}
-                        keyboardType="phone-pad"
-                        style={styles.input}
-                        placeholderTextColor="gray"
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        width: "100%",
+                    }}
+                >
+                    <IconButton
+                        icon="arrow-left"
+                        size={20}
+                        iconColor="black"
+                        onPress={() => router.navigate("/")}
+                        style={styles.backLink}
                     />
-                    <TextInput
-                        placeholder="Email"
-                        autoCapitalize="none"
-                        autoComplete="email"
-                        autoCorrect={false}
-                        keyboardType="email-address"
-                        style={styles.input}
-                        placeholderTextColor="gray"
-                    />
-                    <TextInput
-                        placeholder="Senha"
-                        autoCapitalize="none"
-                        autoComplete="password"
-                        autoCorrect={false}
-                        secureTextEntry={true}
-                        onChangeText={(value) => setPassword(value)} // Update password state
-                        style={styles.input}
-                        placeholderTextColor="gray"
-                    />
-                    <TextInput
-                        placeholder="Confirmar Senha"
-                        autoCapitalize="none"
-                        autoComplete="password"
-                        autoCorrect={false}
-                        textContentType="password"
-                        secureTextEntry={true}
-                        onChangeText={(value) => setConfirmPassword(value)} // Update confirmPassword state
-                        style={styles.input}
-                        placeholderTextColor="gray"
-                    />
-                    {errorMessage ? (
-                        <Text style={styles.errorText}>{errorMessage}</Text>
-                    ) : null}
+                    <View style={styles.title}>
+                        <Text style={styles.header}>Game On</Text>
+                        <Text style={styles.subHeader}>Criar uma conta</Text>
+                    </View>
                 </View>
-                <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
+
+                <View style={styles.fields}>
+                    <View>
+                        <Text>Telefone</Text>
+                        <TextInput
+                            placeholder="(99) 99999-9999"
+                            autoCapitalize="none"
+                            autoComplete="tel"
+                            autoCorrect={false}
+                            keyboardType="phone-pad"
+                            style={styles.input}
+                            placeholderTextColor="gray"
+                        />
+                    </View>
+                    <View>
+                        <Text>Email</Text>
+                        <TextInput
+                            placeholder="Email"
+                            autoCapitalize="none"
+                            autoComplete="email"
+                            autoCorrect={false}
+                            keyboardType="email-address"
+                            style={styles.input}
+                            placeholderTextColor="gray"
+                        />
+                    </View>
+                    <View>
+                        <Text>Senha</Text>
+                        <View style={{flexDirection: 'row'}}>
+                            <TextInput
+                                placeholder="Senha"
+                                autoCapitalize="none"
+                                autoComplete="password"
+                                autoCorrect={false}
+                                secureTextEntry={!viewPsw}
+                                onChangeText={(value) => setPassword(value)} // Update password state
+                                style={styles.input}
+                                placeholderTextColor="gray"
+                            />
+                            <IconButton
+                                icon= {viewPsw ? 'eye' : 'eye-off'}
+                                size={20}
+                                iconColor="black"
+                                onPress={() => setViewPsw(!viewPsw)}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={{backgroundColor: 'green', width: '70%'}}>
+                        <Text>Confirmar Senha</Text>
+                        <View style={{flexDirection: 'row', backgroundColor: 'blue', width: 'auto'}}>
+                            <TextInput
+                                placeholder="Confirmar Senha"
+                                autoCapitalize="none"
+                                autoComplete="password"
+                                autoCorrect={false}
+                                textContentType="password"
+                                secureTextEntry={!viewConPsw}
+                                onChangeText={(value) => setConfirmPassword(value)} // Update confirmPassword state
+                                style={styles.input}
+                                placeholderTextColor="gray"
+                            />
+                            <IconButton
+                                icon= {viewConPsw ? 'eye' : 'eye-off'}
+                                size={20}
+                                style={{margin: 'none', justifyContent: 'center'}}
+                                iconColor="black"
+                                onPress={() => setViewConPsw(!viewConPsw)}
+                            />
+                        </View>
+                        {errorMessage ? (
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                        ) : null}
+                    </View>
+                </View>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleCreateAccount}
+                >
                     <Icon source="account-plus" size={20} color="#fff" />
                     <Text style={styles.buttonText}>Criar conta</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -103,20 +148,32 @@ const styles = StyleSheet.create({
         backgroundColor: "#f5f5f5",
     },
     form: {
-        justifyContent: "space-between",
         width: width,
+        maxWidth: width - 40,
         height: height * 0.7,
-        maxWidth: 400,
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
         padding: 20,
         borderColor: "#ccc",
         borderWidth: 1,
         borderRadius: 10,
         backgroundColor: "#fff",
     },
+    title: {
+        alignItems: "center",
+        marginLeft: 0,
+    },
+    fields: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'red',
+    },
     backLink: {
         position: "absolute",
         borderRadius: 5,
         zIndex: 1,
+        marginRight: "90%",
     },
     header: {
         fontSize: 30,
@@ -133,11 +190,11 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: "100%",
-        maxWidth: 400,
         marginBottom: 15,
     },
     input: {
         color: "#333",
+        width: "70%",
         borderColor: "#ccc",
         borderWidth: 1,
         padding: 10,
