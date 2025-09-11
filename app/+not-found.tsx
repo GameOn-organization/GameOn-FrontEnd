@@ -1,8 +1,8 @@
 import { useRouter, Stack } from 'expo-router';
 import { StyleSheet, TouchableOpacity, Text } from 'react-native';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/examples/ThemedText';
+import { ThemedView } from '@/components/examples/ThemedView';
 
 export default function NotFoundScreen() {
   const router = useRouter();

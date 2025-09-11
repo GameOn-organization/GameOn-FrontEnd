@@ -60,8 +60,9 @@ export default function Profile() {
             {/* StatusBar com estilo dinâmico */}
             <StatusBar style={statusBarStyle} />
             
-            {/* Formulário de Editar Perfil - Trocar por Drawer*/}
+            {/* Formulário de Editar Perfil*/}
             <Modal
+                backdropColor='#667eea'
                 animationType="slide"
                 transparent={modalTransparent}
                 visible={editVisible}
@@ -170,7 +171,7 @@ export default function Profile() {
                             color="black"
                             onPress={() => {
                                 setEditVisible(true),
-                                    setModalTransparent(false);
+                                setModalTransparent(false);
                             }}
                         />
                     </SafeAreaView>

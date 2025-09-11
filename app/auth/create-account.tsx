@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     Dimensions,
+    Modal,
     StyleSheet,
     Text,
     TextInput,
@@ -10,8 +11,15 @@ import {
     View,
     SafeAreaView,
 } from "react-native";
+import MaskInput, { Masks } from "react-native-mask-input";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import Formulario from "../../components/Formulario";
 
 export default function CreateAccount() {
+    const [modalTransparent, setModalTransparent] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [viewPsw, setViewPsw] = useState(false);
@@ -30,6 +38,33 @@ export default function CreateAccount() {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Formulário de Editar Perfil*/}
+            <Modal
+                backdropColor='black'
+                animationType="slide"
+                transparent={modalTransparent}
+                visible={editVisible}
+                onRequestClose={() => {
+                    setEditVisible(!editVisible),
+                        setModalTransparent(!modalTransparent);
+                }}
+            >
+                <IconButton
+                    icon="arrow-left"
+                    size={24}
+                    iconColor="white"
+                    style={{ backgroundColor: "black" }}
+                    onPress={() => {
+                        setEditVisible(!editVisible),
+                            setModalTransparent(!modalTransparent);
+                    }}
+                />
+                <Formulario
+                    styleProp={{backgroundColor: 'black'}}
+                    colorProp={['black', 'black']}
+                />
+            </Modal>
+
             <View style={styles.form}>
                 <View
                     style={{
@@ -53,36 +88,47 @@ export default function CreateAccount() {
                 </View>
 
                 <View style={styles.fields}>
-                    <View>
+                    <View style={{ width: "100%" }}>
                         <Text>Telefone</Text>
-                        <TextInput
+                        <MaskInput
                             placeholder="(99) 99999-9999"
                             autoCapitalize="none"
                             autoComplete="tel"
                             autoCorrect={false}
+                            minLength={15}
+                            maxLength={15}
                             keyboardType="phone-pad"
-                            style={styles.input}
                             placeholderTextColor="gray"
+                            value={phone}
+                            onChangeText={(masked, unmasked) =>
+                                setPhone(masked)
+                            }
+                            mask={Masks.BRL_PHONE}
+                            style={styles.input}
                         />
                     </View>
-                    <View>
+                    <View style={{ width: "100%" }}>
                         <Text>Email</Text>
                         <TextInput
                             placeholder="Email"
                             autoCapitalize="none"
                             autoComplete="email"
                             autoCorrect={false}
+                            maxLength={40}
+                            value={email}
+                            onChangeText={(value) => setEmail(value)}
                             keyboardType="email-address"
                             style={styles.input}
                             placeholderTextColor="gray"
                         />
                     </View>
-                    <View>
+                    <View style={{ width: "100%" }}>
                         <Text>Senha</Text>
-                        <View style={{flexDirection: 'row'}}>
+                        <View style={{ flexDirection: "row" }}>
                             <TextInput
                                 placeholder="Senha"
                                 autoCapitalize="none"
+                                minLength={8}
                                 autoComplete="password"
                                 autoCorrect={false}
                                 secureTextEntry={!viewPsw}
@@ -91,7 +137,7 @@ export default function CreateAccount() {
                                 placeholderTextColor="gray"
                             />
                             <IconButton
-                                icon= {viewPsw ? 'eye' : 'eye-off'}
+                                icon={viewPsw ? "eye" : "eye-off"}
                                 size={20}
                                 iconColor="black"
                                 onPress={() => setViewPsw(!viewPsw)}
@@ -99,24 +145,26 @@ export default function CreateAccount() {
                         </View>
                     </View>
 
-                    <View style={{backgroundColor: 'green', width: '70%'}}>
+                    <View style={{ width: "100%" }}>
                         <Text>Confirmar Senha</Text>
-                        <View style={{flexDirection: 'row', backgroundColor: 'blue', width: 'auto'}}>
+                        <View style={{ flexDirection: "row" }}>
                             <TextInput
                                 placeholder="Confirmar Senha"
                                 autoCapitalize="none"
+                                minLength={8}
                                 autoComplete="password"
                                 autoCorrect={false}
                                 textContentType="password"
                                 secureTextEntry={!viewConPsw}
-                                onChangeText={(value) => setConfirmPassword(value)} // Update confirmPassword state
+                                onChangeText={(value) =>
+                                    setConfirmPassword(value)
+                                }
                                 style={styles.input}
                                 placeholderTextColor="gray"
                             />
                             <IconButton
-                                icon= {viewConPsw ? 'eye' : 'eye-off'}
+                                icon={viewConPsw ? "eye" : "eye-off"}
                                 size={20}
-                                style={{margin: 'none', justifyContent: 'center'}}
                                 iconColor="black"
                                 onPress={() => setViewConPsw(!viewConPsw)}
                             />
@@ -126,6 +174,15 @@ export default function CreateAccount() {
                         ) : null}
                     </View>
                 </View>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {
+                        setEditVisible(true), setModalTransparent(false);
+                    }}
+                >
+                    <Icon source="pencil-outline" size={20} color="#fff" />
+                    <Text style={styles.buttonText}>Editar Informações</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
                     onPress={handleCreateAccount}
@@ -148,10 +205,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#f5f5f5",
     },
     form: {
-        width: width,
+        width: width - 40,
         maxWidth: width - 40,
         height: height * 0.7,
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "flex-start",
         padding: 20,
         borderColor: "#ccc",
@@ -164,10 +221,10 @@ const styles = StyleSheet.create({
         marginLeft: 0,
     },
     fields: {
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'red',
+        flex: 1,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "space-around",
     },
     backLink: {
         position: "absolute",
@@ -188,19 +245,15 @@ const styles = StyleSheet.create({
         color: "#333",
         textAlign: "center",
     },
-    inputContainer: {
-        width: "100%",
-        marginBottom: 15,
-    },
     input: {
+        width: "85%",
+        maxWidth: "85%",
         color: "#333",
-        width: "70%",
         borderColor: "#ccc",
         borderWidth: 1,
         padding: 10,
         borderRadius: 5,
         backgroundColor: "#fff",
-        marginBottom: 15,
     },
     iconContainer: {
         marginRight: 10,

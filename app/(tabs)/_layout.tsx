@@ -12,7 +12,7 @@ import Animated, {
     Extrapolate,
 } from "react-native-reanimated";
 
-import { HapticTab } from "@/components/HapticTab";
+import { HapticTab } from "@/components/examples/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 
 const { width: screenWidth } = Dimensions.get("window");
