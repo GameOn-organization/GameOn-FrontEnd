@@ -1,31 +1,97 @@
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+    Animated,
     Dimensions,
     Image,
     Modal,
+    PanResponder,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
+    View,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
 import MenuProfile from "../../components/MenuProfile";
 import { Switch } from "../../components/Switch";
 
+const { width, height } = Dimensions.get("window");
+const DRAWER_WIDTH = width * 0.8;
+
 export default function Profile() {
     const router = useRouter();
 
     const [modalTransparent, setModalTransparent] = useState(false);
     const [editVisible, setEditVisible] = useState(false);
-    const [settingsVisible, setSettingsVisible] = useState(false);
     const [activeTab, setActiveTab] = useState("posts");
     
     // Estado para controlar o estilo do statusbar
     const [statusBarStyle, setStatusBarStyle] = useState("light");
+
+    // Estados para o Drawer
+    const [drawerVisible, setDrawerVisible] = useState(false);
+    const drawerTranslateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+    const overlayOpacity = useRef(new Animated.Value(0)).current;
+
+    // Função para abrir o drawer
+    const openDrawer = () => {
+        setDrawerVisible(true);
+        Animated.parallel([
+            Animated.timing(drawerTranslateX, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(overlayOpacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
+
+    // Função para fechar o drawer
+    const closeDrawer = () => {
+        Animated.parallel([
+            Animated.timing(drawerTranslateX, {
+                toValue: -DRAWER_WIDTH,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(overlayOpacity, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start(() => {
+            setDrawerVisible(false);
+        });
+    };
+
+    // PanResponder para gestos de arrastar
+    const panResponder = PanResponder.create({
+        onMoveShouldSetPanResponder: (evt, gestureState) => {
+            return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
+        },
+        onPanResponderMove: (evt, gestureState) => {
+            if (gestureState.dx < 0) {
+                const newTranslateX = Math.max(-DRAWER_WIDTH, gestureState.dx);
+                drawerTranslateX.setValue(newTranslateX);
+                overlayOpacity.setValue(1 + (newTranslateX / DRAWER_WIDTH));
+            }
+        },
+        onPanResponderRelease: (evt, gestureState) => {
+            if (gestureState.dx < -DRAWER_WIDTH / 3) {
+                closeDrawer();
+            } else {
+                openDrawer();
+            }
+        },
+    });
 
     // Função para lidar com o scroll
     const handleScroll = (event) => {
@@ -84,36 +150,6 @@ export default function Profile() {
                 <Formulario />
             </Modal>
 
-            {/* Modal de Configurações - Trocar por Drawer */}
-            <Modal
-                animationType="slide"
-                transparent={modalTransparent}
-                visible={settingsVisible}
-                onRequestClose={() => {
-                    setSettingsVisible(!settingsVisible),
-                        setModalTransparent(!modalTransparent);
-                }}
-            >
-                <SafeAreaView
-                    style={{
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        justifyContent: "center",
-                    }}
-                >
-                    <IconButton
-                        icon="arrow-left"
-                        size={24}
-                        iconColor="black"
-                        onPress={() => {
-                            setSettingsVisible(!settingsVisible),
-                                setModalTransparent(!modalTransparent);
-                        }}
-                    />
-                    <MenuProfile />
-                </SafeAreaView>
-            </Modal>
-
             {/* ScrollView Principal */}
             <ScrollView
                 style={styles.scrollSafeAreaView}
@@ -126,12 +162,7 @@ export default function Profile() {
                 {/* Top Section - Seção Superior */}
                 <SafeAreaView style={styles.topSection}>
                     <SafeAreaView style={styles.topHeader}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                setSettingsVisible(true),
-                                    setModalTransparent(false);
-                            }}
-                        >
+                        <TouchableOpacity onPress={openDrawer}>
                             <IconButton
                                 icon="dots-vertical-circle-outline"
                                 size={30}
@@ -217,12 +248,53 @@ export default function Profile() {
                     )}
                 </SafeAreaView>
             </ScrollView>
+
+            {/* Drawer Implementation */}
+            {drawerVisible && (
+                <>
+                    {/* Overlay */}
+                    <Animated.View
+                        style={[
+                            styles.overlay,
+                            {
+                                opacity: overlayOpacity,
+                            }
+                        ]}
+                    >
+                        <TouchableOpacity
+                            style={styles.overlayTouchable}
+                            onPress={closeDrawer}
+                            activeOpacity={1}
+                        />
+                    </Animated.View>
+
+                    {/* Drawer */}
+                    <Animated.View
+                        style={[
+                            styles.drawer,
+                            {
+                                transform: [{ translateX: drawerTranslateX }],
+                            }
+                        ]}
+                        {...panResponder.panHandlers}
+                    >
+                        <SafeAreaView style={styles.drawerContent}>
+                            <View style={styles.drawerHeader}>
+                                <IconButton
+                                    icon="arrow-left"
+                                    size={24}
+                                    iconColor="black"
+                                    onPress={closeDrawer}
+                                />
+                            </View>
+                            <MenuProfile />
+                        </SafeAreaView>
+                    </Animated.View>
+                </>
+            )}
         </SafeAreaView>
     );
 }
-
-// Seus estilos permanecem os mesmos...
-const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
     container: {
@@ -356,5 +428,46 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginLeft: 10,
+    },
+    // Estilos do Drawer
+    overlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 998,
+    },
+    overlayTouchable: {
+        flex: 1,
+    },
+    drawer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: DRAWER_WIDTH,
+        backgroundColor: '#fff',
+        zIndex: 999,
+        elevation: 16,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 2,
+            height: 0,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    drawerContent: {
+        flex: 1,
+    },
+    drawerHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingTop: 50,
+        paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
     },
 });
