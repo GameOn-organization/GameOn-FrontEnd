@@ -14,10 +14,11 @@ export default function ForgotPassword() {
             </Text>
             <TextInput
                 style={styles.input}
-                placeholder="Digite seu e-mail"
+                placeholder="Digite seu E-mail"
                 placeholderTextColor="#999"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoComplete='email'
                 autoCorrect={false}
                 returnKeyType="done"
                 onSubmitEditing={() => console.log("E-mail enviado")}
