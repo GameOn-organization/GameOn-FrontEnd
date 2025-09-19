@@ -280,6 +280,27 @@ export default function Profile() {
                     >
                         <SafeAreaView style={styles.drawerContent}>
                             <View style={styles.drawerHeader}>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        gap: 10,
+                                    }}
+                                >
+                                    <Image
+                                        source={require("../../assets/images/icon.jpeg")}
+                                        style={[styles.image, styles.imageIcon]}
+                                    />
+                                    <View>
+                                        <Text
+                                            style={{fontWeight: 'bold'}}
+                                        >Nome do Usuário</Text>
+                                        <Text
+                                            style={{fontStyle: 'italic'}}
+                                        >email@dominio.com</Text>
+                                    </View>
+                                </View>
                                 <IconButton
                                     icon="arrow-left"
                                     size={24}
@@ -414,6 +435,10 @@ const styles = StyleSheet.create({
         height: "100%",
         borderRadius: 75,
     },
+    imageIcon: {
+        width: 50,
+        height: 50,
+    },
     button: {
         backgroundColor: "black",
         padding: 10,
@@ -461,13 +486,13 @@ const styles = StyleSheet.create({
     },
     drawerContent: {
         flex: 1,
+        flexDirection: 'column',
     },
     drawerHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingTop: 50,
+        justifyContent: 'space-around',
+        paddingTop: '40',
         paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
     },
 });
