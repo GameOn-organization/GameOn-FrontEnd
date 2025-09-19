@@ -25,7 +25,12 @@ interface DataItem {
     icon: string;
 }
 
-export default function Formulario() {
+interface FormularioProps {
+    styleProp?: object;
+    colorProp?: object;
+}
+
+export default function Formulario({styleProp, colorProp}: FormularioProps) {
     const [nome, setNome] = useState("");
     const [descricao, setDescricao] = useState("");
     const [idade, setIdade] = useState("");
@@ -140,8 +145,8 @@ export default function Formulario() {
 
     return (
         <LinearGradient
-            colors={["#667eea", "#764ba2"]}
-            style={styles.container}
+            colors={colorProp ? colorProp : ["#667eea", "#764ba2"]}
+            style={[styles.container, styleProp]}
         >
             <SafeAreaView style={styles.formContainer}>
                 <Text style={styles.title}>Criar Perfil</Text>
@@ -150,7 +155,7 @@ export default function Formulario() {
                     <Icon
                         source="account"
                         size={20}
-                        color="#667eea"
+                        color={colorProp ? colorProp : "#667eea"}
                         style={styles.inputIcon}
                     />
                     <TextInput
@@ -168,7 +173,7 @@ export default function Formulario() {
                     <Icon
                         source="script-text"
                         size={20}
-                        color="#667eea"
+                        color={colorProp ? colorProp : "#667eea"}
                         style={styles.inputIcon}
                     />
                     <TextInput
@@ -187,7 +192,7 @@ export default function Formulario() {
                     <Icon
                         source="cake-variant"
                         size={20}
-                        color="#667eea"
+                        color={colorProp ? colorProp : "#667eea"}
                         style={styles.inputIcon}
                     />
                     {showDate && (
@@ -216,7 +221,7 @@ export default function Formulario() {
                     <IconButton
                         icon="calendar"
                         size={24}
-                        iconColor="#667eea"
+                        iconColor={colorProp ? colorProp : "#667eea"}
                         style={[styles.inputIcon, { marginRight: 0 }]}
                         onPress={() => showMode('date')}
                     />
@@ -226,7 +231,7 @@ export default function Formulario() {
                     <Icon
                         source="map-marker"
                         size={20}
-                        color="#667eea"
+                        color={colorProp ? colorProp : "#667eea"}
                         style={styles.inputIcon}
                     />
                     <TextInput
@@ -243,7 +248,7 @@ export default function Formulario() {
                     <Icon
                         source="border-color"
                         size={20}
-                        color="#667eea"
+                        color={colorProp ? colorProp : "#667eea"}
                         style={styles.inputIcon}
                     />
                     <Picker
@@ -275,7 +280,7 @@ export default function Formulario() {
                     renderLeftIcon={() => (
                         <Icon
                             style={styles.icon}
-                            color="#667eea"
+                            color={colorProp ? colorProp : "#667eea"}
                             source="check"
                             size={20}
                         />
@@ -285,7 +290,7 @@ export default function Formulario() {
                         <TouchableOpacity
                             onPress={() => unSelect && unSelect(item)}
                         >
-                            <SafeAreaView style={styles.selectedStyle}>
+                            <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
                                 <Icon
                                     source={item.icon as any}
                                     size={17}
@@ -318,7 +323,7 @@ export default function Formulario() {
                     renderLeftIcon={() => (
                         <Icon
                             style={styles.icon}
-                            color="#667eea"
+                            color={colorProp ? colorProp : "#667eea"}
                             source="check"
                             size={20}
                         />
@@ -328,7 +333,7 @@ export default function Formulario() {
                         <TouchableOpacity
                             onPress={() => unSelect && unSelect(item)}
                         >
-                            <SafeAreaView style={styles.selectedStyle}>
+                            <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
                                 <Icon
                                     source={item.icon as any}
                                     size={17}

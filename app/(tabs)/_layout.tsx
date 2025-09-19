@@ -12,7 +12,7 @@ import Animated, {
     Extrapolate,
 } from "react-native-reanimated";
 
-import { HapticTab } from "@/components/HapticTab";
+import { HapticTab } from "@/components/examples/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -24,11 +24,12 @@ const TAB_ROUTES = [
     { name: "events", path: "/(tabs)/events" },
     { name: "notification", path: "/(tabs)/notification" },
     { name: "profile", path: "/(tabs)/profile"},
+    { name: "faqsScreen", path: "faqs/faqsScreen", disableSwipe: true },
     { name: "message", path: "messages/message", disableSwipe: true },
     { name: "chat", path: "messages/chat", disableSwipe: true },
 ];
 
-const INVALID_ROUTES = 2
+const INVALID_ROUTES = 3
 
 export default function SwipeTabsLayoutWithVisualFeedback() {
     const router = useRouter();
@@ -267,6 +268,13 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                         {/* EXCLUIDOS: */}
                         <Tabs.Screen
                             name="messages"
+                            options={{
+                                href: null, // Esconde o Botão da tab bar
+                                tabBarStyle: { display: "none" }, //Esconde a Tab Bar
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="faqs"
                             options={{
                                 href: null, // Esconde o Botão da tab bar
                                 tabBarStyle: { display: "none" }, //Esconde a Tab Bar
