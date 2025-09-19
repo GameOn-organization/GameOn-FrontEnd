@@ -7,8 +7,11 @@ import {
     Switch,
 } from "react-native";
 import { Icon, IconButton, Badge } from "react-native-paper";
+import { useRouter } from "expo-router";
 
 export default function MenuProfile() {
+
+    const router = useRouter()
 
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
@@ -75,10 +78,6 @@ export default function MenuProfile() {
                     >
                         Convide um Amigo
                     </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
@@ -94,10 +93,6 @@ export default function MenuProfile() {
                     >
                         Privacidade e Segurança
                     </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
@@ -113,10 +108,6 @@ export default function MenuProfile() {
                     >
                         Assinatura
                     </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
@@ -132,10 +123,6 @@ export default function MenuProfile() {
                     >
                         Idiomas
                     </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
@@ -151,10 +138,6 @@ export default function MenuProfile() {
                     >
                         Configurações
                     </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
                 </TouchableOpacity>
             </SafeAreaView>
             <SafeAreaView
@@ -162,7 +145,7 @@ export default function MenuProfile() {
             >
                 <TouchableOpacity
                     style={[styles.options, {gap: 5}]}
-                    onPress= {() => console.log('Tela FAQs (User)')}
+                    onPress= {() => router.navigate('faqs/faqsScreen')}
                 >
                     <Icon
                         source='help-circle-outline'
