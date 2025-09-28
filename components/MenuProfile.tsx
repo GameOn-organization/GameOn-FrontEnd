@@ -1,13 +1,13 @@
-import React, {useState} from "react";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
     SafeAreaView,
-    Text,
-    TouchableOpacity,
     StyleSheet,
     Switch,
+    Text,
+    TouchableOpacity,
 } from "react-native";
-import { Icon, IconButton, Badge } from "react-native-paper";
-import { useRouter } from "expo-router";
+import { Badge, Icon } from "react-native-paper";
 
 export default function MenuProfile() {
 
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     },
     badge: {
         marginLeft: 'auto',
-        marginRight: '10',
+        marginRight: 10,
         marginBottom: 15,
         backgroundColor: 'white',
         color: 'black',
