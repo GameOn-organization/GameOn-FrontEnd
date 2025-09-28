@@ -23,21 +23,15 @@ export default function FaqsScreen() {
                 style={styles.scroll}
                 contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
             >
-                <FaqButton
-                    // id={}
-                    // pfp={source}
-                    // name={}
-                    onPress={() => router.navigate('/faqs/faqAbout')}
-                />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
-                <FaqButton onPress={() => router.navigate('/faqs/faqAbout')} />
+                <Text>
+                    Nome da Faq
+                </Text>
+                <Text>
+                    Descrição da Faq
+                </Text>
+                <Text>
+                    Soluções da Faq
+                </Text>
             </ScrollView>
         </SafeAreaView>
     )
