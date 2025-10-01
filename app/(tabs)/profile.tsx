@@ -13,9 +13,11 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Pressable,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
+import Post from "../../components/Post";
 import MenuProfile from "../../components/MenuProfile";
 import { Switch } from "../../components/Switch";
 
@@ -27,6 +29,8 @@ export default function Profile() {
 
     const [modalTransparent, setModalTransparent] = useState(false);
     const [editVisible, setEditVisible] = useState(false);
+    const [postTransparent, setPostTransparent] = useState(false);
+    const [postVisible, setPostVisible] = useState(false);
     const [activeTab, setActiveTab] = useState("posts");
     
     // Estado para controlar o estilo do statusbar
@@ -149,6 +153,27 @@ export default function Profile() {
                 />
                 <Formulario />
             </Modal>
+            
+            {/* Formulário de Publicar Post*/}
+            <Modal
+                backdropColor='rgba(0,0,0,0.5)'
+                animationType="fade"
+                transparent={postTransparent}
+                visible={postVisible}
+                onRequestClose={() => {
+                    setPostVisible(!postVisible),
+                    setPostTransparent(!postTransparent);
+                }}
+            >
+                <Pressable
+                    style={{flex: 0.1, height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+                    onPress={() => {
+                        setPostVisible(!postVisible),
+                        setPostTransparent(!postTransparent);
+                    }}
+                />
+                <Post />
+            </Modal>
 
             {/* ScrollView Principal */}
             <ScrollView
@@ -194,7 +219,10 @@ export default function Profile() {
                             icon="plus"
                             size={30}
                             color="black"
-                            onPress={() => console.log("Add pressed")}
+                            onPress={() => {
+                                setPostVisible(true),
+                                setPostTransparent(false);
+                            }}
                         />
                         <IconButton
                             icon="pencil-outline"
