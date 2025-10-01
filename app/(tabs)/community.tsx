@@ -124,7 +124,9 @@ export default function Community() {
                 </View>
 
                 <View style={styles.filtersContainer}>
-                    <TouchableOpacity style={styles.filterButton}>
+                    <TouchableOpacity
+                        style={styles.filterButton}
+                        onClick={() => console.log("Filtrar")}>
                         <Text style={styles.filterText}>Filtrar</Text>
                         <IconButton
                             icon="chevron-down"
@@ -133,7 +135,9 @@ export default function Community() {
                         />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.filterButton}>
+                    <TouchableOpacity
+                        style={styles.filterButton}
+                        onClick={() => console.log("Organizar")}>
                         <Text style={styles.filterText}>Organizar</Text>
                         <IconButton
                             icon="chevron-down"
@@ -276,9 +280,11 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     filterButton: {
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 20,
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 8,
         paddingHorizontal: 12,
     },
     filterText: {

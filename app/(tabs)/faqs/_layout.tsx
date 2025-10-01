@@ -36,15 +36,17 @@ export default function FaqsLayout() {
                         />
                     ),
                     // If User != Player And User != Associate
-                    headerRight: () => (
-                        <IconButton
-                            icon="plus"
-                            size={40}
-                            onPress={() => {
-                                console.log('Adicionar FAQ');
-                            }}
-                        />
-                    )
+                        // If CurrentPage == faqsScreen
+                            headerRight: () => (
+                                <IconButton
+                                    icon="plus"
+                                    size={40}
+                                    onPress={() => {
+                                        console.log('Adicionar FAQ');
+                                    }}
+                                />
+                            )
+                        // EndIf
                     //Endif
                 }}
             >
@@ -52,6 +54,12 @@ export default function FaqsLayout() {
                     name="faqsScreen"
                     options={{
                         title: "FAQS",
+                    }}
+                />
+                <Stack.Screen
+                    name="faqAbout"
+                    options={{
+                        title: "NOME DA FAQ",
                     }}
                 />
                 {/* <Stack.Screen

@@ -139,6 +139,21 @@ export default function MenuProfile() {
                         Configurações
                     </Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                >
+                    <Icon
+                        source='handshake'
+                        size={20}
+                        color='white'
+                    />
+                    <Text
+                        style={styles.buttonText}
+                        onPress={() => console.log("Seja um Associado")}
+                    >
+                        Seja um Associado
+                    </Text>
+                </TouchableOpacity>
             </SafeAreaView>
             <SafeAreaView
                 style={styles.optionsContainer}
@@ -182,9 +197,10 @@ export default function MenuProfile() {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: '10%',
+        marginTop: '5%',
         alignItems: 'center',
         gap: 20,
+        flex: 1,
         width: '100%',
         height: '100%',
     },
@@ -212,7 +228,7 @@ const styles = StyleSheet.create({
     },
     optionsContainer: {
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
     },
     options: {
