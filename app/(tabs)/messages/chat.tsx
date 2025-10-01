@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     StyleSheet,
     Text,
@@ -10,11 +10,15 @@ import {
     Image,
     KeyboardAvoidingView,
     Platform,
+    Keyboard,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
 
 export default function App() {
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([
         {
@@ -65,7 +69,39 @@ export default function App() {
             sender: "user",
             timestamp: "9:41 PM, 8/14/24",
         },
+        {
+            id: 9,
+            text: "Will head to the Help Center if I have more questions tho",
+            sender: "user",
+            timestamp: "9:41 PM, 8/14/24",
+        },
+        {
+            id: 10,
+            text: "Will head to the Help Center if I have more questions tho",
+            sender: "user",
+            timestamp: "9:41 PM, 8/14/24",
+        },
+        {
+            id: 11,
+            text: "Will head to the Help Center if I have more questions tho",
+            sender: "user",
+            timestamp: "9:41 PM, 8/14/24",
+        },
+        {
+            id: 12,
+            text: "Will head to the Help Center if I have more questions tho",
+            sender: "user",
+            timestamp: "9:41 PM, 8/14/24",
+        },
+        {
+            id: 13,
+            text: "Will head to the Help Center if I have more questions tho",
+            sender: "user",
+            timestamp: "9:41 PM, 8/14/24",
+        },
     ]);
+
+    const scrollViewRef = useRef();
 
     const sendMessage = () => {
         if (message.trim()) {
@@ -114,7 +150,39 @@ export default function App() {
         NavigationBar.setBehaviorAsync("overlay-swipe");
         // Esconde barra de navegação
         NavigationBar.setVisibilityAsync("hidden");
+
+        const keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            (e) => {
+                setKeyboardHeight(e.endCoordinates.height - 190); // Ajuste conforme necessário
+                setKeyboardVisible(true);
+                if (scrollViewRef.current) {
+                    scrollViewRef.current.scrollToEnd({ animated: true });
+                }
+            }
+        );
+        const keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            () => {
+                setKeyboardHeight(0);
+                setKeyboardVisible(false);
+                if (scrollViewRef.current) {
+                    scrollViewRef.current.scrollToEnd({ animated: true });
+                }
+            }
+        );
+
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
     }, []);
+
+    useEffect(() => {
+        if (scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+    }, [messages]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -124,8 +192,10 @@ export default function App() {
             <KeyboardAvoidingView
                 style={styles.chatContainer}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 20 : keyboardHeight} // Ajuste conforme necessário
             >
                 <ScrollView
+                    ref={scrollViewRef}
                     style={styles.messagesContainer}
                     contentContainerStyle={styles.messagesContent}
                     showsVerticalScrollIndicator={false}
@@ -134,7 +204,7 @@ export default function App() {
                 </ScrollView>
 
                 {/* Input */}
-                <View style={styles.inputContainer}>
+                <SafeAreaView style={styles.inputContainer}>
                     <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.textInput}
@@ -154,7 +224,7 @@ export default function App() {
                     >
                         <Text style={styles.sendButtonText}>➤</Text>
                     </TouchableOpacity>
-                </View>
+                </SafeAreaView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
