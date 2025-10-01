@@ -13,7 +13,7 @@ interface Props {
     onChangeTab: (tab: "posts" | "info") => void;
 }
 
-export const Switch = ({ activeTab, onChangeTab }: Props) => {
+export const CustomSwitch = ({ activeTab, onChangeTab }: Props) => {
     const animation = useRef(new Animated.Value(activeTab === "posts" ? 0 : 1)).current;
 
     useEffect(() => {
