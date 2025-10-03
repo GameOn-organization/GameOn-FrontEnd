@@ -107,15 +107,14 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
         }
     };
 
-    // Modificação: Função para remover imagem de um slot específico
+    // Modificação: Função para remover imagem de um slot específico e reorganizar índices
     const removeImage = (index: number) => {
         const newImages = [...images];
-        newImages[index] = null;
-        // Remove slots vazios do final do array
-        while (newImages.length > 0 && newImages[newImages.length - 1] === null) {
-            newImages.pop();
-        }
-        setImages(newImages);
+        // Remove a imagem do índice especificado
+        newImages.splice(index, 1);
+        // Filtra apenas as imagens válidas (não nulas) para manter sequência contínua
+        const filteredImages = newImages.filter(img => img !== null);
+        setImages(filteredImages);
     };
 
     // Modificação: Função para calcular quantos slots devem ser renderizados
