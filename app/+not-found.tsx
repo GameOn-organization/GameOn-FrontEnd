@@ -12,8 +12,8 @@ export default function NotFoundScreen() {
       <Stack.Screen options={{ title: 'Oops: Rota Errada!' }} />
       <ThemedView style={styles.container}>
         <ThemedText type="title">Essa Tela Não Existe.</ThemedText>
-        <TouchableOpacity style={styles.link} onPress={() => router.navigate("/")}>
-            <Text style={styles.linkText}>Voltar para o login</Text>
+        <TouchableOpacity style={styles.link} onPress={() => router.back()}>
+            <Text style={styles.linkText}>Voltar</Text>
         </TouchableOpacity>
       </ThemedView>
     </>

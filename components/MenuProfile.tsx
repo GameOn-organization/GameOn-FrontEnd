@@ -89,7 +89,7 @@ export default function MenuProfile() {
                     />
                     <Text
                         style={styles.buttonText}
-                        onPress={() => console.log("Privacidade e Segurança")}
+                        onPress={() => router.navigate("../../settings/privacy")}
                     >
                         Privacidade e Segurança
                     </Text>
@@ -104,24 +104,9 @@ export default function MenuProfile() {
                     />
                     <Text
                         style={styles.buttonText}
-                        onPress={() => console.log("Assinatura")}
+                        onPress={() => router.navigate("../../settings/premium")}
                     >
                         Assinatura
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='web'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => console.log("Idiomas")}
-                    >
-                        Idiomas
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -134,7 +119,7 @@ export default function MenuProfile() {
                     />
                     <Text
                         style={styles.buttonText}
-                        onPress={() => console.log("Configurações")}
+                        onPress={() => router.navigate("../../settings/config")}
                     >
                         Configurações
                     </Text>

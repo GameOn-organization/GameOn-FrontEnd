@@ -4,7 +4,7 @@ import { IconButton, Icon, Badge } from "react-native-paper";
 import React from "react";
 import { SafeAreaView, Image, StyleSheet, Dimensions, Text, TouchableOpacity } from "react-native";
 
-export default function FaqsLayout() {
+export default function SettingsLayout() {
     const router = useRouter();
 
     return (
@@ -14,7 +14,7 @@ export default function FaqsLayout() {
             <Stack
                 screenOptions={{
                     headerStyle: { alignItems: "center", justifyContent: "center" },
-                    headerShown: true, //Se (Chat) -> headerTitle: Nome Usuario
+                    headerShown: true,
                     headerTitleAlign: "center",
                     headerTitleStyle: {
                         fontSize: 20,
@@ -35,62 +35,27 @@ export default function FaqsLayout() {
                             }}
                         />
                     ),
-                    // If User != Player And User != Associate
-                        // If CurrentPage == faqsScreen
-                            headerRight: () => (
-                                <IconButton
-                                    icon="plus"
-                                    size={40}
-                                    onPress={() => {
-                                        console.log('Adicionar FAQ');
-                                    }}
-                                />
-                            )
-                        // EndIf
-                    //Endif
                 }}
             >
                 <Stack.Screen
-                    name="faqsScreen"
+                    name="premium"
                     options={{
-                        title: "FAQS",
+                        title: "Assinatura",
                     }}
                 />
                 <Stack.Screen
-                    name="faqAbout"
+                    name="config"
                     options={{
-                        title: "NOME DA FAQ",
+                        title: "Configurações",
+                    }}
+                />
+                <Stack.Screen
+                    name="privacy"
+                    options={{
+                        title: "Privacidade e Segurança",
                     }}
                 />
             </Stack>
-            <SafeAreaView
-                style={styles.footer}
-            >
-                <TouchableOpacity
-                    style={styles.button}
-                    // Chat Com o Suporte
-                    onPress={() => router.navigate('/messages/chat')}
-                >
-                    <Text
-                        style={{fontSize: 35}}
-                    >SOS</Text>
-                    <Icon
-                        source='message-outline'
-                        color='black'
-                        size={45}
-                    />
-                    <Badge
-                        size={22} // Tamanho do badge
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            right: 0,
-                            borderColor: 'white',
-                            borderWidth: 1.5,
-                        }}
-                    >33</Badge>
-                </TouchableOpacity>
-            </SafeAreaView>
         </SafeAreaView>
     );
 }
