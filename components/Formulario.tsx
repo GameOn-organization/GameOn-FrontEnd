@@ -15,6 +15,7 @@ import {
     ScrollView,
     Modal,
     Image,
+    View,
 } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 
@@ -51,7 +52,7 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
     const [modeDate, setModeDate] = useState('date');
     const [showDate, setShowDate] = useState(false);
 
-    const [image, setImage] = useState<string | null>(null);
+    const [images, setImages] = useState<(string | null)[]>([]);
 
     const onChange = (event: any, selectedDate: Date | undefined) => {
         const currentDate = selectedDate || date;
@@ -88,20 +89,89 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
         { label: "Beisebol", value: "8", icon: "baseball" },
     ];
 
-    const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
+    // Modificação: Função para selecionar imagem em um slot específico
+    const pickImage = async (index: number) => {
         let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
         });
 
         console.log(result);
 
         if (!result.canceled) {
-        setImage(result.assets[0].uri);
+            const newImages = [...images];
+            newImages[index] = result.assets[0].uri;
+            setImages(newImages);
         }
+    };
+
+    // Modificação: Função para remover imagem de um slot específico
+    const removeImage = (index: number) => {
+        const newImages = [...images];
+        newImages[index] = null;
+        // Remove slots vazios do final do array
+        while (newImages.length > 0 && newImages[newImages.length - 1] === null) {
+            newImages.pop();
+        }
+        setImages(newImages);
+    };
+
+    // Modificação: Função para calcular quantos slots devem ser renderizados
+    const getImageSlotsCount = () => {
+        const filledSlots = images.filter(img => img !== null).length;
+        if (filledSlots === 0) return 1; // Sempre mostrar pelo menos 1 slot
+        if (filledSlots >= 9) return 9; // Máximo de 9 slots
+        return filledSlots + 1; // Mostrar slots preenchidos + 1 novo slot
+    };
+
+    // Modificação: Função para renderizar os slots de imagem
+    const renderImageSlots = () => {
+        const slotsCount = getImageSlotsCount();
+        const slots = [];
+
+        for (let i = 0; i < slotsCount; i++) {
+            const hasImage = i < images.length && images[i] !== null;
+            
+            slots.push(
+                <TouchableOpacity
+                    key={i}
+                    style={[
+                        styles.imageSlot,
+                        hasImage ? styles.imageSlotFilled : styles.imageSlotEmpty
+                    ]}
+                    onPress={() => pickImage(i)}
+                >
+                    {hasImage ? (
+                        <View style={styles.imageContainer}>
+                            <Image 
+                                source={{ uri: images[i] }} 
+                                style={styles.slotImage} 
+                            />
+                            <TouchableOpacity
+                                style={styles.removeButton}
+                                onPress={() => removeImage(i)}
+                            >
+                                <Icon
+                                    source="close"
+                                    color="white"
+                                    size={16}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <Icon
+                            source="plus"
+                            color="white"
+                            size={30}
+                        />
+                    )}
+                </TouchableOpacity>
+            );
+        }
+
+        return slots;
     };
 
 
@@ -387,17 +457,13 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
                             </TouchableOpacity>
                         )}
                     />
-                    <TouchableOpacity
-                        style={[styles.inputContainer, {backgroundColor: 'black', justifyContent: "center" }]}
-                        onPress={pickImage}
-                    >
-                        <Icon
-                            source="plus"
-                            color ="white"
-                            size  = {30}
-                        />
-                        {image && <Image source={{ uri: image }} style={{width: 200, height: 200}} />}
-                    </TouchableOpacity>
+                    {/* Modificação: Container para os slots de imagem */}
+                    <View style={styles.imageSlotsContainer}>
+                        <Text style={styles.imageSectionTitle}>Fotos do Perfil</Text>
+                        <View style={styles.imageSlotsGrid}>
+                            {renderImageSlots()}
+                        </View>
+                    </View>
                 </SafeAreaView>
             </ScrollView>
         </LinearGradient>
@@ -532,5 +598,82 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "white",
         fontWeight: "500",
+    },
+    // Novos estilos para os slots de imagem
+    imageSlotsContainer: {
+        marginTop: 20,
+        marginBottom: 20,
+    },
+    imageSectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "white",
+        marginBottom: 15,
+        textAlign: "center",
+        textShadowColor: "rgba(0, 0, 0, 0.3)",
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
+    },
+    imageSlotsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+    imageSlot: {
+        width: "30%",
+        aspectRatio: 1,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    imageSlotEmpty: {
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+        borderStyle: "dashed",
+    },
+    imageSlotFilled: {
+        backgroundColor: "white",
+        padding: 2,
+    },
+    imageContainer: {
+        width: "100%",
+        height: "100%",
+        position: "relative",
+    },
+    slotImage: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 10,
+        resizeMode: "cover",
+    },
+    removeButton: {
+        position: "absolute",
+        top: -5,
+        right: -5,
+        backgroundColor: "red",
+        borderRadius: 12,
+        width: 24,
+        height: 24,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 5,
     },
 });
