@@ -12,9 +12,13 @@ import {
     TouchableOpacity,
     SafeAreaView,
     Button,
+    ScrollView,
+    Modal,
+    Image,
 } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 
+import * as ImagePicker from 'expo-image-picker';
 import * as Location from "expo-location";
 // import axios from 'axios';
 
@@ -47,6 +51,8 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
     const [modeDate, setModeDate] = useState('date');
     const [showDate, setShowDate] = useState(false);
 
+    const [image, setImage] = useState<string | null>(null);
+
     const onChange = (event: any, selectedDate: Date | undefined) => {
         const currentDate = selectedDate || date;
         setShowDate(false);
@@ -57,16 +63,47 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
         setModeDate(currentMode);
     };
 
-    const data: DataItem[] = [
-        { label: "Item 1", value: "1", icon: "star" },
-        { label: "Item 2", value: "2", icon: "star-check-outline" },
-        { label: "Item 3", value: "3", icon: "star-circle" },
-        { label: "Item 4", value: "4", icon: "star-circle-outline" },
-        { label: "Item 5", value: "5", icon: "star-four-points" },
-        { label: "Item 6", value: "6", icon: "star-half" },
-        { label: "Item 7", value: "7", icon: "star-half-full" },
-        { label: "Item 8", value: "8", icon: "star-outline" },
+
+    // Jogos
+    const games: DataItem[] = [
+        { label: "The Legend of Zelda", value: "1", icon: "sword" },
+        { label: "Super Mario", value: "2", icon: "mushroom" },
+        { label: "Minecraft", value: "3", icon: "cube-outline" },
+        { label: "Fortnite", value: "4", icon: "pistol" },
+        { label: "League of Legends", value: "5", icon: "chess-queen" },
+        { label: "Counter-Strike", value: "6", icon: "target" },
+        { label: "Pokémon", value: "7", icon: "pokeball" },
+        { label: "GTA V", value: "8", icon: "car-sports" },
     ];
+
+    // Esportes
+    const sports: DataItem[] = [
+        { label: "Futebol", value: "1", icon: "soccer" },
+        { label: "Basquete", value: "2", icon: "basketball" },
+        { label: "Tênis", value: "3", icon: "tennis" },
+        { label: "Vôlei", value: "4", icon: "volleyball" },
+        { label: "Natação", value: "5", icon: "swim" },
+        { label: "Ciclismo", value: "6", icon: "bike" },
+        { label: "Corrida", value: "7", icon: "run" },
+        { label: "Beisebol", value: "8", icon: "baseball" },
+    ];
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        });
+
+        console.log(result);
+
+        if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        }
+    };
+
 
     const renderItem = (item: DataItem) => (
         <SafeAreaView style={styles.item}>
@@ -148,207 +185,221 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
             colors={colorProp ? colorProp : ["#667eea", "#764ba2"]}
             style={[styles.container, styleProp]}
         >
-            <SafeAreaView style={styles.formContainer}>
-                <Text style={styles.title}>Criar Perfil</Text>
+            <ScrollView>
 
-                <SafeAreaView style={styles.inputContainer}>
-                    <Icon
-                        source="account"
-                        size={20}
-                        color={colorProp ? colorProp : "#667eea"}
-                        style={styles.inputIcon}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={setNome}
-                        maxLength={40}
-                        value={nome}
-                        placeholder="Nome"
-                        placeholderTextColor="#999"
-                        keyboardType="default"
-                    />
-                </SafeAreaView>
+                <SafeAreaView style={styles.formContainer}>
+                    <Text style={styles.title}>Criar Perfil</Text>
 
-                <SafeAreaView style={styles.inputContainer}>
-                    <Icon
-                        source="script-text"
-                        size={20}
-                        color={colorProp ? colorProp : "#667eea"}
-                        style={styles.inputIcon}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={setDescricao}
-                        maxLength={120}
-                        value={descricao}
-                        placeholder="Descrição"
-                        placeholderTextColor="#999"
-                        keyboardType="default"
-                        multiline
-                    />
-                </SafeAreaView>
-
-                <SafeAreaView style={styles.inputContainer}>
-                    <Icon
-                        source="cake-variant"
-                        size={20}
-                        color={colorProp ? colorProp : "#667eea"}
-                        style={styles.inputIcon}
-                    />
-                    {showDate && (
-                        <DateTimePicker
-                        minimumDate={dateMin}
-                        maximumDate={dateMax}
-                        value={date}
-                        mode={modeDate}
-                        is24Hour={true}
-                        //Android: {default, spinner, calendar, clock}
-                        //iOS: {default, spinner, compact, inline}
-                        display="default"
-                        design="default" //default, material
-                        onChange={onChange}
+                    <SafeAreaView style={styles.inputContainer}>
+                        <Icon
+                            source="account"
+                            size={20}
+                            color={colorProp ? colorProp : "#667eea"}
+                            style={styles.inputIcon}
                         />
-                    )}
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={setIdade}
-                        value={date.toLocaleDateString() + " - (" + calcularIdade(date) + " anos)"}
-                        editable={true}
-                        placeholder="Idade"
-                        placeholderTextColor="#999"
-                        keyboardType="numeric"
-                    />
-                    <IconButton
-                        icon="calendar"
-                        size={24}
-                        iconColor={colorProp ? colorProp : "#667eea"}
-                        style={[styles.inputIcon, { marginRight: 0 }]}
-                        onPress={() => showMode('date')}
-                    />
-                </SafeAreaView>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setNome}
+                            maxLength={40}
+                            value={nome}
+                            placeholder="Nome"
+                            placeholderTextColor="#999"
+                            keyboardType="default"
+                        />
+                    </SafeAreaView>
 
-                <SafeAreaView style={styles.inputContainer}>
-                    <Icon
-                        source="map-marker"
-                        size={20}
-                        color={colorProp ? colorProp : "#667eea"}
-                        style={styles.inputIcon}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        value={localizacao}
-                        editable={editaLocal}
-                        onChangeText={setLocalizacao}
-                        placeholder="Localização"
-                        placeholderTextColor="#999"
-                    />
-                </SafeAreaView>
+                    <SafeAreaView style={styles.inputContainer}>
+                        <Icon
+                            source="script-text"
+                            size={20}
+                            color={colorProp ? colorProp : "#667eea"}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setDescricao}
+                            maxLength={120}
+                            value={descricao}
+                            placeholder="Descrição"
+                            placeholderTextColor="#999"
+                            keyboardType="default"
+                            multiline
+                        />
+                    </SafeAreaView>
 
-                <SafeAreaView style={styles.pickerContainer}>
-                    <Icon
-                        source="border-color"
-                        size={20}
-                        color={colorProp ? colorProp : "#667eea"}
-                        style={styles.inputIcon}
+                    <SafeAreaView style={styles.inputContainer}>
+                        <Icon
+                            source="cake-variant"
+                            size={20}
+                            color={colorProp ? colorProp : "#667eea"}
+                            style={styles.inputIcon}
+                        />
+                        {showDate && (
+                            <DateTimePicker
+                            minimumDate={dateMin}
+                            maximumDate={dateMax}
+                            value={date}
+                            mode={modeDate}
+                            is24Hour={true}
+                            //Android: {default, spinner, calendar, clock}
+                            //iOS: {default, spinner, compact, inline}
+                            display="default"
+                            design="default" //default, material
+                            onChange={onChange}
+                            />
+                        )}
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setIdade}
+                            value={date.toLocaleDateString() + " - (" + calcularIdade(date) + " anos)"}
+                            editable={true}
+                            placeholder="Idade"
+                            placeholderTextColor="#999"
+                            keyboardType="numeric"
+                        />
+                        <IconButton
+                            icon="calendar"
+                            size={24}
+                            iconColor={colorProp ? colorProp : "#667eea"}
+                            style={[styles.inputIcon, { marginRight: 0 }]}
+                            onPress={() => showMode('date')}
+                        />
+                    </SafeAreaView>
+
+                    <SafeAreaView style={styles.inputContainer}>
+                        <Icon
+                            source="map-marker"
+                            size={20}
+                            color={colorProp ? colorProp : "#667eea"}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            value={localizacao}
+                            editable={editaLocal}
+                            onChangeText={setLocalizacao}
+                            placeholder="Localização"
+                            placeholderTextColor="#999"
+                        />
+                    </SafeAreaView>
+
+                    <SafeAreaView style={styles.pickerContainer}>
+                        <Icon
+                            source="border-color"
+                            size={20}
+                            color={colorProp ? colorProp : "#667eea"}
+                            style={styles.inputIcon}
+                        />
+                        <Picker
+                            style={styles.picker}
+                            selectedValue={sexo}
+                            onValueChange={(itemValue) => setSexo(itemValue)}
+                        >
+                            <Picker.Item label="Selecione o Gênero" value="" />
+                            <Picker.Item label="Masculino" value="m" />
+                            <Picker.Item label="Feminino" value="f" />
+                            <Picker.Item label="Não-Binário" value="nb" />
+                        </Picker>
+                    </SafeAreaView>
+
+                    <MultiSelect
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={sports}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Esportes"
+                        value={selected1}
+                        search
+                        searchPlaceholder="Buscar..."
+                        onChange={setSelected1}
+                        renderLeftIcon={() => (
+                            <Icon
+                                style={styles.icon}
+                                color={colorProp ? colorProp : "#667eea"}
+                                source="check"
+                                size={20}
+                            />
+                        )}
+                        renderItem={renderItem}
+                        renderSelectedItem={(item, unSelect) => (
+                            <TouchableOpacity
+                                onPress={() => unSelect && unSelect(item)}
+                            >
+                                <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
+                                    <Icon
+                                        source={item.icon as any}
+                                        size={17}
+                                        color="white"
+                                        style={styles.icon}
+                                    />
+                                    <Text style={styles.textSelectedStyle}>
+                                        {item.label}
+                                    </Text>
+                                    <Icon color="white" source="delete" size={17} />
+                                </SafeAreaView>
+                            </TouchableOpacity>
+                        )}
                     />
-                    <Picker
-                        style={styles.picker}
-                        selectedValue={sexo}
-                        onValueChange={(itemValue) => setSexo(itemValue)}
+
+                    <MultiSelect
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={games}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Jogos"
+                        value={selected2}
+                        search
+                        searchPlaceholder="Buscar..."
+                        onChange={setSelected2}
+                        renderLeftIcon={() => (
+                            <Icon
+                                style={styles.icon}
+                                color={colorProp ? colorProp : "#667eea"}
+                                source="check"
+                                size={20}
+                            />
+                        )}
+                        renderItem={renderItem}
+                        renderSelectedItem={(item, unSelect) => (
+                            <TouchableOpacity
+                                onPress={() => unSelect && unSelect(item)}
+                            >
+                                <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
+                                    <Icon
+                                        source={item.icon as any}
+                                        size={17}
+                                        color="white"
+                                        style={styles.icon}
+                                    />
+                                    <Text style={styles.textSelectedStyle}>
+                                        {item.label}
+                                    </Text>
+                                    <Icon color="white" source="delete" size={17} />
+                                </SafeAreaView>
+                            </TouchableOpacity>
+                        )}
+                    />
+                    <TouchableOpacity
+                        style={[styles.inputContainer, {backgroundColor: 'black', justifyContent: "center" }]}
+                        onPress={pickImage}
                     >
-                        <Picker.Item label="Selecione o Gênero" value="" />
-                        <Picker.Item label="Masculino" value="m" />
-                        <Picker.Item label="Feminino" value="f" />
-                        <Picker.Item label="Não-Binário" value="nb" />
-                    </Picker>
+                        <Icon
+                            source="plus"
+                            color ="white"
+                            size  = {30}
+                        />
+                        {image && <Image source={{ uri: image }} style={{width: 200, height: 200}} />}
+                    </TouchableOpacity>
                 </SafeAreaView>
-
-                <MultiSelect
-                    style={styles.dropdown}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={data}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="Selecione os itens"
-                    value={selected1}
-                    search
-                    searchPlaceholder="Buscar..."
-                    onChange={setSelected1}
-                    renderLeftIcon={() => (
-                        <Icon
-                            style={styles.icon}
-                            color={colorProp ? colorProp : "#667eea"}
-                            source="check"
-                            size={20}
-                        />
-                    )}
-                    renderItem={renderItem}
-                    renderSelectedItem={(item, unSelect) => (
-                        <TouchableOpacity
-                            onPress={() => unSelect && unSelect(item)}
-                        >
-                            <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
-                                <Icon
-                                    source={item.icon as any}
-                                    size={17}
-                                    color="white"
-                                    style={styles.icon}
-                                />
-                                <Text style={styles.textSelectedStyle}>
-                                    {item.label}
-                                </Text>
-                                <Icon color="white" source="delete" size={17} />
-                            </SafeAreaView>
-                        </TouchableOpacity>
-                    )}
-                />
-
-                <MultiSelect
-                    style={styles.dropdown}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={data}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="Selecione os itens"
-                    value={selected2}
-                    search
-                    searchPlaceholder="Buscar..."
-                    onChange={setSelected2}
-                    renderLeftIcon={() => (
-                        <Icon
-                            style={styles.icon}
-                            color={colorProp ? colorProp : "#667eea"}
-                            source="check"
-                            size={20}
-                        />
-                    )}
-                    renderItem={renderItem}
-                    renderSelectedItem={(item, unSelect) => (
-                        <TouchableOpacity
-                            onPress={() => unSelect && unSelect(item)}
-                        >
-                            <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
-                                <Icon
-                                    source={item.icon as any}
-                                    size={17}
-                                    color="white"
-                                    style={styles.icon}
-                                />
-                                <Text style={styles.textSelectedStyle}>
-                                    {item.label}
-                                </Text>
-                                <Icon color="white" source="delete" size={17} />
-                            </SafeAreaView>
-                        </TouchableOpacity>
-                    )}
-                />
-            </SafeAreaView>
+            </ScrollView>
         </LinearGradient>
     );
 }
