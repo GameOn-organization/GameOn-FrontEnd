@@ -287,6 +287,13 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                                 tabBarStyle: { display: "none" }, //Esconde a Tab Bar
                             }}
                         />
+                        <Tabs.Screen
+                            name="admin"
+                            options={{
+                                href: null, // Esconde o Botão da tab bar
+                                tabBarStyle: { display: "none" }, //Esconde a Tab Bar
+                            }}
+                        />
                     </Tabs>
                 </Animated.View>
             </SafeAreaView>
