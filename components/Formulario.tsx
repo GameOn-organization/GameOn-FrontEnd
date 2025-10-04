@@ -53,6 +53,8 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
     const [showDate, setShowDate] = useState(false);
 
     const [images, setImages] = useState<(string | null)[]>([]);
+    // Estado separado para o wallpaper
+    const [wallpaper, setWallpaper] = useState<string | null>(null);
 
     const onChange = (event: any, selectedDate: Date | undefined) => {
         const currentDate = selectedDate || date;
@@ -115,6 +117,27 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
         // Filtra apenas as imagens válidas (não nulas) para manter sequência contínua
         const filteredImages = newImages.filter(img => img !== null);
         setImages(filteredImages);
+    };
+
+    // Função para selecionar wallpaper
+    const pickWallpaper = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [16, 9], // Proporção mais larga para wallpaper
+            quality: 1,
+        });
+
+        console.log(result);
+
+        if (!result.canceled) {
+            setWallpaper(result.assets[0].uri);
+        }
+    };
+
+    // Função para remover wallpaper
+    const removeWallpaper = () => {
+        setWallpaper(null);
     };
 
     // Modificação: Função para calcular quantos slots devem ser renderizados
@@ -456,12 +479,55 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
                             </TouchableOpacity>
                         )}
                     />
+
                     {/* Modificação: Container para os slots de imagem */}
                     <View style={styles.imageSlotsContainer}>
                         <Text style={styles.imageSectionTitle}>Fotos do Perfil</Text>
                         <View style={styles.imageSlotsGrid}>
                             {renderImageSlots()}
                         </View>
+                    </View>
+
+                    {/* Slot de Wallpaper */}
+                    <View style={styles.wallpaperContainer}>
+                        <Text style={styles.imageSectionTitle}>Wallpaper do Perfil</Text>
+                        <TouchableOpacity
+                            style={[
+                                styles.wallpaperSlot,
+                                wallpaper ? styles.wallpaperSlotFilled : styles.wallpaperSlotEmpty
+                            ]}
+                            onPress={pickWallpaper}
+                        >
+                            {wallpaper ? (
+                                <View style={styles.wallpaperImageContainer}>
+                                    <Image 
+                                        source={{ uri: wallpaper }} 
+                                        style={styles.wallpaperImage} 
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.removeWallpaperButton}
+                                        onPress={removeWallpaper}
+                                    >
+                                        <Icon
+                                            source="close"
+                                            color="white"
+                                            size={20}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <View style={styles.wallpaperPlaceholder}>
+                                    <Icon
+                                        source="image-plus"
+                                        color="white"
+                                        size={40}
+                                    />
+                                    <Text style={styles.wallpaperPlaceholderText}>
+                                        Adicionar Wallpaper
+                                    </Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
                     </View>
                 </SafeAreaView>
             </ScrollView>
@@ -597,6 +663,79 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "white",
         fontWeight: "500",
+    },
+    // Estilos para o wallpaper
+    wallpaperContainer: {
+        marginTop: 20,
+        marginBottom: 20,
+    },
+    wallpaperSlot: {
+        width: "100%",
+        height: 120,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    wallpaperSlotEmpty: {
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+        borderStyle: "dashed",
+    },
+    wallpaperSlotFilled: {
+        backgroundColor: "white",
+        padding: 2,
+    },
+    wallpaperImageContainer: {
+        width: "100%",
+        height: "100%",
+        position: "relative",
+    },
+    wallpaperImage: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 10,
+        resizeMode: "cover",
+    },
+    wallpaperPlaceholder: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    wallpaperPlaceholderText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "500",
+        marginTop: 8,
+        textShadowColor: "rgba(0, 0, 0, 0.3)",
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
+    },
+    removeWallpaperButton: {
+        position: "absolute",
+        top: -5,
+        right: -5,
+        backgroundColor: "red",
+        borderRadius: 15,
+        width: 30,
+        height: 30,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 5,
     },
     // Novos estilos para os slots de imagem
     imageSlotsContainer: {
