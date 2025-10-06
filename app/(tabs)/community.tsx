@@ -13,6 +13,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 import MapView, { Marker } from "react-native-maps";
 import { IconButton } from "react-native-paper";
 
@@ -23,6 +24,12 @@ export default function Community() {
     const [modalVisible, setModalVisible] = useState(false);
     const [localSearch, setLocalSearch] = useState("");
     const [detailsVisible, setDetailsVisible] = useState(false);
+    const [open1, setOpen1] = useState(false);
+    const [open2, setOpen2] = useState(false);
+    const [value1, setValue1] = useState('Filtrar');
+    const [value2, setValue2] = useState('Organizar');
+    const [items1, setItems1] = useState([{ label: "Teste", value: "Teste" }]);
+    const [items2, setItems2] = useState([{ label: "Teste2", value: "Teste2" }]);
 
     // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
     const mapRef = useRef(null);
@@ -168,11 +175,19 @@ export default function Community() {
                 <View style={styles.filtersContainer}>
                     <TouchableOpacity
                         style={styles.filterButton}
-                        onPress={() => console.log("Filtrar")}
+                        //onPress={() => console.log("Filtrar")}
                     >
-                        <Text style={styles.filterText}>Filtrar</Text>
+                        <DropDownPicker
+                            open={open1}
+                            value={value1}
+                            items={items1}
+                            setOpen={setOpen1}
+                            setValue={setValue1}
+                            setItems={setItems1}
+                            placeholder="Filtrar"
+                            style={styles.filterButton}
+                        />
                         <IconButton
-                            icon="chevron-down"
                             size={16}
                             color="#666"
                         />
@@ -181,9 +196,17 @@ export default function Community() {
                         style={styles.filterButton}
                         onPress={() => console.log("Organizar")}
                     >
-                        <Text style={styles.filterText}>Organizar</Text>
+                        <DropDownPicker
+                            open={open2}
+                            value={value2}
+                            items={items2}
+                            setOpen={setOpen2}
+                            setValue={setValue2}
+                            setItems={setItems2}
+                            placeholder="Organizar"
+                            style={styles.filterButton}
+                        />
                         <IconButton
-                            icon="chevron-down"
                             size={16}
                             color="#666"
                         />
@@ -364,8 +387,10 @@ export default function Community() {
 }
 
 const styles = StyleSheet.create({
-    // ... (seus estilos anteriores)
-    container: { flex: 1, backgroundColor: "#FFFFFF" },
+    container: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+    },
     header: {
         backgroundColor: "#FFFFFF",
         paddingTop: 50,
@@ -383,24 +408,44 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         marginBottom: 16,
     },
-    searchIcon: { marginRight: 8 },
-    searchText: { flex: 1, fontSize: 16, color: "#333", fontWeight: "500" },
+    searchIcon: {
+        marginRight: 8,
+    },
+    searchText: {
+        flex: 1,
+        fontSize: 16,
+        color: "#333",
+        fontWeight: "500",
+    },
     filtersContainer: {
         flexDirection: "row",
+        flex: 2,
         alignItems: "center",
         justifyContent: "space-between",
+        zIndex: 1000,
+        paddingBottom: 15,
+        paddingTop: 20,
     },
     filterButton: {
         borderColor: "gray",
-        borderWidth: 1,
         borderRadius: 20,
         flexDirection: "row",
+        flex: 1,
         alignItems: "center",
         paddingHorizontal: 12,
     },
-    filterText: { fontSize: 14, color: "#666", marginRight: 4 },
-    resultsText: { fontSize: 14, color: "#666" },
-    map: { flex: 1 },
+    filterText: {
+        fontSize: 14,
+        color: "#666",
+        marginRight: 4,
+    },
+    resultsText: {
+        fontSize: 14,
+        color: "#666",
+    },
+    map: {
+        flex: 1,
+    },
     markerContainer: {
         width: 32,
         height: 32,
@@ -410,7 +455,10 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "#FFFFFF",
     },
-    modalOverlay: { flex: 1, justifyContent: "flex-end" },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "flex-end",
+    },
     modalBackdrop: {
         position: "absolute",
         top: 0,
@@ -418,9 +466,17 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         backgroundColor: "rgba(0,0,0,0.2)",
-    }, // Um pouco mais claro
-    animatedContainer: { position: "absolute", bottom: 0, left: 0, right: 0 },
-    modalScroll: { justifyContent: "flex-end", flexGrow: 1 },
+    },
+    animatedContainer: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+    modalScroll: {
+        justifyContent: "flex-end",
+        flexGrow: 1,
+    },
     modalContent: {
         backgroundColor: "#FFFFFF",
         borderTopLeftRadius: 20,
@@ -443,34 +499,54 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
     },
-    placeInfo: { padding: 16, paddingBottom: 32 },
+    placeInfo: {
+        padding: 16,
+        paddingBottom: 32,
+    },
     placeName: {
         fontSize: 22,
         fontWeight: "bold",
         color: "#333",
         marginBottom: 8,
     },
-    placeDetails: { marginBottom: 16 },
+    placeDetails: {
+        marginBottom: 16,
+    },
     ratingContainer: {
         flexDirection: "row",
         alignItems: "center",
         marginBottom: 4,
     },
-    ratingText: { fontSize: 14, color: "#666", marginLeft: 4 },
-    distanceText: { fontSize: 14, color: "#666" },
+    ratingText: {
+        fontSize: 14,
+        color: "#666",
+        marginLeft: 4,
+    },
+    distanceText: {
+        fontSize: 14,
+        color: "#666",
+    },
     typeContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
     },
-    typeText: { fontSize: 18, fontWeight: "600", color: "#333" },
+    typeText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#333",
+    },
     selectButton: {
         backgroundColor: "#333",
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 8,
     },
-    selectButtonText: { color: "#FFFFFF", fontSize: 14, fontWeight: "600" },
+    selectButtonText: {
+        color: "#FFFFFF",
+        fontSize: 14,
+        fontWeight: "600",
+    },
     detailsSection: {
         marginTop: 16,
         borderTopWidth: 1,
