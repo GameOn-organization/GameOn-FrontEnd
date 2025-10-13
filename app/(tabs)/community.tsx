@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react"; // <-- MUDANÇA
 import {
     Animated,
@@ -26,13 +27,20 @@ export default function Community() {
     const [detailsVisible, setDetailsVisible] = useState(false);
     const [open1, setOpen1] = useState(false);
     const [open2, setOpen2] = useState(false);
-    const [value1, setValue1] = useState('Filtrar');
-    const [value2, setValue2] = useState('Organizar');
-    const [items1, setItems1] = useState([{ label: "Teste", value: "Teste" }]);
-    const [items2, setItems2] = useState([{ label: "Teste2", value: "Teste2" }]);
+    const [value1, setValue1] = useState("Filtrar");
+    const [value2, setValue2] = useState("Organizar");
+    const [items1, setItems1] = useState([
+        { label: "Eventos Físicos", value: "Eventos Físicos" },
+        { label: "Eventos Digitais", value: "Eventos Digitais" },
+        { label: "Todos", value: "Todos" },
+    ]);
+    const [items2, setItems2] = useState([
+        { label: "Mais Barato", value: "Mais Barato" },
+        { label: "Perto de Mim", value: "Perto de Mim" },
+    ]);
 
     // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
-    const mapRef = useRef(null);
+    const mapRef = useRef<MapView>(null);
 
     const places = [
         {
@@ -153,6 +161,49 @@ export default function Community() {
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
 
+    const GOOGLE_API_KEY = "AIzaSyAlKad0GTpF4QTNlt3NWqPbj54bAg6zb0o";
+
+    const searchLocation = async () => {
+        if (!localSearch) return;
+
+        try {
+            const response = await axios.get(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+                    localSearch
+                )}&components=country:BR&key=${GOOGLE_API_KEY}`
+            );
+
+            if (response.data.status === "OK") {
+                const location = response.data.results[0].geometry.location;
+                const region = {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                };
+                // Anima o mapa para a nova região
+                mapRef.current?.animateToRegion(region, 1000);
+            } else {
+                alert("Local não encontrado.");
+                console.log("deu erro");
+            }
+        } catch (error) {
+            alert("Erro ao buscar localização.");
+            console.error(error);
+        }
+    };
+
+    const filteredPlaces = places.filter((place) => {
+        if (value1 === "Eventos Digitais") {
+            return place.markerColor === "#8E44AD";
+        }
+        if (value1 === "Eventos Físicos") {
+            return place.markerColor !== "#8E44AD";
+        } else {
+            return true; // mostra todos se não for nenhum filtro específico
+        }
+    });
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -163,13 +214,16 @@ export default function Community() {
                         size={20}
                         color="#666"
                         style={styles.searchIcon}
+                        onPress={searchLocation}
                     />
                     <TextInput
                         style={styles.searchText}
                         placeholder="Digite o Local"
                         onChangeText={setLocalSearch}
                         value={localSearch}
+                        onSubmitEditing={searchLocation}
                     />
+
                     <IconButton icon="pencil" size={18} color="#666" />
                 </View>
                 <View style={styles.filtersContainer}>
@@ -187,10 +241,7 @@ export default function Community() {
                             placeholder="Filtrar"
                             style={styles.filterButton}
                         />
-                        <IconButton
-                            size={16}
-                            color="#666"
-                        />
+                        <IconButton size={16} color="#666" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.filterButton}
@@ -206,10 +257,7 @@ export default function Community() {
                             placeholder="Organizar"
                             style={styles.filterButton}
                         />
-                        <IconButton
-                            size={16}
-                            color="#666"
-                        />
+                        <IconButton size={16} color="#666" />
                     </TouchableOpacity>
                     <Text style={styles.resultsText}>59 results</Text>
                 </View>
@@ -217,7 +265,7 @@ export default function Community() {
 
             {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
             <MapView ref={mapRef} style={styles.map}>
-                {places.map((place) => (
+                {filteredPlaces.map((place) => (
                     <Marker
                         key={place.id}
                         coordinate={place.coordinate}
