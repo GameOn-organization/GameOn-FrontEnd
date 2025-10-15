@@ -1,17 +1,22 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react"; // <-- MUDANÇA
 import {
-    View,
+    Animated,
+    Dimensions,
+    Image,
+    Modal,
+    PanResponder,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
     Text,
     TextInput,
-    StyleSheet,
-    StatusBar,
     TouchableOpacity,
-    Modal,
-    Image,
-    Dimensions,
+    View,
 } from "react-native";
-import { IconButton } from "react-native-paper";
+import DropDownPicker from "react-native-dropdown-picker";
 import MapView, { Marker } from "react-native-maps";
+import { IconButton } from "react-native-paper";
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,8 +24,24 @@ export default function Community() {
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [localSearch, setLocalSearch] = useState("");
+    const [detailsVisible, setDetailsVisible] = useState(false);
+    const [open1, setOpen1] = useState(false);
+    const [open2, setOpen2] = useState(false);
+    const [value1, setValue1] = useState("Filtrar");
+    const [value2, setValue2] = useState("Organizar");
+    const [items1, setItems1] = useState([
+        { label: "Eventos Físicos", value: "Eventos Físicos" },
+        { label: "Eventos Digitais", value: "Eventos Digitais" },
+        { label: "Todos", value: "Todos" },
+    ]);
+    const [items2, setItems2] = useState([
+        { label: "Mais Barato", value: "Mais Barato" },
+        { label: "Perto de Mim", value: "Perto de Mim" },
+    ]);
 
-    // Dados dos locais marcados no mapa
+    // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
+    const mapRef = useRef<MapView>(null);
+
     const places = [
         {
             id: 1,
@@ -29,12 +50,11 @@ export default function Community() {
             rating: 4.8,
             reviews: 500,
             type: "Gratuito",
-            image: "https://via.placeholder.com/300x150/4CAF50/FFFFFF?text=Quadra+Esportiva",
-            coordinate: {
-                latitude: -23.6186,
-                longitude: -46.5472,
-            },
+            image: "https://images.adsttc.com/media/images/643d/5d58/3e4b/311f/a145/231d/large_jpg/parque-ecologico-chico-mendes-recebe-o-selo-de-qualidade-internacional-green-flag-award_1.jpg?1681743201",
+            coordinate: { latitude: -23.6186, longitude: -46.5472 },
             markerColor: "#8E44AD",
+            description:
+                "O Parque Ecológico Chico Mendes é uma ótima opção para lazer ao ar livre, com quadras poliesportivas, pistas de caminhada e uma vasta área verde para piqueniques e descanso.",
         },
         {
             id: 2,
@@ -43,12 +63,11 @@ export default function Community() {
             rating: 4.5,
             reviews: 320,
             type: "Pago",
-            image: "https://via.placeholder.com/300x150/2196F3/FFFFFF?text=Centro+Esportivo",
-            coordinate: {
-                latitude: -23.6156,
-                longitude: -46.5502,
-            },
+            image: "https://www.saocaetanodosul.sp.gov.br/images/secretarias/selj/LAZER_E_ESPORTE_PARA_TODOS_NO_CER_PROSPERIDADE_-_Foto_Divulgacao_PMSCS_-_(1 ).jpg",
+            coordinate: { latitude: -23.6156, longitude: -46.5502 },
             markerColor: "#E67E22",
+            description:
+                "Complexo esportivo completo com piscinas, academia e quadras para diversas modalidades. Requer matrícula e pagamento de mensalidade.",
         },
         {
             id: 3,
@@ -58,11 +77,10 @@ export default function Community() {
             reviews: 180,
             type: "Gratuito",
             image: "https://via.placeholder.com/300x150/FF9800/FFFFFF?text=Quadra+Municipal",
-            coordinate: {
-                latitude: -23.6206,
-                longitude: -46.5432,
-            },
+            coordinate: { latitude: -23.6206, longitude: -46.5432 },
             markerColor: "#8E44AD",
+            description:
+                "Quadra pública disponível para uso da comunidade, ideal para futebol de salão e basquete.",
         },
         {
             id: 4,
@@ -72,23 +90,54 @@ export default function Community() {
             reviews: 650,
             type: "Pago",
             image: "https://via.placeholder.com/300x150/9C27B0/FFFFFF?text=Arena+Esportiva",
-            coordinate: {
-                latitude: -23.6126,
-                longitude: -46.5532,
-            },
+            coordinate: { latitude: -23.6126, longitude: -46.5532 },
             markerColor: "#E67E22",
+            description:
+                "Arena moderna para eventos esportivos e shows, com estrutura de alta qualidade.",
         },
     ];
 
-    const handleMarkerPress = (place) => {
-        setSelectedPlace(place);
-        setModalVisible(true);
+    const pan = useRef(new Animated.ValueXY()).current;
+
+    // <-- MUDANÇA: Função para fechar o modal com animação
+    const closeWithAnimation = () => {
+        Animated.timing(pan, {
+            toValue: { x: 0, y: height },
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            setModalVisible(false); // Fecha o modal DEPOIS que a animação termina
+            pan.setValue({ x: 0, y: 0 }); // Reseta a posição para a próxima vez
+        });
     };
 
-    const closeModal = () => {
-        setModalVisible(false);
-        setSelectedPlace(null);
+    const panResponder = useRef(
+        PanResponder.create({
+            onMoveShouldSetPanResponder: (evt, gestureState) =>
+                Math.abs(gestureState.dy) > 5 && gestureState.dy > 0,
+            onPanResponderMove: Animated.event([null, { dy: pan.y }], {
+                useNativeDriver: false,
+            }),
+            onPanResponderRelease: (evt, gestureState) => {
+                if (gestureState.dy > 120) {
+                    closeWithAnimation(); // Usa a nova função para fechar com animação
+                } else {
+                    Animated.spring(pan, {
+                        toValue: { x: 0, y: 0 },
+                        useNativeDriver: true,
+                    }).start();
+                }
+            },
+        })
+    ).current;
+
+    const handleMarkerPress = (place) => {
+        setSelectedPlace(place);
+        setDetailsVisible(false);
+        setModalVisible(true); // Abre o modal instantaneamente (a animação de entrada cuidará do resto)
     };
+
+    const handleSelectPlace = () => setDetailsVisible(true);
 
     const CustomMarker = ({ place }) => (
         <View
@@ -101,11 +150,63 @@ export default function Community() {
         </View>
     );
 
+    // <-- MUDANÇA: Efeito para ajustar o mapa quando o componente é montado
+    useEffect(() => {
+        if (mapRef.current) {
+            const coordinates = places.map((p) => p.coordinate);
+            mapRef.current.fitToCoordinates(coordinates, {
+                edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                animated: true,
+            });
+        }
+    }, []); // O array vazio [] garante que isso rode apenas uma vez
+
+    const GOOGLE_API_KEY = "AIzaSyAlKad0GTpF4QTNlt3NWqPbj54bAg6zb0o";
+
+    const searchLocation = async () => {
+        if (!localSearch) return;
+
+        try {
+            const response = await axios.get(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+                    localSearch
+                )}&components=country:BR&key=${GOOGLE_API_KEY}`
+            );
+
+            if (response.data.status === "OK") {
+                const location = response.data.results[0].geometry.location;
+                const region = {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                };
+                // Anima o mapa para a nova região
+                mapRef.current?.animateToRegion(region, 1000);
+            } else {
+                alert("Local não encontrado.");
+                console.log("deu erro");
+            }
+        } catch (error) {
+            alert("Erro ao buscar localização.");
+            console.error(error);
+        }
+    };
+
+    const filteredPlaces = places.filter((place) => {
+        if (value1 === "Eventos Digitais") {
+            return place.markerColor === "#8E44AD";
+        }
+        if (value1 === "Eventos Físicos") {
+            return place.markerColor !== "#8E44AD";
+        } else {
+            return true; // mostra todos se não for nenhum filtro específico
+        }
+    });
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-            {/* Header */}
             <View style={styles.header}>
                 <View style={styles.searchContainer}>
                     <IconButton
@@ -113,54 +214,58 @@ export default function Community() {
                         size={20}
                         color="#666"
                         style={styles.searchIcon}
+                        onPress={searchLocation}
                     />
                     <TextInput
                         style={styles.searchText}
                         placeholder="Digite o Local"
-                        onChange={setLocalSearch}
+                        onChangeText={setLocalSearch}
                         value={localSearch}
+                        onSubmitEditing={searchLocation}
                     />
+
                     <IconButton icon="pencil" size={18} color="#666" />
                 </View>
-
                 <View style={styles.filtersContainer}>
                     <TouchableOpacity
                         style={styles.filterButton}
-                        onClick={() => console.log("Filtrar")}>
-                        <Text style={styles.filterText}>Filtrar</Text>
-                        <IconButton
-                            icon="chevron-down"
-                            size={16}
-                            color="#666"
+                        //onPress={() => console.log("Filtrar")}
+                    >
+                        <DropDownPicker
+                            open={open1}
+                            value={value1}
+                            items={items1}
+                            setOpen={setOpen1}
+                            setValue={setValue1}
+                            setItems={setItems1}
+                            placeholder="Filtrar"
+                            style={styles.filterButton}
                         />
+                        <IconButton size={16} color="#666" />
                     </TouchableOpacity>
-
                     <TouchableOpacity
                         style={styles.filterButton}
-                        onClick={() => console.log("Organizar")}>
-                        <Text style={styles.filterText}>Organizar</Text>
-                        <IconButton
-                            icon="chevron-down"
-                            size={16}
-                            color="#666"
+                        onPress={() => console.log("Organizar")}
+                    >
+                        <DropDownPicker
+                            open={open2}
+                            value={value2}
+                            items={items2}
+                            setOpen={setOpen2}
+                            setValue={setValue2}
+                            setItems={setItems2}
+                            placeholder="Organizar"
+                            style={styles.filterButton}
                         />
+                        <IconButton size={16} color="#666" />
                     </TouchableOpacity>
-
                     <Text style={styles.resultsText}>59 results</Text>
                 </View>
             </View>
 
-            {/* Mapa */}
-            <MapView
-                style={styles.map}
-                initialRegion={{
-                    latitude: -23.6176,
-                    longitude: -46.5472,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                }}
-            >
-                {places.map((place) => (
+            {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
+            <MapView ref={mapRef} style={styles.map}>
+                {filteredPlaces.map((place) => (
                     <Marker
                         key={place.id}
                         coordinate={place.coordinate}
@@ -171,72 +276,158 @@ export default function Community() {
                 ))}
             </MapView>
 
-            {/* Modal */}
             <Modal
-                animationType="slide"
+                animationType="none" // A animação é 100% manual agora
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={closeModal}
+                onRequestClose={closeWithAnimation} // Usa a função com animação também para o botão "voltar" do Android
             >
-                {/* TODO: Adicionar ScrollView */}
                 <View style={styles.modalOverlay}>
                     <TouchableOpacity
                         style={styles.modalBackdrop}
-                        onPress={closeModal}
+                        onPress={closeWithAnimation}
                         activeOpacity={1}
                     />
 
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHandle} />
-
-                        {selectedPlace && (
-                            <>
-                                <Image
-                                    source={{ uri: selectedPlace.image }}
-                                    style={styles.placeImage}
-                                    resizeMode="cover"
-                                />
-
-                                <View style={styles.placeInfo}>
-                                    <Text style={styles.placeName}>
-                                        {selectedPlace.name}
-                                    </Text>
-                                    <View style={styles.placeDetails}>
-                                        <View style={styles.ratingContainer}>
-                                            <IconButton
-                                                icon="star"
-                                                size={16}
-                                                color="#FFD700"
-                                            />
-                                            <Text style={styles.ratingText}>
-                                                {selectedPlace.rating} (
-                                                {selectedPlace.reviews}{" "}
-                                                avaliações)
+                    <Animated.View
+                        style={[
+                            styles.animatedContainer,
+                            { transform: [{ translateY: pan.y }] },
+                        ]}
+                        {...panResponder.panHandlers}
+                    >
+                        <ScrollView contentContainerStyle={styles.modalScroll}>
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHandle} />
+                                {selectedPlace && (
+                                    <>
+                                        <Image
+                                            source={{
+                                                uri: selectedPlace.image,
+                                            }}
+                                            style={styles.placeImage}
+                                            resizeMode="cover"
+                                        />
+                                        <View style={styles.placeInfo}>
+                                            <Text style={styles.placeName}>
+                                                {selectedPlace.name}
                                             </Text>
+                                            <View style={styles.placeDetails}>
+                                                <View
+                                                    style={
+                                                        styles.ratingContainer
+                                                    }
+                                                >
+                                                    <IconButton
+                                                        icon="star"
+                                                        size={16}
+                                                        color="#FFD700"
+                                                    />
+                                                    <Text
+                                                        style={
+                                                            styles.ratingText
+                                                        }
+                                                    >
+                                                        {selectedPlace.rating} (
+                                                        {selectedPlace.reviews}{" "}
+                                                        avaliações)
+                                                    </Text>
+                                                </View>
+                                                <Text
+                                                    style={styles.distanceText}
+                                                >
+                                                    📍 {selectedPlace.distance}
+                                                </Text>
+                                            </View>
+                                            {!detailsVisible ? (
+                                                <View
+                                                    style={styles.typeContainer}
+                                                >
+                                                    <Text
+                                                        style={styles.typeText}
+                                                    >
+                                                        {selectedPlace.type}
+                                                    </Text>
+                                                    <TouchableOpacity
+                                                        style={
+                                                            styles.selectButton
+                                                        }
+                                                        onPress={
+                                                            handleSelectPlace
+                                                        }
+                                                    >
+                                                        <Text
+                                                            style={
+                                                                styles.selectButtonText
+                                                            }
+                                                        >
+                                                            Selecionar
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            ) : (
+                                                <View
+                                                    style={
+                                                        styles.detailsSection
+                                                    }
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.sectionTitle
+                                                        }
+                                                    >
+                                                        Descrição
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.descriptionText
+                                                        }
+                                                    >
+                                                        {
+                                                            selectedPlace.description
+                                                        }
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.sectionTitle
+                                                        }
+                                                    >
+                                                        Horários
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.descriptionText
+                                                        }
+                                                    >
+                                                        Segunda a Sexta: 08:00 -
+                                                        22:00
+                                                    </Text>
+                                                    <TouchableOpacity
+                                                        style={[
+                                                            styles.selectButton,
+                                                            {
+                                                                marginTop: 20,
+                                                                alignSelf:
+                                                                    "center",
+                                                            },
+                                                        ]}
+                                                    >
+                                                        <Text
+                                                            style={
+                                                                styles.selectButtonText
+                                                            }
+                                                        >
+                                                            Confirmar Local
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
                                         </View>
-                                        <Text style={styles.distanceText}>
-                                            📍 {selectedPlace.distance}
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.typeContainer}>
-                                        <Text style={styles.typeText}>
-                                            {selectedPlace.type}
-                                        </Text>
-                                        <TouchableOpacity
-                                            style={styles.selectButton}
-                                        >
-                                            <Text
-                                                style={styles.selectButtonText}
-                                            >
-                                                Selecionar
-                                            </Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </>
-                        )}
-                    </View>
+                                    </>
+                                )}
+                            </View>
+                        </ScrollView>
+                    </Animated.View>
                 </View>
             </Modal>
         </View>
@@ -276,14 +467,18 @@ const styles = StyleSheet.create({
     },
     filtersContainer: {
         flexDirection: "row",
+        flex: 2,
         alignItems: "center",
         justifyContent: "space-between",
+        zIndex: 1000,
+        paddingBottom: 15,
+        paddingTop: 20,
     },
     filterButton: {
-        borderColor: 'gray',
-        borderWidth: 1,
+        borderColor: "gray",
         borderRadius: 20,
         flexDirection: "row",
+        flex: 1,
         alignItems: "center",
         paddingHorizontal: 12,
     },
@@ -308,31 +503,34 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "#FFFFFF",
     },
-    bottomNav: {
-        flexDirection: "row",
-        backgroundColor: "#FFFFFF",
-        paddingVertical: 12,
-        paddingBottom: 34,
-        borderTopWidth: 1,
-        borderTopColor: "#E0E0E0",
-    },
-    navItem: {
-        flex: 1,
-        alignItems: "center",
-    },
     modalOverlay: {
         flex: 1,
         justifyContent: "flex-end",
     },
     modalBackdrop: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: "rgba(0,0,0,0.2)",
+    },
+    animatedContainer: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+    modalScroll: {
+        justifyContent: "flex-end",
+        flexGrow: 1,
     },
     modalContent: {
         backgroundColor: "#FFFFFF",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         paddingTop: 8,
+        maxHeight: height * 0.8,
     },
     modalHandle: {
         width: 40,
@@ -346,9 +544,12 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 180,
         backgroundColor: "#F0F0F0",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
     placeInfo: {
         padding: 16,
+        paddingBottom: 32,
     },
     placeName: {
         fontSize: 22,
@@ -393,5 +594,23 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontSize: 14,
         fontWeight: "600",
+    },
+    detailsSection: {
+        marginTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#EEEEEE",
+        paddingTop: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 8,
+    },
+    descriptionText: {
+        fontSize: 15,
+        color: "#666",
+        lineHeight: 22,
+        marginBottom: 16,
     },
 });

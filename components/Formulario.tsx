@@ -1,25 +1,22 @@
-import { Icon, IconButton } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
     Alert,
+    Image,
+    SafeAreaView,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    SafeAreaView,
-    Button,
-    ScrollView,
-    Modal,
-    Image,
-    View,
+    View
 } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
+import { Icon, IconButton } from "react-native-paper";
 
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 // import axios from 'axios';
 
