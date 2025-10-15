@@ -33,6 +33,12 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O App Acessa suas Fotos para Compartilhar com a Comunidade."
+        }
       ]
     ],
     "experiments": {

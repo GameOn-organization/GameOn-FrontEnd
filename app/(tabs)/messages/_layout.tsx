@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { useRouter } from "expo-router";
 import { IconButton } from "react-native-paper";
 import React from "react";
-import { SafeAreaView, Image, StyleSheet, Dimensions, Text } from "react-native";
+import { SafeAreaView, Image, StyleSheet, Text } from "react-native";
 
 export default function MessagesLayout() {
     const router = useRouter();
@@ -10,7 +10,6 @@ export default function MessagesLayout() {
     return (
         <Stack
             screenOptions={{
-                headerStyle: { alignItems: "center", justifyContent: "center" },
                 headerShown: true, //Se (Chat) -> headerTitle: Nome Usuario
                 headerTitleAlign: "center",
                 headerTitleStyle: {
@@ -22,6 +21,8 @@ export default function MessagesLayout() {
                     borderBottomWidth: 0,
                     shadowOpacity: 0,
                     elevation: 0,
+                    alignItems: "center", 
+                    justifyContent: "center"
                 },
                 headerLeft: () => (
                     <IconButton
@@ -89,8 +90,6 @@ export default function MessagesLayout() {
         </Stack>
     );
 }
-
-const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
     imageContainer: {

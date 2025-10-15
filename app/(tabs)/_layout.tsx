@@ -27,6 +27,11 @@ const TAB_ROUTES = [
     { name: "faqsScreen", path: "faqs/faqsScreen", disableSwipe: true },
     { name: "message", path: "messages/message", disableSwipe: true },
     { name: "chat", path: "messages/chat", disableSwipe: true },
+    
+    { name: "config", path: "settings/config", disableSwipe: true },
+    { name: "premium", path: "settings/premium", disableSwipe: true },
+    { name: "privacy", path: "settings/privacy", disableSwipe: true },
+
 ];
 
 const INVALID_ROUTES = 3
@@ -275,6 +280,20 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                         />
                         <Tabs.Screen
                             name="faqs"
+                            options={{
+                                href: null, // Esconde o Botão da tab bar
+                                tabBarStyle: { display: "none" }, //Esconde a Tab Bar
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="settings"
+                            options={{
+                                href: null, // Esconde o Botão da tab bar
+                                tabBarStyle: { display: "none" }, //Esconde a Tab Bar
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="admin"
                             options={{
                                 href: null, // Esconde o Botão da tab bar
                                 tabBarStyle: { display: "none" }, //Esconde a Tab Bar

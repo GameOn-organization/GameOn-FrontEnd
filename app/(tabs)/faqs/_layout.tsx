@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { useRouter } from "expo-router";
 import { IconButton, Icon, Badge } from "react-native-paper";
 import React from "react";
-import { SafeAreaView, Image, StyleSheet, Dimensions, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 export default function FaqsLayout() {
     const router = useRouter();
@@ -13,7 +13,6 @@ export default function FaqsLayout() {
         >
             <Stack
                 screenOptions={{
-                    headerStyle: { alignItems: "center", justifyContent: "center" },
                     headerShown: true, //Se (Chat) -> headerTitle: Nome Usuario
                     headerTitleAlign: "center",
                     headerTitleStyle: {
@@ -25,6 +24,8 @@ export default function FaqsLayout() {
                         borderBottomWidth: 0,
                         shadowOpacity: 0,
                         elevation: 0,
+                        alignItems: "center", 
+                        justifyContent: "center"
                     },
                     headerLeft: () => (
                         <IconButton
@@ -62,52 +63,6 @@ export default function FaqsLayout() {
                         title: "NOME DA FAQ",
                     }}
                 />
-                {/* <Stack.Screen
-                    name="chat"
-                    options={{
-                        headerTitle: () => (
-                            <SafeAreaView
-                                style={{
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Text style={{ fontSize: 18, fontWeight: "bold", left: 0 }}>
-                                    Nome
-                                </Text>
-                                <Text style={{ fontSize: 14, color: "gray", left: 25 }}>
-                                    Ativo 10h atrás
-                                </Text>
-                            </SafeAreaView>
-                        ),
-                        headerLeft: () => (
-                            <>
-                                <IconButton
-                                    icon="arrow-left"
-                                    size={40}
-                                    onPress={() => {
-                                        router.back();
-                                    }}
-                                />
-                                <SafeAreaView style={styles.imageContainer}>
-                                    <Image
-                                        source={require("../../../assets/images/icon.jpeg")}
-                                        style={styles.image}
-                                    />
-                                </SafeAreaView>
-                            </>
-                        ),
-                        headerRight: () => (
-                            <IconButton
-                                icon="phone"
-                                size={33}
-                                onPress={() => {
-                                    console.log("Iniciar Chamada");
-                                }}
-                            />
-                        ),
-                    }}
-                /> */}
             </Stack>
             <SafeAreaView
                 style={styles.footer}
@@ -141,23 +96,7 @@ export default function FaqsLayout() {
     );
 }
 
-const { width, height } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
-    imageContainer: {
-        left: 20, // Centraliza horizontalmente
-        width: 50,
-        height: 50,
-        borderRadius: 75,
-        overflow: "hidden",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    image: {
-        width: "100%",
-        height: "100%",
-        borderRadius: 75,
-    },
     footer: {
         height: 100,
         backgroundColor: "#f5f5f5",
