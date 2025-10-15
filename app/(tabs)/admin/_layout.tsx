@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
 import { useRouter } from "expo-router";
-import { IconButton, Icon, Badge } from "react-native-paper";
+import { IconButton } from "react-native-paper";
 import React from "react";
-import { SafeAreaView, Image, StyleSheet, Dimensions, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native";
 
 export default function AdminLayout() {
     const router = useRouter();
@@ -13,7 +13,6 @@ export default function AdminLayout() {
         >
             <Stack
                 screenOptions={{
-                    headerStyle: { alignItems: "center", justifyContent: "center" },
                     headerShown: true,
                     headerTitleAlign: "center",
                     headerTitleStyle: {
@@ -25,6 +24,8 @@ export default function AdminLayout() {
                         borderBottomWidth: 0,
                         shadowOpacity: 0,
                         elevation: 0,
+                        alignItems: "center", 
+                        justifyContent: "center"
                     },
                     headerLeft: () => (
                         <IconButton
@@ -47,36 +48,3 @@ export default function AdminLayout() {
         </SafeAreaView>
     );
 }
-
-const { width, height } = Dimensions.get("window");
-
-const styles = StyleSheet.create({
-    imageContainer: {
-        left: 20, // Centraliza horizontalmente
-        width: 50,
-        height: 50,
-        borderRadius: 75,
-        overflow: "hidden",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    image: {
-        width: "100%",
-        height: "100%",
-        borderRadius: 75,
-    },
-    footer: {
-        height: 100,
-        backgroundColor: "#f5f5f5",
-        borderTopWidth: 1,
-        borderTopColor: "#ddd",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    button: {
-        flexDirection: 'row',
-        gap: 5,
-        justifyContent: 'center',
-        alignItems: 'center',
-    }
-});

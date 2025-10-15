@@ -336,7 +336,7 @@ export default function Profile() {
                                     onPress={closeDrawer}
                                 />
                             </View>
-                            <MenuProfile />
+                            <MenuProfile closeDrawer={closeDrawer} />
                         </SafeAreaView>
                     </Animated.View>
                 </>
