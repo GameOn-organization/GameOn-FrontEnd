@@ -12,7 +12,7 @@ import { Icon } from 'react-native-paper';
 
 export default function PrivacyScreen() {
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
-    const [locationServicesEnabled, setLocationServicesEnabled] = React.useState(false);
+    const [locationServicesEnabled, setLocationServicesEnabled] = React.useState(true);
 
     const privacyOptions = [
         { title: 'Gerenciar Dados Pessoais', icon: 'shield-account' },
@@ -23,7 +23,6 @@ export default function PrivacyScreen() {
     const securityOptions = [
         { title: 'Alterar Senha', icon: 'lock-reset' },
         { title: 'Autenticação de Dois Fatores', icon: 'two-factor-authentication' },
-        { title: 'Dispositivos Conectados', icon: 'devices' },
     ];
 
     return (
