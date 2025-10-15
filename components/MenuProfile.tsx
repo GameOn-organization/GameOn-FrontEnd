@@ -1,224 +1,126 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import {
     SafeAreaView,
     Text,
     TouchableOpacity,
     StyleSheet,
     Switch,
+    View,
 } from "react-native";
-import { Icon, IconButton, Badge } from "react-native-paper";
+import { Icon, Badge } from "react-native-paper";
 import { useRouter } from "expo-router";
 
-export default function MenuProfile() {
-
-    const router = useRouter()
-
+export default function MenuProfile({ closeDrawer }: { closeDrawer: () => void }) {
+    const router = useRouter();
     const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+
+    const handleNavigation = (path: string) => {
+        if (closeDrawer) {
+            closeDrawer();
+        }
+        router.navigate(path);
+    };
+
+    const menuItems = [
+        { icon: 'calendar', text: 'Eventos', badge: 33, onPress: () => console.log("Eventos") },
+        { icon: 'medal-outline', text: 'Recompensas', badge: 33, onPress: () => console.log("Recompensas") },
+        { icon: 'email-send-outline', text: 'Convide um Amigo', onPress: () => console.log("Convide um Amigo") },
+        { icon: 'lock-outline', text: 'Privacidade e Segurança', onPress: () => handleNavigation("../../settings/privacy") },
+        { icon: 'lightning-bolt-outline', text: 'Assinatura', onPress: () => handleNavigation("../../settings/premium") },
+        { icon: 'tools', text: 'Configurações', onPress: () => handleNavigation("../../settings/config") },
+        { icon: 'handshake', text: 'Seja um Associado', onPress: () => console.log("Seja um Associado") },
+    ];
 
     return (
-        <SafeAreaView
-            style={styles.container}
-        >
-            <SafeAreaView
-                style={[styles.container,
-                    {height: '60%',
-                    borderBottomWidth: 1,
-                    borderBottomColor: '#f0f0f0',}]}
-            >
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='calendar'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => console.log("Eventos")}
-                    >
-                        Eventos
-                    </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.menuContainer}>
+                {menuItems.map((item, index) => (
+                    <TouchableOpacity key={index} style={styles.button} onPress={item.onPress}>
+                        <Icon source={item.icon} size={24} color='#333' />
+                        <Text style={styles.buttonText}>{item.text}</Text>
+                        {item.badge && <Badge style={styles.badge}>{item.badge}</Badge>}
+                        <Icon source="chevron-right" size={24} color="#ccc" />
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.footerButton} onPress={() => handleNavigation('faqs/faqsScreen')}>
+                    <Icon source='help-circle-outline' size={24} color='#333' />
+                    <Text style={styles.footerButtonText}>FAQ</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='medal-outline'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => console.log("Recompensas")}
-                    >
-                        Recompensas
-                    </Text>
-                    <Badge
-                        size={20} // Tamanho do badge
-                        style={styles.badge}
-                    >33</Badge>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='email-send-outline'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => console.log("Convide um Amigo")}
-                    >
-                        Convide um Amigo
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='lock-outline'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => router.navigate("../../settings/privacy")}
-                    >
-                        Privacidade e Segurança
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='lightning-bolt-outline'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => router.navigate("../../settings/premium")}
-                    >
-                        Assinatura
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='tools'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => router.navigate("../../settings/config")}
-                    >
-                        Configurações
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                >
-                    <Icon
-                        source='handshake'
-                        size={20}
-                        color='white'
-                    />
-                    <Text
-                        style={styles.buttonText}
-                        onPress={() => console.log("Seja um Associado")}
-                    >
-                        Seja um Associado
-                    </Text>
-                </TouchableOpacity>
-            </SafeAreaView>
-            <SafeAreaView
-                style={styles.optionsContainer}
-            >
-                <TouchableOpacity
-                    style={[styles.options, {gap: 5}]}
-                    onPress= {() => router.navigate('faqs/faqsScreen')}
-                >
-                    <Icon
-                        source='help-circle-outline'
-                        size={20}
-                        color='black'
-                    />
-                    <Text>FAQ</Text>
-                </TouchableOpacity>
-                <SafeAreaView
-                    style={styles.options}
-                >
-                    <Icon
-                        source='white-balance-sunny'
-                        size={20}
-                        color='black'
-                    />
+
+                <View style={styles.themeSwitcher}>
+                    <Icon source='white-balance-sunny' size={24} color='#333' />
                     <Switch
-                        trackColor={{false: '#81b0ff', true: '#767577'}}
-                        thumbColor={isEnabled ? '#f4f3f4' : '#f5dd4b'}
+                        trackColor={{ false: '#767577', true: '#81b0ff' }}
+                        thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch}
                         value={isEnabled}
                     />
-                    <Icon
-                        source='moon-waxing-crescent'
-                        size={20}
-                        color='black'
-                    />
-                </SafeAreaView>
-            </SafeAreaView>
+                    <Icon source='moon-waxing-crescent' size={24} color='#333' />
+                </View>
+            </View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: '5%',
-        alignItems: 'center',
-        gap: 20,
         flex: 1,
-        width: '100%',
-        height: '100%',
+        backgroundColor: '#f5f5f5',
+        paddingHorizontal: 15,
+    },
+    menuContainer: {
+        flex: 1,
+        marginTop: 20,
     },
     button: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
         alignItems: 'center',
-        paddingLeft: 20,
-        backgroundColor: 'black',
+        backgroundColor: '#fff',
         borderRadius: 10,
-        height: 50,
-        width: '80%',
-        gap: 10,
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        marginBottom: 10,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
     buttonText: {
-        color: 'white',
+        flex: 1,
+        marginLeft: 15,
+        fontSize: 16,
+        color: '#333',
     },
     badge: {
-        marginLeft: 'auto',
-        marginRight: '10',
-        marginBottom: 15,
-        backgroundColor: 'white',
-        color: 'black',
-        borderRadius: 5,
+        marginRight: 10,
+        backgroundColor: '#6200ee',
+        color: 'white',
     },
-    optionsContainer: {
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-    },
-    options: {
+    footer: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         alignItems: 'center',
-    }
-})
+        paddingVertical: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+    },
+    footerButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    footerButtonText: {
+        marginLeft: 10,
+        fontSize: 16,
+        color: '#333',
+    },
+    themeSwitcher: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+});
