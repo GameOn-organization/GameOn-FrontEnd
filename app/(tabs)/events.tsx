@@ -1,60 +1,105 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Dimensions,
-} from 'react-native';
+import AddEventModal from '@/components/addEventModal';
+import EventDetailModal from '@/components/eventDetailModal';
+import React, { useState } from 'react';
+import { Dimensions, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
+const initialEvents = [
+  {
+    id: '1',
+    title: 'NBA House',
+    rating: '4.8 (500 avaliações)',
+    distance: '1.2 km',
+    price: 'R$200',
+    priceNote: 'p/ cada ingresso',
+    description: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites',
+    imagePlaceholderText: 'NBA House',
+    imagePlaceholderSubtext: 'Evento de basquete',
+  },
+  {
+    id: '2',
+    title: 'Brasil Game Show',
+    rating: '4.9 (1200 avaliações)',
+    distance: '5.0 km',
+    price: 'R$350',
+    priceNote: 'p/ cada ingresso',
+    description: 'The Rock in Rio festival is one of the largest music festivals in the world, held in Rio de Janeiro, Brazil. It features a wide variety of international and national artists across multiple stages.',
+    imagePlaceholderText: 'BGS',
+    imagePlaceholderSubtext: 'Evento de Games',
+  },
+  {
+    id: '3',
+    title: 'Comic Con Experience',
+    rating: '4.7 (800 avaliações)',
+    distance: '3.5 km',
+    price: 'R$150',
+    priceNote: 'p/ cada ingresso',
+    description: 'Comic Con Experience (CCXP) is a Brazilian multi-genre entertainment convention. It features comics, movies, TV series, video games, literature, and more, bringing together fans and creators.',
+    imagePlaceholderText: 'CCXP',
+    imagePlaceholderSubtext: 'Cultura Pop',
+  },
+];
+
 export default function App() {
+  const [events, setEvents] = useState(initialEvents);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isDetailModalVisible, setDetailModalVisible] = useState(false);
+  const [isAddModalVisible, setAddModalVisible] = useState(false);
+
+  const handleEventPress = (event) => {
+    setSelectedEvent(event);
+    setDetailModalVisible(true);
+  };
+
+  const handleAddEvent = (newEvent) => {
+    setEvents((prevEvents) => [...prevEvents, { ...newEvent, id: String(prevEvents.length + 1) }]);
+    setAddModalVisible(false);
+  };
+
+  const renderEventItem = ({ item }) => (
+    <TouchableOpacity style={styles.eventCard} onPress={() => handleEventPress(item)}>
+      <View style={styles.eventImagePlaceholderSmall}>
+        <Text style={styles.imagePlaceholderTextSmall}>{item.imagePlaceholderText}</Text>
+      </View>
+      <View style={styles.eventCardInfo}>
+        <Text style={styles.eventCardTitle}>{item.title}</Text>
+        <Text style={styles.eventCardRating}>{item.rating}</Text>
+        <Text style={styles.eventCardDistance}>{item.distance}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
+      <Text style={styles.mainTitle}>Meus Eventos</Text>
+      <FlatList
+        data={events}
+        renderItem={renderEventItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.eventList}
+      />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Imagem principal do evento */}
-        <View style={styles.imageContainer}>
-          <View style={styles.eventImagePlaceholder}>
-            <Text style={styles.imagePlaceholderText}>NBA HOUSE</Text>
-            <Text style={styles.imagePlaceholderSubtext}>Evento em destaque</Text>
-          </View>
-        </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setAddModalVisible(true)}
+      >
+        <Text style={styles.addButtonText}>+</Text>
+      </TouchableOpacity>
 
-        {/* Informações do evento */}
-        <View style={styles.eventInfo}>
-          <Text style={styles.eventTitle}>NBA HOUSE</Text>
-          <View style={styles.ratingContainer}>
-            <Text style={styles.rating}>⭐ 4.8 (500 avaliações)</Text>
-            <Text style={styles.distance}>📍 1.2 km</Text>
-          </View>
-          
-          <View style={styles.priceContainer}>
-            <View style={styles.priceSection}>
-              <Text style={styles.price}>R$200</Text>
-              <Text style={styles.priceNote}>p/ Late</Text>
-            </View>
-            <TouchableOpacity style={styles.subscribeButton}>
-              <Text style={styles.subscribeText}>Inscrever-se</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      {selectedEvent && (
+        <EventDetailModal
+          isVisible={isDetailModalVisible}
+          onClose={() => setDetailModalVisible(false)}
+          event={selectedEvent}
+        />
+      )}
 
-        {/* Separador */}
-        <View style={styles.separator} />
-
-        {/* Descrição */}
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.descriptionTitle}>Descrição</Text>
-          <Text style={styles.descriptionText}>
-            Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites
-          </Text>
-        </View>
-      </ScrollView>
+      <AddEventModal
+        isVisible={isAddModalVisible}
+        onClose={() => setAddModalVisible(false)}
+        onAddEvent={handleAddEvent}
+      />
     </SafeAreaView>
   );
 }
@@ -62,140 +107,87 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f0f2f5',
     paddingTop: 20,
-    backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#000',
-  },
-  timeText: {
-    color: '#fff',
-    fontSize: 16,
+  mainTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
-  },
-  statusIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  signalText: {
-    color: '#fff',
-    marginRight: 5,
-  },
-  wifiText: {
-    marginRight: 5,
-  },
-  batteryText: {
-    // Ícone da bateria
-  },
-  scrollView: {
-    flex: 1,
-  },
-  imageContainer: {
-    width: '100%',
-    height: 250,
+    color: '#333',
+    textAlign: 'center',
     marginBottom: 20,
-    paddingHorizontal: 20,
+    paddingTop: 30,
   },
-  eventImagePlaceholder: {
-    width: '100%',
-    height: '100%',
+  eventList: {
+    paddingHorizontal: 10,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginVertical: 8,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  eventImagePlaceholderSmall: {
+    width: 100,
+    height: 100,
     backgroundColor: '#1a1a2e',
-    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
   },
-  imagePlaceholderText: {
+  imagePlaceholderTextSmall: {
     color: '#ff4757',
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  imagePlaceholderSubtext: {
-    color: '#fff',
-    fontSize: 16,
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  eventInfo: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  eventTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 8,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  rating: {
-    fontSize: 14,
-    color: '#666',
-    marginRight: 15,
-  },
-  distance: {
-    fontSize: 14,
-    color: '#666',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  priceSection: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    flex: 1,
-  },
-  price: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  priceNote: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 5,
-  },
-  subscribeButton: {
-    backgroundColor: '#000',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  subscribeText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  descriptionContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
-  },
-  descriptionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 10,
+    textAlign: 'center',
   },
-  descriptionText: {
+  eventCardInfo: {
+    padding: 15,
+    justifyContent: 'center',
+    flex: 1,
+  },
+  eventCardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  eventCardRating: {
     fontSize: 14,
     color: '#666',
-    lineHeight: 20,
+    marginBottom: 3,
+  },
+  eventCardDistance: {
+    fontSize: 14,
+    color: '#666',
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#000',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 30,
+    lineHeight: 30,
   },
 });
