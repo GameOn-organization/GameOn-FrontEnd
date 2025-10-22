@@ -11,10 +11,7 @@ import {
 
 const AddEventModal = ({ isVisible, onClose, onAddEvent }) => {
   const [title, setTitle] = useState('');
-  const [rating, setRating] = useState('');
-  const [distance, setDistance] = useState('');
   const [price, setPrice] = useState('');
-  const [priceNote, setPriceNote] = useState('');
   const [description, setDescription] = useState('');
   const [imagePlaceholderText, setImagePlaceholderText] = useState('');
   const [imagePlaceholderSubtext, setImagePlaceholderSubtext] = useState('');
@@ -23,10 +20,7 @@ const AddEventModal = ({ isVisible, onClose, onAddEvent }) => {
     if (title && description) {
       onAddEvent({
         title,
-        rating: rating || 'N/A',
-        distance: distance || 'N/A',
         price: price || 'Grátis',
-        priceNote: priceNote || '',
         description,
         imagePlaceholderText: imagePlaceholderText || title.toUpperCase(),
         imagePlaceholderSubtext: imagePlaceholderSubtext || 'Novo Evento',
@@ -65,27 +59,9 @@ const AddEventModal = ({ isVisible, onClose, onAddEvent }) => {
             />
             <TextInput
               style={styles.input}
-              placeholder="Avaliação (ex: 4.5 (100 avaliações))"
-              value={rating}
-              onChangeText={setRating}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Distância (ex: 2.5 km)"
-              value={distance}
-              onChangeText={setDistance}
-            />
-            <TextInput
-              style={styles.input}
               placeholder="Preço (ex: R$150)"
               value={price}
               onChangeText={setPrice}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Nota do Preço (ex: p/ cada ingresso)"
-              value={priceNote}
-              onChangeText={setPriceNote}
             />
             <TextInput
               style={[styles.input, styles.textArea]}

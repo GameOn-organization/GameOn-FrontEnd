@@ -27,16 +27,11 @@ export default function Community() {
     const [detailsVisible, setDetailsVisible] = useState(false);
     const [open1, setOpen1] = useState(false);
     const [open2, setOpen2] = useState(false);
-    const [value1, setValue1] = useState("Filtrar");
-    const [value2, setValue2] = useState("Organizar");
+    const [value1, setValue1] = useState("Todos");
     const [items1, setItems1] = useState([
         { label: "Eventos Físicos", value: "Eventos Físicos" },
         { label: "Eventos Digitais", value: "Eventos Digitais" },
         { label: "Todos", value: "Todos" },
-    ]);
-    const [items2, setItems2] = useState([
-        { label: "Mais Barato", value: "Mais Barato" },
-        { label: "Perto de Mim", value: "Perto de Mim" },
     ]);
 
     // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
@@ -226,11 +221,11 @@ export default function Community() {
 
                     <IconButton icon="pencil" size={18} color="#666" />
                 </View>
-                <View style={styles.filtersContainer}>
-                    <TouchableOpacity
-                        style={styles.filterButton}
-                        //onPress={() => console.log("Filtrar")}
-                    >
+
+                <View
+                    style={{flexDirection:"row", alignItems: 'center', justifyContent: 'space-between'}}
+                >
+                    <View style={styles.filtersContainer}>
                         <DropDownPicker
                             open={open1}
                             value={value1}
@@ -239,28 +234,12 @@ export default function Community() {
                             setValue={setValue1}
                             setItems={setItems1}
                             placeholder="Filtrar"
-                            style={styles.filterButton}
+                            style={{width: "100%"}}
                         />
-                        <IconButton size={16} color="#666" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.filterButton}
-                        onPress={() => console.log("Organizar")}
-                    >
-                        <DropDownPicker
-                            open={open2}
-                            value={value2}
-                            items={items2}
-                            setOpen={setOpen2}
-                            setValue={setValue2}
-                            setItems={setItems2}
-                            placeholder="Organizar"
-                            style={styles.filterButton}
-                        />
-                        <IconButton size={16} color="#666" />
-                    </TouchableOpacity>
+                    </View>
                     <Text style={styles.resultsText}>59 results</Text>
                 </View>
+
             </View>
 
             {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
@@ -467,25 +446,9 @@ const styles = StyleSheet.create({
     },
     filtersContainer: {
         flexDirection: "row",
-        flex: 2,
         alignItems: "center",
-        justifyContent: "space-between",
-        zIndex: 1000,
-        paddingBottom: 15,
-        paddingTop: 20,
-    },
-    filterButton: {
-        borderColor: "gray",
-        borderRadius: 20,
-        flexDirection: "row",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 12,
-    },
-    filterText: {
-        fontSize: 14,
-        color: "#666",
-        marginRight: 4,
+        justifyContent: "space-around",
+        width: '40%'
     },
     resultsText: {
         fontSize: 14,
