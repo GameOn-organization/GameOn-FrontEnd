@@ -27,10 +27,7 @@ const AddEventModal = ({ isVisible, onClose, onAddEvent }) => {
       });
       // Limpar formulário
       setTitle('');
-      setRating('');
-      setDistance('');
       setPrice('');
-      setPriceNote('');
       setDescription('');
       setImagePlaceholderText('');
       setImagePlaceholderSubtext('');
