@@ -156,35 +156,71 @@ export default function Community() {
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
 
-    const GOOGLE_API_KEY = "AIzaSyAlKad0GTpF4QTNlt3NWqPbj54bAg6zb0o";
+    const GOOGLE_API_KEY = "mandei a chave da api no gp, se precisar ela vai estar la, só substituir";
 
     const searchLocation = async () => {
         if (!localSearch) return;
 
+        // Log da URL para debug
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+            localSearch
+        )}&components=country:BR&key=${GOOGLE_API_KEY}`;
+        console.log("URL da Requisição:", url);
+
         try {
-            const response = await axios.get(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-                    localSearch
-                )}&components=country:BR&key=${GOOGLE_API_KEY}`
-            );
+            const response = await axios.get(url);
 
             if (response.data.status === "OK") {
                 const location = response.data.results[0].geometry.location;
+
+                //A API do Google retorna 'lat' e 'lng'
                 const region = {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
+                    latitude: location.lat, // CORRIGIDO
+                    longitude: location.lng, // CORRIGIDO
                     latitudeDelta: 0.05,
                     longitudeDelta: 0.05,
                 };
-                // Anima o mapa para a nova região
+
                 mapRef.current?.animateToRegion(region, 1000);
             } else {
-                alert("Local não encontrado.");
-                console.log("deu erro");
+                // Tratamento para status de erro da API (ex: ZERO_RESULTS, REQUEST_DENIED)
+                const errorMessage =
+                    response.data.error_message || "Local não encontrado.";
+                alert(
+                    `Erro da API: ${errorMessage} (Status: ${response.data.status})`
+                );
+                console.log("Erro de Status da API:", response.data.status);
+                console.log(
+                    "Mensagem de Erro da API:",
+                    response.data.error_message
+                );
             }
         } catch (error) {
-            alert("Erro ao buscar localização.");
-            console.error(error);
+            // Tratamento para erros de rede ou HTTP (ex: 403 Forbidden)
+            console.error("Erro completo da requisição:", error);
+
+            if (axios.isAxiosError(error)) {
+                const status = error.response?.status;
+                const data = error.response?.data;
+
+                console.error("Status HTTP:", status);
+                console.error("Dados da Resposta (Erro):", data);
+
+                let alertMessage =
+                    "Erro ao buscar localização. Verifique o console para detalhes.";
+                if (status === 403) {
+                    alertMessage =
+                        "Erro 403: A chave da API está inválida ou não tem permissão (Verifique as restrições no Google Cloud Console).";
+                } else if (status) {
+                    alertMessage = `Erro HTTP ${status}: ${error.message}`;
+                } else {
+                    alertMessage = `Erro de Rede: ${error.message}`;
+                }
+
+                alert(alertMessage);
+            } else {
+                alert("Erro Desconhecido. Verifique o console.");
+            }
         }
     };
 
@@ -223,7 +259,11 @@ export default function Community() {
                 </View>
 
                 <View
-                    style={{flexDirection:"row", alignItems: 'center', justifyContent: 'space-between'}}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}
                 >
                     <View style={styles.filtersContainer}>
                         <DropDownPicker
@@ -234,12 +274,13 @@ export default function Community() {
                             setValue={setValue1}
                             setItems={setItems1}
                             placeholder="Filtrar"
-                            style={{width: "100%"}}
+                            style={{ width: "100%" }}
                         />
                     </View>
-                    <Text style={styles.resultsText}>59 results</Text>
+                    <Text style={styles.resultsText}>
+                        {filteredPlaces.length} results
+                    </Text>
                 </View>
-
             </View>
 
             {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
@@ -448,7 +489,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-around",
-        width: '40%'
+        width: "40%",
     },
     resultsText: {
         fontSize: 14,

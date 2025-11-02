@@ -76,7 +76,7 @@ export default function App() {
     const [isDetailModalVisible, setDetailModalVisible] = useState(false);
     const [isAddModalVisible, setAddModalVisible] = useState(false);
 
-    // Estado para o filtro. Usamos "Todos" como valor inicial.
+    // Estado para o filtro. Usando "Todos" como valor inicial.
     const [selectedFilter, setSelectedFilter] =
         useState<FilterCategory>("Todos");
 
