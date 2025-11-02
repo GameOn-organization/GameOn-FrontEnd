@@ -1,19 +1,36 @@
 import AddEventModal from "@/components/addEventModal";
 import EventDetailModal from "@/components/eventDetailModal";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
-  Dimensions,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    FlatList,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
 
-const initialEvents = [
+// Definindo o tipo para os dados de evento para melhor tipagem
+interface Event {
+    id: string;
+    title: string;
+    rating: string;
+    distance: string;
+    price: string;
+    description: string;
+    imagePlaceholderText: string;
+    imagePlaceholderSubtext: string;
+    category: "Eventos Inscritos" | "Eventos Abertos";
+}
+
+// Definindo o tipo para as categorias de filtro
+type FilterCategory = "Todos" | "Eventos Inscritos" | "Eventos Abertos";
+
+// Dados Iniciais (com tipagem)
+const initialEvents: Event[] = [
     {
         id: "1",
         title: "NBA House",
@@ -53,37 +70,51 @@ const initialEvents = [
 ];
 
 export default function App() {
-    const [events, setEvents] = useState(initialEvents);
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    // Mantendo o estado 'events' para permitir a adição de novos eventos
+    const [events, setEvents] = useState<Event[]>(initialEvents);
+    const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [isDetailModalVisible, setDetailModalVisible] = useState(false);
     const [isAddModalVisible, setAddModalVisible] = useState(false);
-    const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
-    const filters = ["Todos", "Eventos Inscritos", "Eventos Abertos"];
+    // Estado para o filtro. Usamos "Todos" como valor inicial.
+    const [selectedFilter, setSelectedFilter] =
+        useState<FilterCategory>("Todos");
 
-    const filteredNotifications =
-        selectedFilter && selectedFilter !== "Todos"
-            ? initialEvents.filter((n) => n.category === selectedFilter)
-            : initialEvents;
+    const filters: FilterCategory[] = [
+        "Todos",
+        "Eventos Inscritos",
+        "Eventos Abertos",
+    ];
 
-    const handleFilterPress = (filter: string) => {
-        setSelectedFilter((prev) => (prev === filter ? null : filter));
+    // Lógica de Filtragem Otimizada com useMemo
+    const filteredEvents = useMemo(() => {
+        if (selectedFilter === "Todos") {
+            // Retorna a lista de eventos atualizada (incluindo os adicionados)
+            return events;
+        }
+        // Filtra a lista de eventos atualizada pela categoria selecionada
+        return events.filter((event) => event.category === selectedFilter);
+    }, [selectedFilter, events]); // Recalcula quando o filtro ou a lista de eventos muda
+
+    const handleFilterPress = (filter: FilterCategory) => {
+        // Apenas define o filtro, a lista é recalculada pelo useMemo
+        setSelectedFilter(filter);
     };
 
-    const handleEventPress = (event) => {
+    const handleEventPress = (event: Event) => {
         setSelectedEvent(event);
         setDetailModalVisible(true);
     };
 
-    const handleAddEvent = (newEvent) => {
+    const handleAddEvent = (newEvent: Omit<Event, "id">) => {
         setEvents((prevEvents) => [
-            ...prevEvents,
-            { ...newEvent, id: String(prevEvents.length + 1) },
+            { ...newEvent, id: String(prevEvents.length + 1) } as Event,
+            ...prevEvents, // Adiciona o novo evento no topo da lista
         ]);
         setAddModalVisible(false);
     };
 
-    const renderEventItem = ({ item }) => (
+    const renderEventItem = ({ item }: { item: Event }) => (
         <TouchableOpacity
             style={styles.eventCard}
             onPress={() => handleEventPress(item)}
@@ -104,6 +135,7 @@ export default function App() {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.mainTitle}>Eventos</Text>
+
             {/* Filtros */}
             <SafeAreaView style={styles.filterContainer}>
                 {filters.map((filter) => (
@@ -111,22 +143,16 @@ export default function App() {
                         key={filter}
                         style={[
                             styles.filterButton,
-                            selectedFilter === filter ||
-                            (filter === "Todos" && selectedFilter === null)
+                            selectedFilter === filter
                                 ? styles.activeFilterButton
                                 : null,
                         ]}
-                        onPress={() =>
-                            setSelectedFilter(
-                                filter === "Todos" ? null : filter
-                            )
-                        }
+                        onPress={() => handleFilterPress(filter)}
                     >
                         <Text
                             style={[
                                 styles.filterText,
-                                selectedFilter === filter ||
-                                (filter === "Todos" && selectedFilter === null)
+                                selectedFilter === filter
                                     ? styles.activeFilterText
                                     : null,
                             ]}
@@ -137,16 +163,21 @@ export default function App() {
                 ))}
             </SafeAreaView>
 
-            {/*<ScrollView>
-              {filteredNotifications.map((n, i) => (
-              ))}
-            </ScrollView>*/}
-            <FlatList
-                data={events}
-                renderItem={renderEventItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.eventList}
-            />
+            {/* FlatList agora usa a lista filtrada */}
+            {filteredEvents.length > 0 ? (
+                <FlatList
+                    data={filteredEvents}
+                    renderItem={renderEventItem}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.eventList}
+                />
+            ) : (
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>
+                        Nenhum evento encontrado para "{selectedFilter}".
+                    </Text>
+                </View>
+            )}
 
             <TouchableOpacity
                 style={styles.addButton}
@@ -188,6 +219,7 @@ const styles = StyleSheet.create({
     },
     eventList: {
         paddingHorizontal: 10,
+        paddingBottom: 100, // Adicionado para garantir que o último item não fique escondido pelo botão flutuante
     },
     eventCard: {
         flexDirection: "row",
@@ -285,5 +317,16 @@ const styles = StyleSheet.create({
     activeFilterText: {
         color: "#fff",
         fontWeight: "bold",
+    },
+    emptyState: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 50,
+    },
+    emptyStateText: {
+        fontSize: 16,
+        color: "#666",
+        textAlign: "center",
     },
 });

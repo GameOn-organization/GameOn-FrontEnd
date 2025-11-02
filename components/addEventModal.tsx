@@ -16,7 +16,7 @@ const AddEventModal = ({ isVisible, onClose, onAddEvent }) => {
   const [imagePlaceholderText, setImagePlaceholderText] = useState('');
   const [imagePlaceholderSubtext, setImagePlaceholderSubtext] = useState('');
 
-  const handleSave = () => {
+  const handleSave = () =>{
     if (title && description) {
       onAddEvent({
         title,
