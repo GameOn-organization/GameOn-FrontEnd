@@ -156,7 +156,7 @@ export default function Community() {
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
 
-    const GOOGLE_API_KEY = "AIzaSyAlKad0GTpF4QTNlt3NWqPbj54bAg6zb0o";
+    const GOOGLE_API_KEY = "substituir pela chave no gp";
 
     const searchLocation = async () => {
         if (!localSearch) return;
