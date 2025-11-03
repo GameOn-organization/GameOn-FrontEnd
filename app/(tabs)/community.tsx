@@ -156,7 +156,7 @@ export default function Community() {
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
 
-    const GOOGLE_API_KEY = "mandei a chave da api no gp, se precisar ela vai estar la, só substituir";
+    const GOOGLE_API_KEY = "AIzaSyAlKad0GTpF4QTNlt3NWqPbj54bAg6zb0o";
 
     const searchLocation = async () => {
         if (!localSearch) return;
@@ -164,24 +164,43 @@ export default function Community() {
         // Log da URL para debug
         const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
             localSearch
-        )}&components=country:BR&key=${GOOGLE_API_KEY}`;
+        )}&key=${GOOGLE_API_KEY}`;
         console.log("URL da Requisição:", url);
 
         try {
             const response = await axios.get(url);
 
             if (response.data.status === "OK") {
-                const location = response.data.results[0].geometry.location;
+                const result = response.data.results[0];
+                const location = result.geometry.location;
+                const viewport = result.geometry.viewport;
 
-                //A API do Google retorna 'lat' e 'lng'
-                const region = {
-                    latitude: location.lat, // CORRIGIDO
-                    longitude: location.lng, // CORRIGIDO
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                };
+                // Verifica se há um viewport (geralmente presente para áreas maiores como países ou estados)
+                if (viewport) {
+                    // Se houver viewport, usa fitToCoordinates para mostrar a área inteira
+                    const northEast = viewport.northeast;
+                    const southWest = viewport.southwest;
 
-                mapRef.current?.animateToRegion(region, 1000);
+                    mapRef.current?.fitToCoordinates(
+                        [
+                            { latitude: northEast.lat, longitude: northEast.lng },
+                            { latitude: southWest.lat, longitude: southWest.lng },
+                        ],
+                        {
+                            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                            animated: true,
+                        }
+                    );
+                } else {
+                    // Se não houver viewport (geralmente para pontos específicos ou cidades), usa animateToRegion
+                    const region = {
+                        latitude: location.lat,
+                        longitude: location.lng,
+                        latitudeDelta: 0.05,
+                        longitudeDelta: 0.05,
+                    };
+                    mapRef.current?.animateToRegion(region, 1000);
+                }
             } else {
                 // Tratamento para status de erro da API (ex: ZERO_RESULTS, REQUEST_DENIED)
                 const errorMessage =
