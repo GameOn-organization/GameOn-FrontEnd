@@ -41,7 +41,7 @@ export default function NotificationScreen() {
       category: "Comunidade",
     },
   ];
-
+ 
   const filters = ["Todos", "MATCH!", "Equipes", "Eventos", "Comunidade"];
 
   const filteredNotifications =

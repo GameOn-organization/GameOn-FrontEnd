@@ -341,7 +341,7 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
                             style={styles.input}
                             onChangeText={setIdade}
                             value={date.toLocaleDateString() + " - (" + calcularIdade(date) + " anos)"}
-                            editable={true}
+                            editable={false}
                             placeholder="Idade"
                             placeholderTextColor="#999"
                             keyboardType="numeric"
