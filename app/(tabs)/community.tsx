@@ -27,16 +27,11 @@ export default function Community() {
     const [detailsVisible, setDetailsVisible] = useState(false);
     const [open1, setOpen1] = useState(false);
     const [open2, setOpen2] = useState(false);
-    const [value1, setValue1] = useState("Filtrar");
-    const [value2, setValue2] = useState("Organizar");
+    const [value1, setValue1] = useState("Todos");
     const [items1, setItems1] = useState([
         { label: "Eventos Físicos", value: "Eventos Físicos" },
         { label: "Eventos Digitais", value: "Eventos Digitais" },
         { label: "Todos", value: "Todos" },
-    ]);
-    const [items2, setItems2] = useState([
-        { label: "Mais Barato", value: "Mais Barato" },
-        { label: "Perto de Mim", value: "Perto de Mim" },
     ]);
 
     // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
@@ -161,35 +156,90 @@ export default function Community() {
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
 
-    const GOOGLE_API_KEY = "AIzaSyAlKad0GTpF4QTNlt3NWqPbj54bAg6zb0o";
+    const GOOGLE_API_KEY = "substituir pela chave no gp";
 
     const searchLocation = async () => {
         if (!localSearch) return;
 
+        // Log da URL para debug
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+            localSearch
+        )}&key=${GOOGLE_API_KEY}`;
+        console.log("URL da Requisição:", url);
+
         try {
-            const response = await axios.get(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-                    localSearch
-                )}&components=country:BR&key=${GOOGLE_API_KEY}`
-            );
+            const response = await axios.get(url);
 
             if (response.data.status === "OK") {
-                const location = response.data.results[0].geometry.location;
-                const region = {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                };
-                // Anima o mapa para a nova região
-                mapRef.current?.animateToRegion(region, 1000);
+                const result = response.data.results[0];
+                const location = result.geometry.location;
+                const viewport = result.geometry.viewport;
+
+                // Verifica se há um viewport (geralmente presente para áreas maiores como países ou estados)
+                if (viewport) {
+                    // Se houver viewport, usa fitToCoordinates para mostrar a área inteira
+                    const northEast = viewport.northeast;
+                    const southWest = viewport.southwest;
+
+                    mapRef.current?.fitToCoordinates(
+                        [
+                            { latitude: northEast.lat, longitude: northEast.lng },
+                            { latitude: southWest.lat, longitude: southWest.lng },
+                        ],
+                        {
+                            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                            animated: true,
+                        }
+                    );
+                } else {
+                    // Se não houver viewport (geralmente para pontos específicos ou cidades), usa animateToRegion
+                    const region = {
+                        latitude: location.lat,
+                        longitude: location.lng,
+                        latitudeDelta: 0.05,
+                        longitudeDelta: 0.05,
+                    };
+                    mapRef.current?.animateToRegion(region, 1000);
+                }
             } else {
-                alert("Local não encontrado.");
-                console.log("deu erro");
+                // Tratamento para status de erro da API (ex: ZERO_RESULTS, REQUEST_DENIED)
+                const errorMessage =
+                    response.data.error_message || "Local não encontrado.";
+                alert(
+                    `Erro da API: ${errorMessage} (Status: ${response.data.status})`
+                );
+                console.log("Erro de Status da API:", response.data.status);
+                console.log(
+                    "Mensagem de Erro da API:",
+                    response.data.error_message
+                );
             }
         } catch (error) {
-            alert("Erro ao buscar localização.");
-            console.error(error);
+            // Tratamento para erros de rede ou HTTP (ex: 403 Forbidden)
+            console.error("Erro completo da requisição:", error);
+
+            if (axios.isAxiosError(error)) {
+                const status = error.response?.status;
+                const data = error.response?.data;
+
+                console.error("Status HTTP:", status);
+                console.error("Dados da Resposta (Erro):", data);
+
+                let alertMessage =
+                    "Erro ao buscar localização. Verifique o console para detalhes.";
+                if (status === 403) {
+                    alertMessage =
+                        "Erro 403: A chave da API está inválida ou não tem permissão (Verifique as restrições no Google Cloud Console).";
+                } else if (status) {
+                    alertMessage = `Erro HTTP ${status}: ${error.message}`;
+                } else {
+                    alertMessage = `Erro de Rede: ${error.message}`;
+                }
+
+                alert(alertMessage);
+            } else {
+                alert("Erro Desconhecido. Verifique o console.");
+            }
         }
     };
 
@@ -226,11 +276,15 @@ export default function Community() {
 
                     <IconButton icon="pencil" size={18} color="#666" />
                 </View>
-                <View style={styles.filtersContainer}>
-                    <TouchableOpacity
-                        style={styles.filterButton}
-                        //onPress={() => console.log("Filtrar")}
-                    >
+
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <View style={styles.filtersContainer}>
                         <DropDownPicker
                             open={open1}
                             value={value1}
@@ -239,27 +293,12 @@ export default function Community() {
                             setValue={setValue1}
                             setItems={setItems1}
                             placeholder="Filtrar"
-                            style={styles.filterButton}
+                            style={{ width: "100%" }}
                         />
-                        <IconButton size={16} color="#666" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.filterButton}
-                        onPress={() => console.log("Organizar")}
-                    >
-                        <DropDownPicker
-                            open={open2}
-                            value={value2}
-                            items={items2}
-                            setOpen={setOpen2}
-                            setValue={setValue2}
-                            setItems={setItems2}
-                            placeholder="Organizar"
-                            style={styles.filterButton}
-                        />
-                        <IconButton size={16} color="#666" />
-                    </TouchableOpacity>
-                    <Text style={styles.resultsText}>59 results</Text>
+                    </View>
+                    <Text style={styles.resultsText}>
+                        {filteredPlaces.length} results
+                    </Text>
                 </View>
             </View>
 
@@ -467,25 +506,9 @@ const styles = StyleSheet.create({
     },
     filtersContainer: {
         flexDirection: "row",
-        flex: 2,
         alignItems: "center",
-        justifyContent: "space-between",
-        zIndex: 1000,
-        paddingBottom: 15,
-        paddingTop: 20,
-    },
-    filterButton: {
-        borderColor: "gray",
-        borderRadius: 20,
-        flexDirection: "row",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 12,
-    },
-    filterText: {
-        fontSize: 14,
-        color: "#666",
-        marginRight: 4,
+        justifyContent: "space-around",
+        width: "40%",
     },
     resultsText: {
         fontSize: 14,

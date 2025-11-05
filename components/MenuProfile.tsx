@@ -23,9 +23,7 @@ export default function MenuProfile({ closeDrawer }: { closeDrawer: () => void }
     };
 
     const menuItems = [
-        { icon: 'calendar', text: 'Eventos', badge: 33, onPress: () => console.log("Eventos") },
-        { icon: 'medal-outline', text: 'Recompensas', badge: 33, onPress: () => console.log("Recompensas") },
-        { icon: 'email-send-outline', text: 'Convide um Amigo', onPress: () => console.log("Convide um Amigo") },
+        { icon: 'calendar', text: 'Eventos', badge: 33, onPress: () => handleNavigation("../../events") },
         { icon: 'lock-outline', text: 'Privacidade e Segurança', onPress: () => handleNavigation("../../settings/privacy") },
         { icon: 'lightning-bolt-outline', text: 'Assinatura', onPress: () => handleNavigation("../../settings/premium") },
         { icon: 'tools', text: 'Configurações', onPress: () => handleNavigation("../../settings/config") },

@@ -7,7 +7,7 @@ interface NotificationProps {
   username: string;
   time: string;
   action: string;
-  thumbnail?: any;
+  thumbnail?: any; 
   highlight?: boolean;
   category?: string;
 }

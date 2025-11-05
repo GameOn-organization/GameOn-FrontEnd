@@ -20,7 +20,7 @@ const { width: screenWidth } = Dimensions.get("window");
 // Array com as rotas das tabs na ordem
 const TAB_ROUTES = [
     { name: "home", path: "/(tabs)/home" },
-    { name: "community", path: "/(tabs)/community" },
+    { name: "community", path: "/(tabs)/community", disableSwipe: true },
     { name: "events", path: "/(tabs)/events" },
     { name: "notification", path: "/(tabs)/notification" },
     { name: "profile", path: "/(tabs)/profile"},
