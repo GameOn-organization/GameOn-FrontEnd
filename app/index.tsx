@@ -9,20 +9,44 @@ import {
     TouchableOpacity,
     SafeAreaView,
     View,
+    Alert,
+    ActivityIndicator,
 } from "react-native";
+import { login } from "../services/authService";
 
 export default function Index() {
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const handleLogin = () => {
-        if (password != "1234") {
-            setErrorMessage("As senhas não coincidem");
-        } else {
-            setErrorMessage(""); // Clear error message
+    const handleLogin = async () => {
+        if (!email || !password) {
+            setErrorMessage("Preencha todos os campos");
+            return;
+        }
+
+        setLoading(true);
+        setErrorMessage("");
+
+        try {
+            await login({ email, password });
+            Alert.alert("Sucesso", "Login realizado com sucesso!", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        router.replace("/(tabs)/home");
+                    }
+                }
+            ]);
+        } catch (error: any) {
+            console.error("Erro no login:", error);
+            setErrorMessage(error.message || "Email ou senha inválidos");
+            Alert.alert("Erro", error.message || "Email ou senha inválidos");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -33,33 +57,57 @@ export default function Index() {
                 <Text style={styles.subHeader}>Entrar</Text>
 
                 <TextInput
-                    placeholder="Email ou Telefone"
+                    placeholder="Email"
                     style={[styles.input, { marginBottom: 15 }]}
                     autoComplete="email"
                     inputMode="email"
                     placeholderTextColor="gray"
+                    value={email}
+                    onChangeText={setEmail}
+                    editable={!loading}
                 />
-                <TextInput
-                    placeholder="Senha"
-                    onChangeText={(value) => setPassword(value)}
-                    style={styles.input}
-                    autoCapitalize="none"
-                    autoComplete="password"
-                    autoCorrect={false}
-                    inputMode="text"
-                    secureTextEntry={!showPassword}
-                    placeholderTextColor="gray"
-                />
+                <View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
+                    <TextInput
+                        placeholder="Senha"
+                        onChangeText={(value) => setPassword(value)}
+                        style={styles.input}
+                        autoCapitalize="none"
+                        autoComplete="password"
+                        autoCorrect={false}
+                        inputMode="text"
+                        secureTextEntry={!showPassword}
+                        placeholderTextColor="gray"
+                        value={password}
+                        editable={!loading}
+                    />
+                    <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={{ marginLeft: 10 }}
+                    >
+                        <Icon 
+                            source={showPassword ? "eye" : "eye-off"} 
+                            size={24} 
+                            color="#333" 
+                        />
+                    </TouchableOpacity>
+                </View>
                 {errorMessage ? (
                     <Text style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
                 <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => router.navigate("(tabs)/home")}
+                    style={[styles.button, loading && styles.buttonDisabled]}
+                    onPress={handleLogin}
+                    disabled={loading}
                 >
-                    <Icon source="login" size={20} color="white" />
-                    <Text style={styles.buttonText}>Entrar</Text>
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <>
+                            <Icon source="login" size={20} color="white" />
+                            <Text style={styles.buttonText}>Entrar</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
 
                 <SafeAreaView style={styles.linkContainer}>
@@ -218,5 +266,8 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
         fontSize: 16,
         color: "#333",
+    },
+    buttonDisabled: {
+        opacity: 0.6,
     },
 });

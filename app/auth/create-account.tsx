@@ -10,10 +10,13 @@ import {
     TouchableOpacity,
     View,
     SafeAreaView,
+    Alert,
+    ActivityIndicator,
 } from "react-native";
 import MaskInput, { Masks } from "react-native-mask-input";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Formulario from "../../components/Formulario";
+import { signup, createProfile } from "../../services/authService";
 
 export default function CreateAccount() {
     const [modalTransparent, setModalTransparent] = useState(false);
@@ -25,14 +28,79 @@ export default function CreateAccount() {
     const [viewPsw, setViewPsw] = useState(false);
     const [viewConPsw, setViewConPsw] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState<any>(null);
     const router = useRouter();
 
-    const handleCreateAccount = () => {
+    const handleCreateAccount = async () => {
         if (password !== confirmPassword) {
             setErrorMessage("As senhas não coincidem");
-        } else {
-            console.log("Conta criada com sucesso!");
-            setErrorMessage(""); // Clear error message
+            return;
+        }
+
+        if (password.length < 6) {
+            setErrorMessage("A senha deve ter pelo menos 6 caracteres");
+            return;
+        }
+
+        if (!email || !phone) {
+            setErrorMessage("Preencha todos os campos obrigatórios");
+            return;
+        }
+
+        // Abrir modal do formulário primeiro
+        setEditVisible(true);
+        setModalTransparent(false);
+    };
+
+    const handleFormSubmit = async (formData: any) => {
+        if (!formData.nome) {
+            Alert.alert("Erro", "Nome é obrigatório");
+            return;
+        }
+
+        setLoading(true);
+        setErrorMessage("");
+
+        try {
+            // 1. Fazer signup no backend
+            await signup({
+                email,
+                password,
+                name: formData.nome,
+                age: formData.idade,
+                phone: phone || undefined
+            });
+
+            // 2. Criar perfil completo
+            await createProfile({
+                name: formData.nome,
+                age: formData.idade,
+                email,
+                phone: phone || undefined,
+                descricao: formData.descricao || undefined,
+                sexo: formData.sexo as 'm' | 'f' | 'nb' | undefined,
+                localizacao: formData.localizacao || undefined,
+                images: formData.images || [],
+                wallpaper: formData.wallpaper || null,
+                tags: [...(formData.selected1 || []), ...(formData.selected2 || [])]
+            });
+
+            Alert.alert("Sucesso", "Conta criada com sucesso!", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        setEditVisible(false);
+                        router.replace("/(tabs)/home");
+                    }
+                }
+            ]);
+        } catch (error: any) {
+            console.error("Erro ao criar conta:", error);
+            Alert.alert("Erro", error.message || "Erro ao criar conta. Tente novamente.");
+            setErrorMessage(error.message || "Erro ao criar conta");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -62,7 +130,14 @@ export default function CreateAccount() {
                 <Formulario
                     styleProp={{backgroundColor: 'black'}}
                     colorProp={['black', 'black']}
+                    onSubmit={handleFormSubmit}
                 />
+                {loading && (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={styles.loadingText}>Criando conta...</Text>
+                    </View>
+                )}
             </Modal>
 
             <View style={styles.form}>
@@ -184,11 +259,18 @@ export default function CreateAccount() {
                     <Text style={styles.buttonText}>Editar Informações</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={styles.button}
+                    style={[styles.button, loading && styles.buttonDisabled]}
                     onPress={handleCreateAccount}
+                    disabled={loading}
                 >
-                    <Icon source="account-plus" size={20} color="#fff" />
-                    <Text style={styles.buttonText}>Criar conta</Text>
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <>
+                            <Icon source="account-plus" size={20} color="#fff" />
+                            <Text style={styles.buttonText}>Criar conta</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -279,5 +361,24 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         marginLeft: 10,
+    },
+    buttonDisabled: {
+        opacity: 0.6,
+    },
+    loadingContainer: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+    },
+    loadingText: {
+        color: "#fff",
+        marginTop: 10,
+        fontSize: 16,
     },
 });
