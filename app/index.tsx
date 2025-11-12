@@ -33,18 +33,19 @@ export default function Index() {
 
         try {
             await login({ email, password });
-            Alert.alert("Sucesso", "Login realizado com sucesso!", [
-                {
-                    text: "OK",
-                    onPress: () => {
-                        router.replace("/(tabs)/home");
-                    }
-                }
-            ]);
+            router.navigate("/(tabs)/home");
+            // Alert.alert("Sucesso", "Login realizado com sucesso!", [
+            //     {
+            //         text: "OK",
+            //         onPress: () => {
+            //             router.replace("/(tabs)/home");
+            //         }
+            //     }
+            // ]);
         } catch (error: any) {
             console.error("Erro no login:", error);
             setErrorMessage(error.message || "Email ou senha inválidos");
-            Alert.alert("Erro", error.message || "Email ou senha inválidos");
+            // Alert.alert("Erro", error.message || "Email ou senha inválidos");
         } finally {
             setLoading(false);
         }

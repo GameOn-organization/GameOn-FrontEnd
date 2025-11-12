@@ -86,18 +86,21 @@ export default function CreateAccount() {
                 tags: [...(formData.selected1 || []), ...(formData.selected2 || [])]
             });
 
-            Alert.alert("Sucesso", "Conta criada com sucesso!", [
-                {
-                    text: "OK",
-                    onPress: () => {
-                        setEditVisible(false);
-                        router.replace("/(tabs)/home");
-                    }
-                }
-            ]);
+            
+            setEditVisible(false);
+            router.navigate("/(tabs)/home");
+            // Alert.alert("Sucesso", "Conta criada com sucesso!", [
+            //     {
+            //         text: "OK",
+            //         onPress: () => {
+            //             setEditVisible(false);
+            //             router.replace("/(tabs)/home");
+            //         }
+            //     }
+            // ]);
         } catch (error: any) {
             console.error("Erro ao criar conta:", error);
-            Alert.alert("Erro", error.message || "Erro ao criar conta. Tente novamente.");
+            // Alert.alert("Erro", error.message || "Erro ao criar conta. Tente novamente.");
             setErrorMessage(error.message || "Erro ao criar conta");
         } finally {
             setLoading(false);
