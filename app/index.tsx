@@ -1,4 +1,4 @@
-import { Icon } from "react-native-paper";
+import { IconButton, Icon } from "react-native-paper";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -11,8 +11,10 @@ import {
     View,
     Alert,
     ActivityIndicator,
+    Modal,
 } from "react-native";
-import { login } from "../services/authService";
+import { login, loginWithGoogle, getMyProfile, hasCompleteProfile, createProfile, getCurrentUser } from "../services/authService";
+import Formulario from "../components/Formulario";
 
 export default function Index() {
     const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +22,8 @@ export default function Index() {
     const [email, setEmail] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [formVisible, setFormVisible] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const router = useRouter();
 
     const handleLogin = async () => {
@@ -46,6 +50,89 @@ export default function Index() {
             console.error("Erro no login:", error);
             setErrorMessage(error.message || "Email ou senha inválidos");
             // Alert.alert("Erro", error.message || "Email ou senha inválidos");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        setGoogleLoading(true);
+        setErrorMessage("");
+
+        try {
+            console.log("🔵 [LOGIN] Iniciando login com Google...");
+            
+            // 1. Fazer login com Google
+            await loginWithGoogle();
+            
+            console.log("🔵 [LOGIN] Verificando perfil do usuário...");
+            
+            // 2. Verificar se o usuário tem perfil completo
+            const profile = await getMyProfile();
+            
+            if (!profile || !hasCompleteProfile(profile)) {
+                // Usuário não tem perfil completo, mostrar formulário
+                console.log("🔵 [LOGIN] Usuário não tem perfil completo, abrindo formulário...");
+                setFormVisible(true);
+            } else {
+                // Usuário tem perfil completo, redirecionar para home
+                console.log("✅ [LOGIN] Usuário tem perfil completo, redirecionando...");
+                router.navigate("/(tabs)/home");
+            }
+        } catch (error: any) {
+            console.error("❌ [LOGIN] Erro no login com Google:", error);
+            const errorMessage = error.message || "Erro ao fazer login com Google";
+            setErrorMessage(errorMessage);
+            
+            // Mostrar alerta apenas se não for erro de cancelamento
+            if (!errorMessage.includes("cancelado")) {
+                Alert.alert(
+                    "Erro no Login",
+                    errorMessage + "\n\nSe o problema persistir, pode ser devido a problemas temporários nos serviços do Google Cloud.",
+                    [{ text: "OK" }]
+                );
+            }
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
+
+    const handleFormSubmit = async (formData: any) => {
+        if (!formData.nome) {
+            Alert.alert("Erro", "Nome é obrigatório");
+            return;
+        }
+
+        setLoading(true);
+        setErrorMessage("");
+
+        try {
+            // Obter email do usuário atual
+            const currentUser = getCurrentUser();
+            if (!currentUser || !currentUser.email) {
+                throw new Error("Usuário não autenticado");
+            }
+
+            // Criar perfil completo
+            await createProfile({
+                name: formData.nome,
+                age: formData.idade,
+                email: currentUser.email,
+                phone: undefined, // Google login não fornece telefone
+                descricao: formData.descricao || undefined,
+                sexo: formData.sexo as 'm' | 'f' | 'nb' | undefined,
+                localizacao: formData.localizacao || undefined,
+                images: formData.images || [],
+                wallpaper: formData.wallpaper || null,
+                tags: [...(formData.selected1 || []), ...(formData.selected2 || [])]
+            });
+
+            setFormVisible(false);
+            router.navigate("/(tabs)/home");
+        } catch (error: any) {
+            console.error("Erro ao criar perfil:", error);
+            setErrorMessage(error.message || "Erro ao criar perfil");
+            Alert.alert("Erro", error.message || "Erro ao criar perfil");
         } finally {
             setLoading(false);
         }
@@ -139,11 +226,18 @@ export default function Index() {
                 </SafeAreaView>
 
                 <TouchableOpacity
-                    style={[styles.button, { backgroundColor: "#e0d7d7c0" }]}
-                    onPress={() => console.log("Entrar com Google pressed")}
+                    style={[styles.button, { backgroundColor: "#e0d7d7c0" }, googleLoading && styles.buttonDisabled]}
+                    onPress={handleGoogleLogin}
+                    disabled={googleLoading || loading}
                 >
-                    <Icon source="google" size={20} color="black" />
-                    <Text style={[styles.buttonText, {color: 'black'}]}>Entrar com Google</Text>
+                    {googleLoading ? (
+                        <ActivityIndicator color="black" />
+                    ) : (
+                        <>
+                            <Icon source="google" size={20} color="black" />
+                            <Text style={[styles.buttonText, {color: 'black'}]}>Entrar com Google</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -164,6 +258,33 @@ export default function Index() {
                     
                 </View>
             </SafeAreaView>
+
+            {/* Modal do Formulário para completar perfil */}
+            <Modal
+                animationType="slide"
+                transparent={false}
+                visible={formVisible}
+                onRequestClose={() => setFormVisible(false)}
+            >
+                <IconButton
+                    icon="arrow-left"
+                    size={24}
+                    iconColor="white"
+                    style={{ backgroundColor: "black" }}
+                    onPress={() => setFormVisible(false)}
+                />
+                <Formulario
+                    styleProp={{backgroundColor: 'black'}}
+                    colorProp={['black', 'black']}
+                    onSubmit={handleFormSubmit}
+                />
+                {loading && (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={styles.loadingText}>Criando perfil...</Text>
+                    </View>
+                )}
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -270,5 +391,21 @@ const styles = StyleSheet.create({
     },
     buttonDisabled: {
         opacity: 0.6,
+    },
+    loadingContainer: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+    },
+    loadingText: {
+        color: "#fff",
+        marginTop: 10,
+        fontSize: 16,
     },
 });
