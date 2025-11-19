@@ -30,9 +30,31 @@ interface DataItem {
 interface FormularioProps {
     styleProp?: object;
     colorProp?: object;
+    onSubmit?: (data: {
+        nome: string;
+        descricao: string;
+        idade: number;
+        sexo: string;
+        localizacao: string;
+        selected1: string[];
+        selected2: string[];
+        images: (string | null)[];
+        wallpaper: string | null;
+    }) => void | Promise<void>;
+    initialData?: {
+        nome?: string;
+        descricao?: string;
+        idade?: number;
+        sexo?: string;
+        localizacao?: string;
+        selected1?: string[];
+        selected2?: string[];
+        images?: (string | null)[];
+        wallpaper?: string | null;
+    };
 }
 
-export default function Formulario({styleProp, colorProp}: FormularioProps) {
+export default function Formulario({styleProp, colorProp, onSubmit, initialData}: FormularioProps) {
     const [nome, setNome] = useState("");
     const [descricao, setDescricao] = useState("");
     const [idade, setIdade] = useState("");
@@ -268,6 +290,23 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
         }
         return idade;
     }
+
+    const handleSubmit = () => {
+        if (!onSubmit) return;
+        
+        const idadeCalculada = calcularIdade(date);
+        onSubmit({
+            nome,
+            descricao,
+            idade: idadeCalculada,
+            sexo,
+            localizacao,
+            selected1,
+            selected2,
+            images,
+            wallpaper
+        });
+    };
 
     return (
         <LinearGradient
@@ -526,6 +565,16 @@ export default function Formulario({styleProp, colorProp}: FormularioProps) {
                             )}
                         </TouchableOpacity>
                     </View>
+
+                    {/* Botão de Submit */}
+                    {onSubmit && (
+                        <TouchableOpacity
+                            style={styles.submitButton}
+                            onPress={handleSubmit}
+                        >
+                            <Text style={styles.submitButtonText}>Salvar Perfil</Text>
+                        </TouchableOpacity>
+                    )}
                 </SafeAreaView>
             </ScrollView>
         </LinearGradient>
@@ -810,5 +859,26 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 3,
         elevation: 5,
+    },
+    submitButton: {
+        backgroundColor: "white",
+        paddingVertical: 15,
+        borderRadius: 12,
+        marginTop: 30,
+        marginBottom: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    submitButtonText: {
+        color: "#667eea",
+        fontSize: 18,
+        fontWeight: "bold",
     },
 });
