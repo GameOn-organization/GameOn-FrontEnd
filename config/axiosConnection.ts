@@ -45,6 +45,10 @@ api.interceptors.request.use(
       console.log(' [AXIOS] Requisição:', config.method?.toUpperCase(), config.url)
       console.log(' [AXIOS] URL completa:', `${config.baseURL}${config.url}`)
       console.log(' [AXIOS] Dados:', config.data ? JSON.stringify(config.data).substring(0, 200) : 'sem dados')
+      if (config.params) {
+        console.log(' [AXIOS] Params:', JSON.stringify(config.params, null, 2))
+        console.log(' [AXIOS] Params category:', config.params.category)
+      }
       
       const user = auth.currentUser
       if (user) {

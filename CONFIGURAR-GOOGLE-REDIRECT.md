@@ -54,20 +54,25 @@ Quando você executar o app e tentar fazer login com Google, verifique os logs n
 Dependendo de como você está executando o app, o Redirect URI pode ser:
 
 #### Para Expo Go (Desenvolvimento):
+
 ```
 https://auth.expo.io/@seu-usuario/gameon
 ```
 
 #### Para Build de Desenvolvimento:
+
 ```
 gameon://auth
 ```
 
 #### Para Web:
+
 ```
 http://localhost:8081
 ```
-ou
+
+
+
 ```
 https://seu-dominio.com
 ```
@@ -105,14 +110,17 @@ EXPO_PUBLIC_GOOGLE_CLIENT_ID=seu-client-id-completo.apps.googleusercontent.com
 ## ❌ Erros Comuns
 
 ### Erro: "redirect_uri_mismatch"
+
 - **Causa**: O Redirect URI não está configurado no Google Cloud Console
 - **Solução**: Adicione o URI exato que aparece nos logs
 
 ### Erro: "invalid_client"
+
 - **Causa**: Client ID incorreto ou não configurado
 - **Solução**: Verifique se o `EXPO_PUBLIC_GOOGLE_CLIENT_ID` está correto no `.env`
 
 ### Erro: 404
+
 - **Causa**: Redirect URI não encontrado no Google Cloud Console
 - **Solução**: Adicione o Redirect URI que aparece nos logs do console
 
@@ -128,4 +136,3 @@ EXPO_PUBLIC_GOOGLE_CLIENT_ID=seu-client-id-completo.apps.googleusercontent.com
 - [Google Cloud Console - Credentials](https://console.cloud.google.com/apis/credentials)
 - [Firebase Console - Authentication](https://console.firebase.google.com/project/tcc-gameon/authentication/providers)
 - [Expo AuthSession Documentation](https://docs.expo.dev/guides/authentication/#google)
-

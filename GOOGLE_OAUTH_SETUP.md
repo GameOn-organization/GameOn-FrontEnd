@@ -110,3 +110,4 @@ O scheme `gameon` já está configurado no `app.json`:
 - [Google OAuth 2.0](https://developers.google.com/identity/protocols/oauth2)
 - [Expo AuthSession](https://docs.expo.dev/guides/authentication/#google)
 
+
