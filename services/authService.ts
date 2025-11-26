@@ -5,6 +5,7 @@ import * as AuthSession from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
 import { Platform } from 'react-native'
 import Constants from 'expo-constants'
+import { uploadMultipleImages, uploadSingleImage } from './storageService'
 
 // Configurar WebBrowser para fechar após autenticação
 WebBrowser.maybeCompleteAuthSession()
@@ -182,7 +183,43 @@ export const createProfile = async (profileData: ProfileData) => {
       imagesCount: profileData.images?.length || 0
     })
     
-    const { data } = await api.post('/users', profileData)
+    // Obter userId atual
+    const currentUser = auth.currentUser
+    if (!currentUser) {
+      throw new Error('Usuário não autenticado')
+    }
+
+    // Fazer upload das imagens se houver
+    let processedImages = profileData.images || []
+    if (profileData.images && profileData.images.length > 0) {
+      console.log('🔵 [AUTH SERVICE] Fazendo upload das imagens...')
+      processedImages = await uploadMultipleImages(
+        profileData.images,
+        `profiles/${currentUser.uid}`
+      )
+      console.log('✅ [AUTH SERVICE] Upload de imagens concluído')
+    }
+
+    // Fazer upload do wallpaper se houver
+    let processedWallpaper = profileData.wallpaper
+    if (profileData.wallpaper) {
+      console.log('🔵 [AUTH SERVICE] Fazendo upload do wallpaper...')
+      processedWallpaper = await uploadSingleImage(
+        profileData.wallpaper,
+        currentUser.uid,
+        'wallpaper'
+      )
+      console.log('✅ [AUTH SERVICE] Upload de wallpaper concluído')
+    }
+
+    // Atualizar profileData com as URLs das imagens
+    const updatedProfileData = {
+      ...profileData,
+      images: processedImages,
+      wallpaper: processedWallpaper
+    }
+    
+    const { data } = await api.post('/users', updatedProfileData)
     console.log('✅ [AUTH SERVICE] Perfil criado com sucesso:', data.id)
     return data
   } catch (error: any) {
@@ -193,7 +230,7 @@ export const createProfile = async (profileData: ProfileData) => {
     if (error.response?.data?.message) {
       throw new Error(error.response.data.message)
     }
-    throw new Error('Erro ao criar perfil')
+    throw new Error(error.message || 'Erro ao criar perfil')
   }
 }
 
@@ -514,6 +551,70 @@ export const getMyProfile = async () => {
       throw new Error(error.response.data.message)
     }
     throw new Error('Erro ao buscar perfil')
+  }
+}
+
+/**
+ * Atualiza o perfil do usuário atual
+ */
+export const updateMyProfile = async (profileData: Partial<ProfileData>) => {
+  try {
+    console.log('🔵 [AUTH SERVICE] Atualizando perfil...')
+    console.log('🔵 [AUTH SERVICE] Dados do perfil:', {
+      name: profileData.name,
+      age: profileData.age,
+      tagsCount: profileData.tags?.length || 0,
+      imagesCount: profileData.images?.length || 0
+    })
+    
+    // Obter userId atual
+    const currentUser = auth.currentUser
+    if (!currentUser) {
+      throw new Error('Usuário não autenticado')
+    }
+
+    // Fazer upload das imagens se houver
+    let processedImages = profileData.images
+    if (profileData.images && profileData.images.length > 0) {
+      console.log('🔵 [AUTH SERVICE] Fazendo upload das imagens...')
+      processedImages = await uploadMultipleImages(
+        profileData.images,
+        `profiles/${currentUser.uid}`
+      )
+      console.log('✅ [AUTH SERVICE] Upload de imagens concluído')
+    }
+
+    // Fazer upload do wallpaper se houver
+    let processedWallpaper = profileData.wallpaper
+    if (profileData.wallpaper !== undefined) {
+      console.log('🔵 [AUTH SERVICE] Fazendo upload do wallpaper...')
+      processedWallpaper = await uploadSingleImage(
+        profileData.wallpaper,
+        currentUser.uid,
+        'wallpaper'
+      )
+      console.log('✅ [AUTH SERVICE] Upload de wallpaper concluído')
+    }
+
+    // Atualizar profileData com as URLs das imagens
+    const updatedProfileData = {
+      ...profileData,
+      ...(processedImages !== undefined && { images: processedImages }),
+      ...(processedWallpaper !== undefined && { wallpaper: processedWallpaper })
+    }
+    
+    const { data } = await api.patch('/users/me', updatedProfileData)
+    console.log('✅ [AUTH SERVICE] Perfil atualizado com sucesso:', data.id)
+    return data
+  } catch (error: any) {
+    console.error('❌ [AUTH SERVICE] Erro ao atualizar perfil:', error)
+    console.error('❌ [AUTH SERVICE] Status:', error.response?.status)
+    console.error('❌ [AUTH SERVICE] Dados:', error.response?.data)
+    
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message)
+    }
+    throw new Error(error.message || 'Erro ao atualizar perfil')
   }
 }
 
