@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
     Animated,
     Dimensions,
@@ -14,12 +14,16 @@ import {
     TouchableOpacity,
     View,
     Pressable,
+    ActivityIndicator,
+    RefreshControl,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
 import Post from "../../components/Post";
+import PostComposer from "../../components/PostComposer";
 import MenuProfile from "../../components/MenuProfile";
 import { Switch } from "../../components/Switch";
+import { getMyPosts, Post as PostType } from "../../services/postsService";
 
 const { width, height } = Dimensions.get("window");
 const DRAWER_WIDTH = width * 0.8;
@@ -40,6 +44,11 @@ export default function Profile() {
     const [drawerVisible, setDrawerVisible] = useState(false);
     const drawerTranslateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
     const overlayOpacity = useRef(new Animated.Value(0)).current;
+
+    // Estados para posts
+    const [posts, setPosts] = useState<PostType[]>([]);
+    const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Função para abrir o drawer
     const openDrawer = () => {
@@ -109,12 +118,51 @@ export default function Profile() {
         }
     };
 
-    // Dados de exemplo para demonstrar o scroll
-    const examplePosts = Array.from({ length: 30 }, (_, i) => ({
-        id: i + 1,
-        title: `Post ${i + 1}`,
-        content: `Este é o conteúdo do post ${i + 1}.`,
-    }));
+    // Função para buscar posts
+    const fetchPosts = async () => {
+        setIsLoadingPosts(true);
+        try {
+            const userPosts = await getMyPosts({
+                orderBy: "createdAt",
+                orderDirection: "desc",
+                limit: 50,
+            });
+            setPosts(userPosts);
+        } catch (error: any) {
+            console.error("Erro ao buscar posts:", error);
+        } finally {
+            setIsLoadingPosts(false);
+        }
+    };
+
+    // Função para atualizar posts (pull to refresh)
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        await fetchPosts();
+        setIsRefreshing(false);
+    };
+
+    // Função chamada após criar um novo post
+    const handlePostCreated = () => {
+        fetchPosts();
+    };
+
+    // Função chamada após deletar um post
+    const handlePostDeleted = (postId: string) => {
+        setPosts(posts.filter(post => post.id !== postId));
+    };
+
+    // Função chamada após dar like em um post
+    const handlePostLiked = (updatedPost: PostType) => {
+        setPosts(posts.map(post => 
+            post.id === updatedPost.id ? updatedPost : post
+        ));
+    };
+
+    // Buscar posts ao montar o componente
+    useEffect(() => {
+        fetchPosts();
+    }, []);
 
     const userInfo = [
         "Email: usuario@exemplo.com",
@@ -156,23 +204,30 @@ export default function Profile() {
             
             {/* Formulário de Publicar Post*/}
             <Modal
-                backdropColor='rgba(0,0,0,0.5)'
                 animationType="fade"
-                transparent={postTransparent}
+                transparent={true}
                 visible={postVisible}
                 onRequestClose={() => {
-                    setPostVisible(!postVisible),
-                    setPostTransparent(!postTransparent);
+                    setPostVisible(false);
+                    setPostTransparent(false);
                 }}
             >
                 <Pressable
-                    style={{flex: 0.1, height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+                    style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}
                     onPress={() => {
-                        setPostVisible(!postVisible),
-                        setPostTransparent(!postTransparent);
+                        setPostVisible(false);
+                        setPostTransparent(false);
                     }}
                 />
-                <Post />
+                <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', pointerEvents: 'box-none'}}>
+                    <PostComposer 
+                        onPostCreated={handlePostCreated}
+                        onClose={() => {
+                            setPostVisible(false);
+                            setPostTransparent(false);
+                        }}
+                    />
+                </View>
             </Modal>
 
             {/* ScrollView Principal */}
@@ -183,6 +238,14 @@ export default function Profile() {
                 nestedScrollEnabled={true}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                        colors={["#667eea"]}
+                        tintColor="#667eea"
+                    />
+                }
             >
                 {/* Top Section - Seção Superior */}
                 <SafeAreaView style={styles.topSection}>
@@ -244,23 +307,36 @@ export default function Profile() {
                 {/* Content Section - AQUI É ONDE O SCROLL SERÁ DETERMINADO */}
                 <SafeAreaView style={styles.contentSection}>
                     {activeTab === "posts" ? (
-                        <SafeAreaView>
-                            {examplePosts.map((post) => (
-                                <SafeAreaView
-                                    key={post.id}
-                                    style={styles.postItem}
-                                >
-                                    <Text style={styles.postTitle}>
-                                        {post.title}
+                        <SafeAreaView style={{alignItems: 'center'}}>
+                            {isLoadingPosts ? (
+                                <View style={styles.loadingContainer}>
+                                    <ActivityIndicator size="large" color="#667eea" />
+                                    <Text style={styles.loadingText}>Carregando posts...</Text>
+                                </View>
+                            ) : posts.length === 0 ? (
+                                <View style={styles.emptyContainer}>
+                                    <IconButton
+                                        icon="post-outline"
+                                        size={60}
+                                        iconColor="#ccc"
+                                    />
+                                    <Text style={styles.emptyText}>
+                                        Nenhum post ainda
                                     </Text>
-                                    <Text style={styles.postContent}>
-                                        {post.content}
+                                    <Text style={styles.emptySubText}>
+                                        Crie seu primeiro post clicando no botão +
                                     </Text>
-                                    <Text style={styles.postDate}>
-                                        {new Date().toLocaleDateString("pt-BR")}
-                                    </Text>
-                                </SafeAreaView>
-                            ))}
+                                </View>
+                            ) : (
+                                posts.map((post) => (
+                                    <Post
+                                        key={post.id}
+                                        post={post}
+                                        onPostDeleted={handlePostDeleted}
+                                        onPostLiked={handlePostLiked}
+                                    />
+                                ))
+                            )}
                         </SafeAreaView>
                     ) : (
                         <SafeAreaView>
@@ -401,38 +477,35 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 20,
     },
-    postItem: {
-        backgroundColor: "#f9f9f9",
-        padding: 20,
-        marginBottom: 15,
-        borderRadius: 12,
-        borderLeftWidth: 4,
-        borderLeftColor: "#667eea",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 40,
     },
-    postTitle: {
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: "#666",
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 60,
+    },
+    emptyText: {
         fontSize: 18,
         fontWeight: "bold",
-        marginBottom: 8,
-        color: "#333",
-    },
-    postContent: {
-        fontSize: 14,
         color: "#666",
-        lineHeight: 22,
-        marginBottom: 8,
+        marginTop: 10,
     },
-    postDate: {
-        fontSize: 12,
+    emptySubText: {
+        fontSize: 14,
         color: "#999",
-        textAlign: "right",
+        marginTop: 5,
+        textAlign: "center",
+        paddingHorizontal: 40,
     },
     infoItem: {
         backgroundColor: "#f9f9f9",
