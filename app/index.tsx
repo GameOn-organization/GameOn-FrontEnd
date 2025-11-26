@@ -158,7 +158,7 @@ export default function Index() {
                     <TextInput
                         placeholder="Senha"
                         onChangeText={(value) => setPassword(value)}
-                        style={styles.input}
+                        style={[styles.input, { flex: 1 }]}
                         autoCapitalize="none"
                         autoComplete="password"
                         autoCorrect={false}
