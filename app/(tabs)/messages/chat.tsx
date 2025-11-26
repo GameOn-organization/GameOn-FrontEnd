@@ -11,113 +11,102 @@ import {
     KeyboardAvoidingView,
     Platform,
     Keyboard,
+    ActivityIndicator,
+    Alert,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { getMessagesByConversation, sendMessage as sendMessageAPI, Message } from "../../../services/messagesService";
+import { getConversationById } from "../../../services/conversationsService";
+import { getCurrentUser } from "../../../services/authService";
+import { getUserById } from "../../../services/usersService";
+import { convertFirestoreObject } from "../../../utils/firestoreUtils";
+import { formatRelativeDate } from "../../../utils/firestoreUtils";
 
-export default function App() {
+export default function Chat() {
+    const params = useLocalSearchParams();
+    const router = useRouter();
+    const conversationId = params.id as string;
+    const otherUserName = params.name as string;
+    const otherUserImage = params.image as string;
+
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            text: "This is the main chat template",
-            sender: "bot",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 2,
-            text: "Oh?",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 3,
-            text: "Cool",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 4,
-            text: "How does it work?",
-            sender: "bot",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 5,
-            text: "You just edit any text to type in the conversation you want to show, and then you can save it to use.",
-            sender: "bot",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 6,
-            text: "Hmm",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 7,
-            text: "I think I get it",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 8,
-            text: "Will head to the Help Center if I have more questions tho",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 9,
-            text: "Will head to the Help Center if I have more questions tho",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 10,
-            text: "Will head to the Help Center if I have more questions tho",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 11,
-            text: "Will head to the Help Center if I have more questions tho",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 12,
-            text: "Will head to the Help Center if I have more questions tho",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-        {
-            id: 13,
-            text: "Will head to the Help Center if I have more questions tho",
-            sender: "user",
-            timestamp: "9:41 PM, 8/14/24",
-        },
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-    const scrollViewRef = useRef();
+    const scrollViewRef = useRef<ScrollView>(null);
 
-    const sendMessage = () => {
-        if (message.trim()) {
-            const newMessage = {
-                id: messages.length + 1,
-                text: message,
-                sender: "user",
-                timestamp: new Date().toLocaleString(),
-            };
-            setMessages([...messages, newMessage]);
-            setMessage("");
+    // Carregar dados iniciais
+    useEffect(() => {
+        loadMessages();
+    }, [conversationId]);
+
+    const loadMessages = async () => {
+        try {
+            setLoading(true);
+            console.log('🔵 [CHAT] Buscando mensagens da conversa:', conversationId);
+            
+            // Buscar usuário atual
+            const user = await getCurrentUser();
+            setCurrentUserId(user.uid);
+
+            // Buscar mensagens
+            const rawMessages = await getMessagesByConversation(conversationId);
+            const convertedMessages = rawMessages.map(msg => convertFirestoreObject(msg));
+            
+            console.log('✅ [CHAT] Mensagens carregadas:', convertedMessages.length);
+            setMessages(convertedMessages);
+        } catch (error: any) {
+            console.error('❌ [CHAT] Erro ao carregar mensagens:', error);
+            Alert.alert('Erro', 'Não foi possível carregar as mensagens');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const renderMessage = (msg) => {
-        const isUser = msg.sender === "user";
+    const sendMessage = async () => {
+        if (message.trim() && currentUserId) {
+            try {
+                setSending(true);
+                console.log('🔵 [CHAT] Enviando mensagem...');
+                
+                // Enviar mensagem
+                const sentMessage = await sendMessageAPI({
+                    conversationId,
+                    senderId: currentUserId,
+                    text: message.trim(),
+                });
+
+                console.log('✅ [CHAT] Mensagem enviada:', sentMessage.id);
+                
+                // Adicionar à lista local
+                const converted = convertFirestoreObject(sentMessage);
+                setMessages([...messages, converted]);
+                setMessage("");
+                
+                // Scroll para baixo
+                setTimeout(() => {
+                    if (scrollViewRef.current) {
+                        scrollViewRef.current.scrollToEnd({ animated: true });
+                    }
+                }, 100);
+            } catch (error: any) {
+                console.error('❌ [CHAT] Erro ao enviar mensagem:', error);
+                Alert.alert('Erro', 'Não foi possível enviar a mensagem');
+            } finally {
+                setSending(false);
+            }
+        }
+    };
+
+    const renderMessage = (msg: Message) => {
+        const isUser = msg.senderId === currentUserId;
         return (
             <View
                 key={msg.id}
@@ -139,6 +128,14 @@ export default function App() {
                         ]}
                     >
                         {msg.text}
+                    </Text>
+                    <Text
+                        style={[
+                            styles.timestampText,
+                            isUser ? styles.userTimestamp : styles.botTimestamp,
+                        ]}
+                    >
+                        {formatRelativeDate(msg.timeStamp)}
                     </Text>
                 </View>
             </View>
@@ -184,6 +181,19 @@ export default function App() {
         }
     }, [messages]);
 
+    // Loading state
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <StatusBar style="dark" />
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#007AFF" />
+                    <Text style={styles.loadingText}>Carregando mensagens...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar style="dark" />
@@ -192,7 +202,7 @@ export default function App() {
             <KeyboardAvoidingView
                 style={styles.chatContainer}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 20 : keyboardHeight} // Ajuste conforme necessário
+                keyboardVerticalOffset={Platform.OS === "ios" ? 20 : keyboardHeight}
             >
                 <ScrollView
                     ref={scrollViewRef}
@@ -200,11 +210,18 @@ export default function App() {
                     contentContainerStyle={styles.messagesContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    {messages.map(renderMessage)}
+                    {messages.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>Nenhuma mensagem ainda</Text>
+                            <Text style={styles.emptySubtext}>Envie a primeira mensagem!</Text>
+                        </View>
+                    ) : (
+                        messages.map(renderMessage)
+                    )}
                 </ScrollView>
 
-                {/* Input */}
-                <SafeAreaView style={styles.inputContainer}>
+                {/* Input - Ajustado com marginBottom */}
+                <View style={styles.inputContainer}>
                     <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.textInput}
@@ -213,18 +230,24 @@ export default function App() {
                             placeholder="Mensagem..."
                             placeholderTextColor="#999"
                             multiline
+                            editable={!sending}
                         />
                         <TouchableOpacity style={styles.attachButton}>
                             <Text style={styles.attachButtonText}>📎</Text>
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity
-                        style={styles.sendButton}
+                        style={[styles.sendButton, sending && styles.sendButtonDisabled]}
                         onPress={sendMessage}
+                        disabled={sending || !message.trim()}
                     >
-                        <Text style={styles.sendButtonText}>➤</Text>
+                        {sending ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                            <Text style={styles.sendButtonText}>➤</Text>
+                        )}
                     </TouchableOpacity>
-                </SafeAreaView>
+                </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -321,11 +344,26 @@ const styles = StyleSheet.create({
     botText: {
         color: "#fff",
     },
+    timestampText: {
+        fontSize: 10,
+        marginTop: 4,
+        opacity: 0.7,
+    },
+    userTimestamp: {
+        color: "#fff",
+        textAlign: "right",
+    },
+    botTimestamp: {
+        color: "#fff",
+        textAlign: "left",
+    },
     inputContainer: {
         flexDirection: "row",
         alignItems: "flex-end",
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingTop: 12,
+        paddingBottom: 20, // Aumentado de 12 para 20
+        marginBottom: 10, // Adicionado margin bottom
         backgroundColor: "#fff",
         borderTopWidth: 1,
         borderTopColor: "#f0f0f0",
@@ -365,5 +403,34 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 18,
         fontWeight: "bold",
+    },
+    sendButtonDisabled: {
+        opacity: 0.5,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: "#666",
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 40,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#333",
+        marginBottom: 8,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        color: "#666",
     },
 });

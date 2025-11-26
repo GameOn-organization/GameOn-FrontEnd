@@ -2,25 +2,44 @@ import React from "react";
 import { StyleSheet, Text, SafeAreaView, Image, View, Dimensions, TouchableOpacity } from "react-native";
 import { Icon } from "react-native-paper";
 
-export default function ChatButton({onPress}) {
+interface ChatButtonProps {
+    onPress: () => void;
+    idProfile?: string;
+    pfp?: any;
+    name?: string;
+    idChat?: string;
+    lastMsg?: string;
+    time?: string;
+}
+
+export default function ChatButton({
+    onPress, 
+    idProfile, 
+    pfp, 
+    name = "Nome", 
+    idChat, 
+    lastMsg = "Última Mensagem", 
+    time = "Agora"
+}: ChatButtonProps) {
+    // Se pfp não for fornecido, usar placeholder
+    const imageSource = pfp || require("../assets/images/icon.jpeg");
+
     return (
         <TouchableOpacity style={styles.chatContainer} onPress={onPress}>
             <View style={styles.items}>
                 <View style={styles.imageContainer}>
                     <Image
-                        source={require("../assets/images/icon.jpeg")}
+                        source={imageSource}
                         style={{ width: 50, height: 50, borderRadius: 25 }}
                     />
                 </View>
                 <View style={styles.info}>
-                    <Text style={styles.name}>Nome</Text>
-                    <Text style={styles.lastMsg}>Última Mensagem</Text>
+                    <Text style={styles.name} numberOfLines={1}>{name}</Text>
+                    <Text style={styles.lastMsg} numberOfLines={1}>{lastMsg}</Text>
                 </View>
                 <View style={{ marginLeft: "auto", alignItems: 'flex-end'}}>
-                    {/* {visto ? ( */}
-                    <Icon source="check" color="blue" size={24} />
-                    <Text style={styles.time}>Hora/Dia</Text>
-                    {/* ) : null} */}
+                    <Icon source="check" color="blue" size={20} />
+                    <Text style={styles.time}>{time}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -46,6 +65,8 @@ const styles = StyleSheet.create({
     },
     info: {
         marginLeft: 12,
+        flex: 1,
+        marginRight: 8,
     },
     imageContainer: {
         width: 50,
