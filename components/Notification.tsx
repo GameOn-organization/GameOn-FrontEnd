@@ -3,13 +3,15 @@ import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface NotificationProps {
-  avatar: any;
+  avatar: any | string; // Pode ser require() ou URL string
   username: string;
   time: string;
   action: string;
-  thumbnail?: any; 
+  thumbnail?: any | string; // Pode ser require() ou URL string
   highlight?: boolean;
   category?: string;
+  onPress?: () => void;
+  onMessagePress?: () => void;
 }
 
 export const Notification = ({
@@ -20,17 +22,33 @@ export const Notification = ({
   thumbnail,
   highlight = false,
   category,
+  onPress,
+  onMessagePress,
 }: NotificationProps) => {
   const handleMessagePress = () => {
     console.log(`Iniciar conversa com ${username}`);
-    // Navegar para o chat ou abrir modal, se desejado
+    if (onMessagePress) {
+      onMessagePress();
+    }
+  };
+
+  // Função para determinar a fonte da imagem (require ou URI)
+  const getImageSource = (image: any | string) => {
+    if (typeof image === 'string') {
+      return { uri: image };
+    }
+    return image;
   };
 
   return (
-    <View style={[styles.container, highlight && styles.highlight]}>
+    <TouchableOpacity 
+      style={[styles.container, highlight && styles.highlight]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
       <View style={styles.avatarContainer}>
-        <Image source={avatar} style={styles.avatar} />
-        {category === "MATCH!" && (
+        <Image source={getImageSource(avatar)} style={styles.avatar} />
+        {category === "MATCH" && (
           <View style={styles.matchBadge}>
             <Text style={styles.matchText}>🔥</Text>
           </View>
@@ -44,7 +62,7 @@ export const Notification = ({
         <Text style={styles.time}>{time}</Text>
       </View>
 
-      {category === "MATCH!" ? (
+      {category === "MATCH" ? (
         <TouchableOpacity onPress={handleMessagePress} style={styles.messageButton}>
           <LinearGradient
             colors={['#4ecdc4', '#44a08d']}
@@ -55,10 +73,10 @@ export const Notification = ({
         </TouchableOpacity>
       ) : thumbnail ? (
         <View style={styles.thumbnailContainer}>
-          <Image source={thumbnail} style={styles.thumbnail} />
+          <Image source={getImageSource(thumbnail)} style={styles.thumbnail} />
         </View>
       ) : null}
-    </View>
+    </TouchableOpacity>
   );
 };
 
