@@ -1,188 +1,256 @@
 import { IconButton } from "react-native-paper";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Dimensions,
     StyleSheet,
     Text,
-    TextInput,
-    Modal,
+    View,
     Image,
     TouchableOpacity,
-    SafeAreaView,
-    Pressable
+    Alert,
 } from "react-native";
+import { Post as PostType, likePost, deleteMyPost } from "../services/postsService";
+import { getCurrentUser } from "../services/authService";
+import { formatRelativeDate } from "../utils/firestoreUtils";
+import CommentsModal from "./CommentsModal";
 
-interface User {
-    id: number;
-    name: string;
-    image: any;
-}
+const { width } = Dimensions.get("window");
 
 interface PostProps {
-    id: string;
-    user: User;
-    images?: any[];
-    likes: number;
-    comments?: PostProps[];
+    post: PostType;
+    onPostDeleted?: (postId: string) => void;
+    onPostLiked?: (updatedPost: PostType) => void;
 }
 
-export default function Post({id, user, likes, comments}: PostProps) {
+export default function Post({ post, onPostDeleted, onPostLiked }: PostProps) {
+    const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(post.likes);
+    const [isLiking, setIsLiking] = useState(false);
+    const [commentsCount, setCommentsCount] = useState(post.comments);
+    const [commentsModalVisible, setCommentsModalVisible] = useState(false);
 
-    const [postTransparent, setPostTransparent] = useState(false);
-    const [postVisible, setPostVisible] = useState(false);
+    const currentUser = getCurrentUser();
+    const isMyPost = currentUser?.uid === post.authorId;
 
-    const [liked, setLiked] = useState(false);
+    // Verificar se o usuário atual já deu like
+    React.useEffect(() => {
+        if (currentUser && post.likedBy?.includes(currentUser.uid)) {
+            setIsLiked(true);
+        }
+    }, [currentUser, post.likedBy]);
+
+    const handleLike = async () => {
+        if (isLiking) return;
+        
+        setIsLiking(true);
+        try {
+            const updatedPost = await likePost(post.id);
+            setIsLiked(!isLiked);
+            setLikesCount(updatedPost.likes);
+            
+            if (onPostLiked) {
+                onPostLiked(updatedPost);
+            }
+        } catch (error: any) {
+            Alert.alert("Erro", error.message || "Erro ao curtir post");
+        } finally {
+            setIsLiking(false);
+        }
+    };
+
+    const handleDelete = () => {
+        Alert.alert(
+            "Deletar Post",
+            "Tem certeza que deseja deletar este post?",
+            [
+                {
+                    text: "Cancelar",
+                    style: "cancel",
+                },
+                {
+                    text: "Deletar",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await deleteMyPost(post.id);
+                            
+                            if (onPostDeleted) {
+                                onPostDeleted(post.id);
+                            }
+                            
+                            Alert.alert("Sucesso", "Post deletado com sucesso");
+                        } catch (error: any) {
+                            Alert.alert("Erro", error.message || "Erro ao deletar post");
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
 
     return (
-        <>
-            {/* Formulário de Publicar Post*/}
-            <Modal
-                backdropColor='rgba(0,0,0,0.5)'
-                animationType="fade"
-                transparent={postTransparent}
-                visible={postVisible}
-                onRequestClose={() => {
-                    setPostVisible(!postVisible),
-                    setPostTransparent(!postTransparent);
-                }}
-            >
-                <Pressable
-                    style={{flex: 0.1, height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-                    onPress={() => {
-                        setPostVisible(!postVisible),
-                        setPostTransparent(!postTransparent);
-                    }}
-                />
-                <Post
-                    // id={this}
-                />
-            </Modal>
-            <SafeAreaView style={styles.container}>
-                <SafeAreaView style={styles.postContainer}>
-                    <SafeAreaView style={styles.userContainer}>
-                        {/* <Image
-                                source={user.image}
-                                style={styles.image}
-                            /> */}
-                        {/* <Text>{user.name}</Text> */}
+        <View style={styles.container}>
+            <View style={styles.postContainer}>
+                {/* Header do Post */}
+                <View style={styles.header}>
+                    <View style={styles.userContainer}>
                         <Image
                             source={require("../assets/images/icon.jpeg")}
                             style={styles.image}
                         />
-                        <Text>Usuário</Text>
-                    </SafeAreaView>
-                    <SafeAreaView style={styles.content}>
-                        <SafeAreaView>
-                            <TextInput
-                                style={styles.input}
-                                multiline
-                                placeholder="O que você está pensando?"
+                        <View style={styles.userInfo}>
+                            <Text style={styles.userName}>{post.authorName}</Text>
+                            <Text style={styles.postDate}>{formatRelativeDate(post.createdAt)}</Text>
+                        </View>
+                    </View>
+                    
+                    {/* Botão de deletar se for post do usuário */}
+                    {isMyPost && (
+                        <IconButton
+                            icon="delete-outline"
+                            size={20}
+                            iconColor="#999"
+                            onPress={handleDelete}
+                        />
+                    )}
+                </View>
+
+                {/* Conteúdo do Post */}
+                <View style={styles.content}>
+                    <Text style={styles.postContent}>{post.content}</Text>
+                </View>
+
+                {/* Footer com ações */}
+                <View style={styles.footer}>
+                    <View style={styles.iconContainer}>
+                        <TouchableOpacity 
+                            onPress={handleLike}
+                            disabled={isLiking}
+                            style={styles.actionButton}
+                        >
+                            <IconButton
+                                icon={isLiked ? "cards-heart" : "cards-heart-outline"}
+                                size={24}
+                                iconColor={isLiked ? "red" : "#666"}
                             />
-                        </SafeAreaView>
-                        <SafeAreaView style={styles.iconContainer}>
-                            {/* If posted */}
-                                <IconButton
-                                    icon={liked ? "cards-heart" : "cards-heart-outline"}
-                                    size={24}
-                                    iconColor="red"
-                                    onPress={() => setLiked(!liked)}
-                                />
-                                <IconButton
-                                    icon="comment-outline"
-                                    size={24}
-                                    iconColor="green"
-                                    onPress={() => {
-                                        setPostVisible(true),
-                                        setPostTransparent(false);
-                                    }}
-                                />
-                            {/* else */}
-                                {/* if is posting */}
-                                <IconButton
-                                    icon="attachment"
-                                    style={{transform: [{ rotate: '-45deg' }]}}
-                                    size={24}
-                                    iconColor="black"
-                                    onPress={() => console.log("Upload Image")}
-                                />
-                                {/* endif */}
-                            {/* endif */}
-                            <TouchableOpacity
-                                onPress={() => console.log("Send Pressed")}
-                                style={styles.buttonSend}
-                            >
-                                <Text>Postar</Text>
-                                <IconButton
-                                    icon="send"
-                                    size={24}
-                                    iconColor="purple"
-                                />
-                            </TouchableOpacity>
-                        </SafeAreaView>
-                    </SafeAreaView>
-                </SafeAreaView>
-            </SafeAreaView>
-        </>
+                            {likesCount > 0 && (
+                                <Text style={styles.actionText}>{likesCount}</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                            style={styles.actionButton}
+                            onPress={() => setCommentsModalVisible(true)}
+                        >
+                            <IconButton
+                                icon="comment-outline"
+                                size={24}
+                                iconColor="#666"
+                            />
+                            {commentsCount > 0 && (
+                                <Text style={styles.actionText}>{commentsCount}</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.actionButton}>
+                            <IconButton
+                                icon="share-variant-outline"
+                                size={24}
+                                iconColor="#666"
+                            />
+                            {post.shares > 0 && (
+                                <Text style={styles.actionText}>{post.shares}</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+
+            {/* Modal de Comentários */}
+            <CommentsModal
+                visible={commentsModalVisible}
+                postId={post.id}
+                onClose={() => setCommentsModalVisible(false)}
+                onCommentCountChange={(count) => setCommentsCount(count)}
+            />
+        </View>
     );
 }
 
-const {width, height} = Dimensions.get("window")
-
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        marginTop: "50%",
-        marginLeft: width * 0.025,
-        maxHeight: height * 0.3,
-        maxWidth: width * 0.95,
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 25,
-    },
-    image: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-    },
-    userContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 30,
-        marginBottom: 10,
-        gap: 20,
+        width: width * 0.95,
+        marginVertical: 8,
     },
     postContainer: {
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        marginBottom: 20,
+        backgroundColor: "white",
+        borderRadius: 12,
+        padding: 15,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+    userContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    image: {
+        width: 45,
+        height: 45,
+        borderRadius: 22.5,
+        marginRight: 10,
+    },
+    userInfo: {
+        flexDirection: "column",
+    },
+    userName: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    postDate: {
+        fontSize: 12,
+        color: "#999",
+        marginTop: 2,
     },
     content: {
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-        marginBottom: 20,
+        marginBottom: 12,
+    },
+    postContent: {
+        fontSize: 15,
+        color: "#333",
+        lineHeight: 22,
+    },
+    footer: {
+        borderTopWidth: 1,
+        borderTopColor: "#f0f0f0",
+        paddingTop: 10,
     },
     iconContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        marginTop: 10,
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
     },
-    input: {
-        borderColor: 'gray',
-        borderWidth: 1,
-        padding: 10,
-        width: width * 0.8,
-        height: 100,
-        borderRadius: 10,
+    actionButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
     },
-    buttonSend: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        backgroundColor: '#DDDDDD',
-        borderRadius: 25,
-        paddingLeft: 15,
+    actionText: {
+        fontSize: 14,
+        color: "#666",
+        marginLeft: -8,
     },
 });
