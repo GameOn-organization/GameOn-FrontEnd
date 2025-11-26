@@ -16,6 +16,7 @@ import {
     Pressable,
     ActivityIndicator,
     RefreshControl,
+    Alert,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
@@ -24,6 +25,8 @@ import PostComposer from "../../components/PostComposer";
 import MenuProfile from "../../components/MenuProfile";
 import { Switch } from "../../components/Switch";
 import { getMyPosts, Post as PostType } from "../../services/postsService";
+import { getMyProfile, updateMyProfile } from "../../services/authService";
+import { getTagNames } from "../../utils/tagsMap";
 
 const { width, height } = Dimensions.get("window");
 const DRAWER_WIDTH = width * 0.8;
@@ -49,6 +52,11 @@ export default function Profile() {
     const [posts, setPosts] = useState<PostType[]>([]);
     const [isLoadingPosts, setIsLoadingPosts] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Estados para perfil do usuário
+    const [userProfile, setUserProfile] = useState<any>(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
 
     // Função para abrir o drawer
     const openDrawer = () => {
@@ -135,10 +143,28 @@ export default function Profile() {
         }
     };
 
+    // Função para buscar perfil do usuário
+    const fetchProfile = async () => {
+        try {
+            const profile = await getMyProfile();
+            if (profile) {
+                setUserProfile(profile);
+            } else {
+                console.warn("Perfil não encontrado");
+            }
+        } catch (error: any) {
+            console.error("Erro ao buscar perfil:", error);
+            // Não mostrar alerta, apenas logar o erro
+            // O usuário pode não ter perfil ainda
+        } finally {
+            setIsLoadingProfile(false);
+        }
+    };
+
     // Função para atualizar posts (pull to refresh)
     const handleRefresh = async () => {
         setIsRefreshing(true);
-        await fetchPosts();
+        await Promise.all([fetchPosts(), fetchProfile()]);
         setIsRefreshing(false);
     };
 
@@ -159,19 +185,87 @@ export default function Profile() {
         ));
     };
 
-    // Buscar posts ao montar o componente
+    // Função para salvar edição do perfil
+    const handleProfileEdit = async (formData: any) => {
+        setIsSavingProfile(true);
+        try {
+            await updateMyProfile({
+                name: formData.nome,
+                age: formData.idade,
+                descricao: formData.descricao,
+                sexo: formData.sexo as 'm' | 'f' | 'nb' | undefined,
+                localizacao: formData.localizacao,
+                images: formData.images || [],
+                wallpaper: formData.wallpaper || null,
+                tags: [...(formData.selected1 || []), ...(formData.selected2 || [])]
+            });
+            
+            // Atualizar perfil localmente
+            await fetchProfile();
+            
+            // Fechar modal
+            setEditVisible(false);
+            setModalTransparent(false);
+            
+            Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+        } catch (error: any) {
+            console.error("Erro ao atualizar perfil:", error);
+            Alert.alert("Erro", error.message || "Erro ao atualizar perfil");
+        } finally {
+            setIsSavingProfile(false);
+        }
+    };
+
+    // Buscar posts e perfil ao montar o componente
     useEffect(() => {
         fetchPosts();
+        fetchProfile();
     }, []);
 
-    const userInfo = [
-        "Email: usuario@exemplo.com",
-        "Telefone: (11) 99999-9999",
-        "Localização: São Paulo - SP - Brasil",
-        "Data de nascimento: 01/01/1990",
-        "Disponibilidade: Imediata",
-        "Idiomas: Português, Inglês, Espanhol",
-    ];
+    // Função para formatar as informações do usuário
+    const getUserInfo = () => {
+        if (!userProfile) return [];
+        
+        const info = [];
+        
+        if (userProfile.email) {
+            info.push(`Email: ${userProfile.email}`);
+        }
+        
+        if (userProfile.phone) {
+            info.push(`Telefone: ${userProfile.phone}`);
+        }
+        
+        if (userProfile.localizacao) {
+            info.push(`Localização: ${userProfile.localizacao}`);
+        }
+        
+        if (userProfile.age) {
+            info.push(`Idade: ${userProfile.age} anos`);
+        }
+        
+        if (userProfile.sexo) {
+            const sexoMap = {
+                'm': 'Masculino',
+                'f': 'Feminino',
+                'nb': 'Não-binário'
+            };
+            info.push(`Gênero: ${sexoMap[userProfile.sexo] || userProfile.sexo}`);
+        }
+        
+        if (userProfile.descricao) {
+            info.push(`Sobre: ${userProfile.descricao}`);
+        }
+        
+        if (userProfile.tags && userProfile.tags.length > 0) {
+            const tagNames = getTagNames(userProfile.tags);
+            info.push(`Interesses: ${tagNames.join(', ')}`);
+        }
+        
+        return info;
+    };
+
+    const userInfo = getUserInfo();
 
     return (
         <SafeAreaView style={styles.container}>
@@ -199,7 +293,28 @@ export default function Profile() {
                             setModalTransparent(!modalTransparent);
                     }}
                 />
-                <Formulario />
+                <Formulario 
+                    styleProp={{backgroundColor: '#667eea'}}
+                    colorProp={['#667eea', '#667eea']}
+                    onSubmit={handleProfileEdit}
+                    initialData={userProfile ? {
+                        nome: userProfile.name,
+                        idade: userProfile.age,
+                        descricao: userProfile.descricao,
+                        sexo: userProfile.sexo,
+                        localizacao: userProfile.localizacao,
+                        images: userProfile.images || [],
+                        wallpaper: userProfile.wallpaper,
+                        selected1: userProfile.tags ? userProfile.tags.slice(0, Math.ceil(userProfile.tags.length / 2)) : [],
+                        selected2: userProfile.tags ? userProfile.tags.slice(Math.ceil(userProfile.tags.length / 2)) : []
+                    } : undefined}
+                />
+                {isSavingProfile && (
+                    <View style={styles.loadingOverlay}>
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={styles.loadingOverlayText}>Salvando...</Text>
+                    </View>
+                )}
             </Modal>
             
             {/* Formulário de Publicar Post*/}
@@ -269,10 +384,24 @@ export default function Profile() {
 
                 {/* Profile Image - Posicionada de forma absoluta sobre o ScrollView */}
                 <SafeAreaView style={styles.imageContainer}>
-                    <Image
-                        source={require("../../assets/images/icon.jpeg")}
-                        style={styles.image}
-                    />
+                    {isLoadingProfile ? (
+                        <ActivityIndicator size="large" color="#667eea" />
+                    ) : userProfile?.images && userProfile.images.length > 0 && userProfile.images[0] ? (
+                        <Image
+                            source={{ uri: userProfile.images[0] }}
+                            style={styles.image}
+                        />
+                    ) : userProfile?.image ? (
+                        <Image
+                            source={{ uri: userProfile.image }}
+                            style={styles.image}
+                        />
+                    ) : (
+                        <Image
+                            source={require("../../assets/images/icon.jpeg")}
+                            style={styles.image}
+                        />
+                    )}
                 </SafeAreaView>
 
                 {/* Profile Section - Seção do Perfil */}
@@ -298,8 +427,12 @@ export default function Profile() {
                         />
                     </SafeAreaView>
 
-                    <Text style={styles.userName}>Nome do Usuário</Text>
-                    <Text style={styles.description}>Descrição do perfil</Text>
+                    <Text style={styles.userName}>
+                        {isLoadingProfile ? "Carregando..." : (userProfile?.name || "Nome do Usuário")}
+                    </Text>
+                    <Text style={styles.description}>
+                        {isLoadingProfile ? "" : (userProfile?.descricao || "Descrição do perfil")}
+                    </Text>
 
                     <Switch activeTab={activeTab} onChangeTab={setActiveTab} />
                 </SafeAreaView>
@@ -340,14 +473,35 @@ export default function Profile() {
                         </SafeAreaView>
                     ) : (
                         <SafeAreaView>
-                            {userInfo.map((info, index) => (
-                                <SafeAreaView
-                                    key={index}
-                                    style={styles.infoItem}
-                                >
-                                    <Text style={styles.infoText}>{info}</Text>
-                                </SafeAreaView>
-                            ))}
+                            {isLoadingProfile ? (
+                                <View style={styles.loadingContainer}>
+                                    <ActivityIndicator size="large" color="#667eea" />
+                                    <Text style={styles.loadingText}>Carregando informações...</Text>
+                                </View>
+                            ) : userInfo.length === 0 ? (
+                                <View style={styles.emptyContainer}>
+                                    <IconButton
+                                        icon="information-outline"
+                                        size={60}
+                                        iconColor="#ccc"
+                                    />
+                                    <Text style={styles.emptyText}>
+                                        Nenhuma informação disponível
+                                    </Text>
+                                    <Text style={styles.emptySubText}>
+                                        Complete seu perfil clicando no botão de editar
+                                    </Text>
+                                </View>
+                            ) : (
+                                userInfo.map((info, index) => (
+                                    <SafeAreaView
+                                        key={index}
+                                        style={styles.infoItem}
+                                    >
+                                        <Text style={styles.infoText}>{info}</Text>
+                                    </SafeAreaView>
+                                ))
+                            )}
                         </SafeAreaView>
                     )}
                 </SafeAreaView>
@@ -392,17 +546,29 @@ export default function Profile() {
                                         gap: 10,
                                     }}
                                 >
-                                    <Image
-                                        source={require("../../assets/images/icon.jpeg")}
-                                        style={[styles.image, styles.imageIcon]}
-                                    />
+                                    {userProfile?.images && userProfile.images.length > 0 && userProfile.images[0] ? (
+                                        <Image
+                                            source={{ uri: userProfile.images[0] }}
+                                            style={[styles.image, styles.imageIcon]}
+                                        />
+                                    ) : userProfile?.image ? (
+                                        <Image
+                                            source={{ uri: userProfile.image }}
+                                            style={[styles.image, styles.imageIcon]}
+                                        />
+                                    ) : (
+                                        <Image
+                                            source={require("../../assets/images/icon.jpeg")}
+                                            style={[styles.image, styles.imageIcon]}
+                                        />
+                                    )}
                                     <View>
                                         <Text
                                             style={{fontWeight: 'bold'}}
-                                        >Nome do Usuário</Text>
+                                        >{userProfile?.name || "Nome do Usuário"}</Text>
                                         <Text
                                             style={{fontStyle: 'italic'}}
-                                        >email@dominio.com</Text>
+                                        >{userProfile?.email || "email@dominio.com"}</Text>
                                     </View>
                                 </View>
                                 <IconButton
@@ -595,5 +761,21 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         paddingTop: '40',
         paddingHorizontal: 10,
+    },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    loadingOverlayText: {
+        color: '#fff',
+        marginTop: 10,
+        fontSize: 16,
     },
 });

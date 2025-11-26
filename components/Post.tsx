@@ -95,10 +95,17 @@ export default function Post({ post, onPostDeleted, onPostLiked }: PostProps) {
                 {/* Header do Post */}
                 <View style={styles.header}>
                     <View style={styles.userContainer}>
-                        <Image
-                            source={require("../assets/images/icon.jpeg")}
-                            style={styles.image}
-                        />
+                        {post.authorImage ? (
+                            <Image
+                                source={{ uri: post.authorImage }}
+                                style={styles.image}
+                            />
+                        ) : (
+                            <Image
+                                source={require("../assets/images/icon.jpeg")}
+                                style={styles.image}
+                            />
+                        )}
                         <View style={styles.userInfo}>
                             <Text style={styles.userName}>{post.authorName}</Text>
                             <Text style={styles.postDate}>{formatRelativeDate(post.createdAt)}</Text>
