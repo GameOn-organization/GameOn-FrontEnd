@@ -187,7 +187,7 @@ export default function Message() {
                     return (
                         <ChatButton
                             key={conv.id}
-                            pfp={imageSource.uri || null}
+                            pfp={imageSource}
                             name={conv.otherUser?.name || 'Usuário'}
                             lastMsg={conv.lastMessage?.text || 'Sem mensagens'}
                             time={formatTime(conv.lastMessage?.timestamp || conv.createdAt)}
