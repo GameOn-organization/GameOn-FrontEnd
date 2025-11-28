@@ -24,6 +24,7 @@ const TAB_ROUTES = [
     { name: "events", path: "/(tabs)/events" },
     { name: "notification", path: "/(tabs)/notification" },
     { name: "profile", path: "/(tabs)/profile"},
+
     { name: "faqsScreen", path: "faqs/faqsScreen", disableSwipe: true },
     { name: "message", path: "messages/message", disableSwipe: true },
     { name: "chat", path: "messages/chat", disableSwipe: true },
@@ -34,7 +35,7 @@ const TAB_ROUTES = [
 
 ];
 
-const INVALID_ROUTES = 3
+const INVALID_ROUTES = 6
 
 export default function SwipeTabsLayoutWithVisualFeedback() {
     const router = useRouter();
