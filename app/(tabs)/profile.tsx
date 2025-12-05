@@ -364,32 +364,57 @@ export default function Profile() {
                 }
             >
                 {/* Top Section - Seção Superior */}
-                <ImageBackground
-                    source={
-                        { uri: userProfile.wallpaper }
-                    }
-                    style={styles.topSection}
-                    resizeMode="cover"
-                >
-                    <SafeAreaView style={styles.topHeader}>
-                        <TouchableOpacity onPress={openDrawer}>
-                            <IconButton
-                                icon="dots-vertical-circle-outline"
-                                size={30}
-                                iconColor="white"
-                            />
-                        </TouchableOpacity>
+                {isLoadingProfile ? (
+                    <ActivityIndicator size="large" color="#667eea" style={styles.topSection} />
+                ) : userProfile?.wallpaper ? (
+                    <ImageBackground
+                        source={{ uri: userProfile.wallpaper }}
+                        style={styles.topSection}
+                        resizeMode="cover"
+                    >
+                        <SafeAreaView style={styles.topHeader}>
+                            <TouchableOpacity onPress={openDrawer}>
+                                <IconButton
+                                    icon="dots-vertical-circle-outline"
+                                    size={30}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => router.navigate("/")}>
-                            <IconButton
-                                icon="logout"
-                                size={24}
-                                iconColor="white"
-                            />
-                        </TouchableOpacity>
-                    </SafeAreaView>
-                </ImageBackground>
+                            <TouchableOpacity onPress={() => router.navigate("/")}>
+                                <IconButton
+                                    icon="logout"
+                                    size={24}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
+                        </SafeAreaView>
+                    </ImageBackground>
+                ) : (
+                    <ImageBackground
+                        source={require("../../assets/images/icon.jpeg")}
+                        style={styles.topSection}
+                        resizeMode="cover"
+                    >
+                        <SafeAreaView style={styles.topHeader}>
+                            <TouchableOpacity onPress={openDrawer}>
+                                <IconButton
+                                    icon="dots-vertical-circle-outline"
+                                    size={30}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
 
+                            <TouchableOpacity onPress={() => router.navigate("/")}>
+                                <IconButton
+                                    icon="logout"
+                                    size={24}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
+                        </SafeAreaView>
+                    </ImageBackground>
+                )}
 
                 {/* Profile Image - Posicionada de forma absoluta sobre o ScrollView */}
                 <SafeAreaView style={styles.imageContainer}>
