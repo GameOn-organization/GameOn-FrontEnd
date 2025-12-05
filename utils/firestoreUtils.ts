@@ -89,3 +89,33 @@ export function formatShortDate(date: Date | string | FirestoreTimestamp | any):
   });
 }
 
+/**
+ * Converte recursivamente objetos do Firestore
+ * Converte todos os timestamps (_seconds/_nanoseconds) em Date
+ * @param obj - Objeto a ser convertido
+ * @returns Objeto com timestamps convertidos
+ */
+export function convertFirestoreObject(obj: any): any {
+  if (!obj) return obj
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => convertFirestoreObject(item))
+  }
+  
+  if (typeof obj === 'object') {
+    // Verificar se é um timestamp do Firestore
+    if (obj._seconds !== undefined && obj._nanoseconds !== undefined) {
+      return convertFirestoreDate(obj)
+    }
+    
+    // Converter todos os campos recursivamente
+    const converted: any = {}
+    for (const key in obj) {
+      converted[key] = convertFirestoreObject(obj[key])
+    }
+    return converted
+  }
+  
+  return obj
+}
+

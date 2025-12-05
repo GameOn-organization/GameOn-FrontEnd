@@ -6,6 +6,7 @@ export interface Post {
   content: string
   authorId: string
   authorName: string
+  authorImage?: string | null
   createdAt: Date | string | FirestoreTimestamp
   updatedAt: Date | string | FirestoreTimestamp
   likes: number

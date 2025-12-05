@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import SwipeCard, { SwipeCardRef } from "./SwipeCard";
 
@@ -12,6 +12,7 @@ type Profile = {
     name: string;
     age: number;
     image: any;
+    images?: any[];
     tags: Tag[];
 };
 
@@ -19,11 +20,20 @@ interface SwipeDeckProps {
     data: Profile[];
     onSwipeRight?: (profile: Profile) => void;
     onSwipeLeft?: (profile: Profile) => void;
+    onDeckEmpty?: () => void;   // <-- ADICIONADO
 }
 
-export const SwipeDeck = ({ data, onSwipeRight, onSwipeLeft }: SwipeDeckProps) => {
+export const SwipeDeck = ({ data, onSwipeRight, onSwipeLeft, onDeckEmpty }: SwipeDeckProps) => {
     const [index, setIndex] = useState(0);
     const cardRef = useRef<SwipeCardRef>(null);
+
+    // Avisar quando o deck acabou
+    useEffect(() => {
+        if (index >= data.length) {
+            console.log("🏁 Deck acabou! Disparando onDeckEmpty()");
+            onDeckEmpty?.();
+        }
+    }, [index, data.length, onDeckEmpty]);
 
     const handleSwipe = (direction: "left" | "right") => {
         const currentProfile = data[index];
@@ -40,18 +50,18 @@ export const SwipeDeck = ({ data, onSwipeRight, onSwipeLeft }: SwipeDeckProps) =
         <View style={styles.container}>
             {data.slice(index).map((profile, i) => {
                 const isTop = i === 0;
+
                 return (
                     <View
                         key={profile.id}
                         style={{
                             position: "absolute",
-                            width: '100%', // Adjust the vertical spacing between cards
+                            width: "100%",
                             alignItems: "center",
                             justifyContent: "center",
                         }}
                     >
                         <SwipeCard
-                            key={profile.id}
                             ref={isTop ? cardRef : null}
                             profile={profile}
                             onSwipeLeft={() => handleSwipe("left")}

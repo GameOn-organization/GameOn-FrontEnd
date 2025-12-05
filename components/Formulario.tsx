@@ -75,6 +75,28 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
     // Estado separado para o wallpaper
     const [wallpaper, setWallpaper] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (initialData) {
+            setNome(initialData.nome || "");
+            setDescricao(initialData.descricao || "");
+            setSexo(initialData.sexo || "");
+            setLocalizacao(initialData.localizacao || "");
+            setSelected1(initialData.selected1 || []);
+            setSelected2(initialData.selected2 || []);
+            setImages(initialData.images || []);
+            setWallpaper(initialData.wallpaper || null);
+
+            // Caso queira também ajustar a data pelo valor da idade inicial
+            if (initialData.idade) {
+                const currentYear = new Date().getFullYear();
+                const birthYear = currentYear - initialData.idade;
+                const birthDate = new Date(birthYear, 0, 1); // Ajuste de mês/dia se necessário
+                setDate(birthDate);
+            }
+        }
+    }, [initialData]);
+
+
     const onChange = (event: any, selectedDate: Date | undefined) => {
         const currentDate = selectedDate || date;
         setShowDate(false);
@@ -310,13 +332,16 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
 
     return (
         <LinearGradient
-            colors={colorProp ? colorProp : ["#667eea", "#764ba2"]}
+            colors={colorProp ? colorProp : ["black", "black"]}
             style={[styles.container, styleProp]}
         >
             <ScrollView>
 
                 <SafeAreaView style={styles.formContainer}>
-                    <Text style={styles.title}>Criar Perfil</Text>
+                    <Text style={styles.title}>
+                        {initialData ? "Editar Perfil" : "Criar Perfil"}
+                    </Text>
+
 
                     <SafeAreaView style={styles.inputContainer}>
                         <Icon
@@ -447,7 +472,7 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
                         renderLeftIcon={() => (
                             <Icon
                                 style={styles.icon}
-                                color={colorProp ? colorProp : "#667eea"}
+                                color={"#E67E22"}
                                 source="check"
                                 size={20}
                             />
@@ -457,7 +482,7 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
                             <TouchableOpacity
                                 onPress={() => unSelect && unSelect(item)}
                             >
-                                <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
+                                <SafeAreaView style={[styles.selectedStyle, {backgroundColor: '#E67E22'}]}>
                                     <Icon
                                         source={item.icon as any}
                                         size={17}
@@ -490,7 +515,7 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
                         renderLeftIcon={() => (
                             <Icon
                                 style={styles.icon}
-                                color={colorProp ? colorProp : "#667eea"}
+                                color={"#8E44AD"}
                                 source="check"
                                 size={20}
                             />
@@ -500,7 +525,7 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
                             <TouchableOpacity
                                 onPress={() => unSelect && unSelect(item)}
                             >
-                                <SafeAreaView style={[styles.selectedStyle, {backgroundColor: colorProp ? colorProp : '#667eea'}]}>
+                                <SafeAreaView style={[styles.selectedStyle, {backgroundColor: '#8E44AD'}]}>
                                     <Icon
                                         source={item.icon as any}
                                         size={17}
@@ -690,7 +715,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderRadius: 16,
-        backgroundColor: "#667eea",
         shadowColor: "#000",
         marginTop: 8,
         marginRight: 12,

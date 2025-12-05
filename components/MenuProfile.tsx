@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     },
     badge: {
         marginRight: 10,
-        backgroundColor: '#6200ee',
+        backgroundColor: 'red',
         color: 'white',
     },
     footer: {

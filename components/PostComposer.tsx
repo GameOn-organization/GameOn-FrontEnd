@@ -1,5 +1,5 @@
 import { IconButton } from "react-native-paper";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Dimensions,
     StyleSheet,
@@ -13,7 +13,7 @@ import {
     View,
 } from "react-native";
 import { createPost } from "../services/postsService";
-import { getCurrentUser } from "../services/authService";
+import { getCurrentUser, getMyProfile } from "../services/authService";
 
 const { width, height } = Dimensions.get("window");
 
@@ -25,9 +25,27 @@ interface PostComposerProps {
 export default function PostComposer({ onPostCreated, onClose }: PostComposerProps) {
     const [content, setContent] = useState("");
     const [isPosting, setIsPosting] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
     
     const currentUser = getCurrentUser();
     const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || "Usuário";
+    
+    // Buscar perfil do usuário ao montar o componente
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const profile = await getMyProfile();
+                if (profile) {
+                    setUserProfile(profile);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar perfil:", error);
+                // Silencioso, o usuário pode não ter foto ainda
+            }
+        };
+        
+        fetchUserProfile();
+    }, []);
     
     const handlePost = async () => {
         if (!content.trim()) {
@@ -81,10 +99,22 @@ export default function PostComposer({ onPostCreated, onClose }: PostComposerPro
 
                 {/* User Info */}
                 <SafeAreaView style={styles.userContainer}>
-                    <Image
-                        source={require("../assets/images/icon.jpeg")}
-                        style={styles.image}
-                    />
+                    {userProfile?.images && userProfile.images.length > 0 && userProfile.images[0] ? (
+                        <Image
+                            source={{ uri: userProfile.images[0] }}
+                            style={styles.image}
+                        />
+                    ) : userProfile?.image ? (
+                        <Image
+                            source={{ uri: userProfile.image }}
+                            style={styles.image}
+                        />
+                    ) : (
+                        <Image
+                            source={require("../assets/images/icon.jpeg")}
+                            style={styles.image}
+                        />
+                    )}
                     <Text style={styles.userName}>{userName}</Text>
                 </SafeAreaView>
 
