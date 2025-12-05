@@ -297,7 +297,7 @@ export default function Community() {
                         />
                     </View>
                     <Text style={styles.resultsText}>
-                        {filteredPlaces.length} results
+                        {filteredPlaces.length} Resultados
                     </Text>
                 </View>
             </View>

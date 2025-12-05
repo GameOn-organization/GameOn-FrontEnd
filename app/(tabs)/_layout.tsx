@@ -11,7 +11,10 @@ import Animated, {
     interpolate,
     Extrapolate,
 } from "react-native-reanimated";
-
+import { getCurrentUser } from '../../services/authService'
+import { getMyConversations, Conversation } from '../../services/conversationsService'
+import { convertFirestoreObject } from '../../utils/firestoreUtils'
+import { getNotifications, markAsRead, Notification as NotificationType, ListNotificationsQuery } from "../../services/notificationService";
 import { HapticTab } from "@/components/examples/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 
@@ -45,6 +48,60 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
 
     const segments = useSegments();
     const lastSegment = segments[segments.length - 1];
+
+    const [conversations, setConversations] = useState<ConversationWithUser[]>([])
+    const [notifications, setNotifications] = useState<NotificationType[]>([]);
+
+    // Função para buscar conversas
+    const fetchConversations = async () => {
+        try {
+            const currentUser = getCurrentUser()
+            if (!currentUser) {
+                throw new Error('Usuário não autenticado')
+            }
+            const rawConvs = await getMyConversations(currentUser.uid)
+            
+            // Converter timestamps do Firestore
+            const convs = rawConvs.map(conv => convertFirestoreObject(conv))
+            
+            // Buscar dados dos outros participantes
+            const convsWithUsers = await Promise.all(
+                convs.map(async (conv) => {
+                    // Encontrar o outro usuário (não é o usuário atual)
+                    const otherUserId = conv.participants.find(p => p !== currentUser.uid)
+                    
+                    return conv
+                })
+            )
+            
+            setConversations(convsWithUsers)
+        } catch (error: any) {
+            setError(error.message || 'Erro ao carregar conversas')
+        } finally {
+            setIsLoading(false)
+            setIsRefreshing(false)
+        }
+    }
+
+    // Buscar conversas ao montar
+    useEffect(() => {
+        fetchConversations()
+    }, [])
+
+    const loadNotifications = async () => {
+        try {
+            const query: ListNotificationsQuery = {};
+            const notifs  = await getNotifications(query);
+            setNotifications(notifs);
+        } catch (error) {
+            console.error("Erro ao carregar notificações:", error);
+        }
+    };
+    
+    useEffect(() => {
+        loadNotifications();
+    }, []);
+
     // Atualiza currentTabIndex com base na rota atual do Expo Router
     useEffect(() => {
         const index = TAB_ROUTES.findIndex((tab) => tab.name === lastSegment);
@@ -197,7 +254,7 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                                                 top: 6,
                                                 right: 10,
                                             }}
-                                        >33</Badge>
+                                        >{conversations.length}</Badge>
                                     </>
                                 ),
                                 tabBarIcon: ({ focused }) => (
@@ -246,7 +303,7 @@ export default function SwipeTabsLayoutWithVisualFeedback() {
                                     color: "white",
                                     backgroundColor: "red",
                                 },
-                                tabBarBadge: 4,
+                                tabBarBadge: notifications.length,
                                 tabBarIcon: ({ focused }) => (
                                     <Icon
                                         size={28}
