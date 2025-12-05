@@ -17,6 +17,7 @@ import {
     ActivityIndicator,
     RefreshControl,
     Alert,
+    ImageBackground,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
@@ -363,7 +364,13 @@ export default function Profile() {
                 }
             >
                 {/* Top Section - Seção Superior */}
-                <SafeAreaView style={styles.topSection}>
+                <ImageBackground
+                    source={
+                        { uri: userProfile.wallpaper }
+                    }
+                    style={styles.topSection}
+                    resizeMode="cover"
+                >
                     <SafeAreaView style={styles.topHeader}>
                         <TouchableOpacity onPress={openDrawer}>
                             <IconButton
@@ -372,6 +379,7 @@ export default function Profile() {
                                 iconColor="white"
                             />
                         </TouchableOpacity>
+
                         <TouchableOpacity onPress={() => router.navigate("/")}>
                             <IconButton
                                 icon="logout"
@@ -380,7 +388,8 @@ export default function Profile() {
                             />
                         </TouchableOpacity>
                     </SafeAreaView>
-                </SafeAreaView>
+                </ImageBackground>
+
 
                 {/* Profile Image - Posicionada de forma absoluta sobre o ScrollView */}
                 <SafeAreaView style={styles.imageContainer}>
