@@ -275,7 +275,7 @@ export default function Profile() {
             
             {/* Formulário de Editar Perfil*/}
             <Modal
-                backdropColor='#667eea'
+                backdropColor='black'
                 animationType="slide"
                 transparent={modalTransparent}
                 visible={editVisible}
@@ -288,15 +288,15 @@ export default function Profile() {
                     icon="arrow-left"
                     size={24}
                     iconColor="white"
-                    style={{ backgroundColor: "#667eea" }}
+                    style={{ backgroundColor: "black" }}
                     onPress={() => {
                         setEditVisible(!editVisible),
                             setModalTransparent(!modalTransparent);
                     }}
                 />
                 <Formulario 
-                    styleProp={{backgroundColor: '#667eea'}}
-                    colorProp={['#667eea', '#667eea']}
+                    styleProp={{backgroundColor: 'black'}}
+                    colorProp={['black', 'black']}
                     onSubmit={handleProfileEdit}
                     initialData={userProfile ? {
                         nome: userProfile.name,
