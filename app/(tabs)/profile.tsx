@@ -132,8 +132,8 @@ export default function Profile() {
         try {
             const userPosts = await getMyPosts({
                 orderBy: "createdAt",
-                orderDirection: "desc",
-                limit: 50,
+                orderDirection: "desc"
+                // limit: 50,
             });
             setPosts(userPosts);
         } catch (error: any) {

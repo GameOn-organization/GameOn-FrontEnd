@@ -196,7 +196,7 @@ export default function Message() {
                                 params: {
                                     id: conv.id,
                                     name: conv.otherUser?.name || 'Usuário',
-                                    image: otherUserImage || ''
+                                    image: encodeURIComponent(imageSource?.uri),
                                 }
                             })}
                         />
