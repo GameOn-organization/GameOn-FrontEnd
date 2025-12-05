@@ -156,7 +156,7 @@ export default function Community() {
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
 
-    const GOOGLE_API_KEY = "substituir pela chave no gp";
+    const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
 
     const searchLocation = async () => {
         if (!localSearch) return;
@@ -297,7 +297,7 @@ export default function Community() {
                         />
                     </View>
                     <Text style={styles.resultsText}>
-                        {filteredPlaces.length} results
+                        {filteredPlaces.length} Resultados
                     </Text>
                 </View>
             </View>

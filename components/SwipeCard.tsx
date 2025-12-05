@@ -2,6 +2,7 @@ import { IconButton } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
 import React, {
     forwardRef,
+    useState,
     useImperativeHandle,
     useRef,
 } from "react";
@@ -12,8 +13,9 @@ import {
     PanResponder,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
+    FlatList,
+    TouchableOpacity
 } from "react-native";
 
 type Tag = {
@@ -26,6 +28,7 @@ type Profile = {
     name: string;
     age: number;
     image: any;
+    images?: any[]; // array de imagens adicionais
     tags: Tag[];
 };
 
@@ -43,6 +46,16 @@ interface SwipeCardProps {
 
 const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>(
     ({ profile, onSwipeRight, onSwipeLeft, disabled = false }, ref) => {
+
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Função para avançar a imagem
+    const handleNextImage = () => {
+        if (!profile.images || profile.images.length === 0) return;
+        console.log("Current Index before:", currentIndex);
+        setCurrentIndex((prev) => (prev + 1) % profile.images.length);
+    };
+
     const pan = useRef(new Animated.ValueXY()).current;
 
     const panResponder = useRef(
@@ -106,10 +119,6 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>(
                 style={[styles.card, { transform: pan.getTranslateTransform() }]}
                 {...(!disabled ? panResponder.panHandlers : {})}
             >
-                <LinearGradient
-                    colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.3)']}
-                    style={styles.gradientOverlay}
-                />
                 
                 <View style={styles.header}>
                     <View style={styles.nameContainer}>
@@ -132,7 +141,30 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>(
                     ))}
                 </View>
 
-                <Image source={profile.image} style={styles.image} resizeMode="cover" />
+                <View style={styles.imageContainer}>
+                    {(profile.images && profile.images.length > 0) ? (
+                        <TouchableOpacity onPress={handleNextImage} activeOpacity={0.9} style={{ flex: 1 }}>
+                            <Image
+                                source={typeof profile.images[currentIndex] === 'string' ? { uri: profile.images[currentIndex] } : profile.images[currentIndex]}
+                                style={[styles.image, { width: CARD_WIDTH, height: CARD_HEIGHT }]}
+                                resizeMode="cover"
+                            />
+                        </TouchableOpacity>
+                    ) : profile.image ? (
+                        <Image
+                            source={typeof profile.image === "string" ? { uri: profile.image } : profile.image}
+                            style={styles.image}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <Image
+                            source={require("../assets/images/icon.jpeg")}
+                            style={styles.image}
+                            resizeMode="cover"
+                        />
+                    )}
+                </View>
+
 
                 <View style={styles.actions}>                        
                     <IconButton
@@ -244,6 +276,11 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
         fontSize: 12,
+    },
+    imageContainer: {
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#eee",
     },
     image: {
         width: "100%",

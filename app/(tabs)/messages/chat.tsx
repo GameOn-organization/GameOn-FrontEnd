@@ -23,13 +23,23 @@ import { getCurrentUser } from "../../../services/authService";
 import { getUserById } from "../../../services/usersService";
 import { convertFirestoreObject } from "../../../utils/firestoreUtils";
 import { formatRelativeDate } from "../../../utils/firestoreUtils";
+import { Stack } from "expo-router";
 
 export default function Chat() {
-    const params = useLocalSearchParams();
     const router = useRouter();
-    const conversationId = params.id as string;
-    const otherUserName = params.name as string;
-    const otherUserImage = params.image as string;
+
+    const { id, name, image } = useLocalSearchParams();
+
+    const conversationId = Array.isArray(id) ? id[0] : id;
+    const otherUserName = Array.isArray(name) ? name[0] : name;
+    
+    const imageUrl =
+    typeof image === "string"
+        ? { uri: image }
+        : image; // caso já venha { uri: "" }
+
+    console.log("🖼️ URL final da imagem:", imageUrl);
+
 
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
@@ -58,7 +68,34 @@ export default function Chat() {
 
             // Buscar mensagens
             const rawMessages = await getMessagesByConversation(conversationId);
-            const convertedMessages = rawMessages.map(msg => convertFirestoreObject(msg));
+            // const convertedMessages = rawMessages.map(msg => convertFirestoreObject(msg))
+            
+            const parseTime = (t: any) => {
+                if (!t) return 0;
+
+                // Firestore Timestamp
+                if (typeof t === "object" && t.seconds != null) {
+                    return t.seconds * 1000;
+                }
+
+                // ISO string
+                if (typeof t === "string") {
+                    const parsed = Date.parse(t);
+                    return isNaN(parsed) ? 0 : parsed;
+                }
+
+                // Date
+                if (t instanceof Date) {
+                    return t.getTime();
+                }
+
+                return 0;
+            };
+
+            const convertedMessages = rawMessages
+                .map(msg => convertFirestoreObject(msg))
+                .sort((a, b) => parseTime(a.timeStamp) - parseTime(b.timeStamp)); // ASC
+
             
             console.log('✅ [CHAT] Mensagens carregadas:', convertedMessages.length);
             setMessages(convertedMessages);
@@ -194,62 +231,91 @@ export default function Chat() {
         );
     }
 
+
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar style="dark" />
+        <>
+            <Stack.Screen
+                options={{
+                    title: "",
+                    headerTitle: () => (
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                            {/* Foto do usuário */}
+                            <Image
+                                source={ imageUrl }
 
-            {/* Mensagens */}
-            <KeyboardAvoidingView
-                style={styles.chatContainer}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 20 : keyboardHeight}
-            >
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.messagesContainer}
-                    contentContainerStyle={styles.messagesContent}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {messages.length === 0 ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>Nenhuma mensagem ainda</Text>
-                            <Text style={styles.emptySubtext}>Envie a primeira mensagem!</Text>
+                                style={{ width: 38, height: 38, borderRadius: 20 }}
+                            />
+
+                            {/* Nome */}
+                            <View>
+                                <Text style={{ fontSize: 17, fontWeight: "600" }}>
+                                    {otherUserName}
+                                </Text>
+                                <Text style={{ fontSize: 12, color: "#666" }}>
+                                    online
+                                </Text>
+                            </View>
                         </View>
-                    ) : (
-                        messages.map(renderMessage)
-                    )}
-                </ScrollView>
+                    ),
+                    headerBackTitleVisible: false,
+                }}
+            />
+            <SafeAreaView style={styles.container}>
+                <StatusBar style="dark" />
 
-                {/* Input - Ajustado com marginBottom */}
-                <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                        <TextInput
-                            style={styles.textInput}
-                            value={message}
-                            onChangeText={setMessage}
-                            placeholder="Mensagem..."
-                            placeholderTextColor="#999"
-                            multiline
-                            editable={!sending}
-                        />
-                        <TouchableOpacity style={styles.attachButton}>
-                            <Text style={styles.attachButtonText}>📎</Text>
+                {/* Mensagens */}
+                <KeyboardAvoidingView
+                    style={styles.chatContainer}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 20 : keyboardHeight}
+                >
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.messagesContainer}
+                        contentContainerStyle={styles.messagesContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {messages.length === 0 ? (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>Nenhuma mensagem ainda</Text>
+                                <Text style={styles.emptySubtext}>Envie a primeira mensagem!</Text>
+                            </View>
+                        ) : (
+                            messages.map(renderMessage)
+                        )}
+                    </ScrollView>
+
+                    {/* Input - Ajustado com marginBottom */}
+                    <View style={styles.inputContainer}>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.textInput}
+                                value={message}
+                                onChangeText={setMessage}
+                                placeholder="Mensagem..."
+                                placeholderTextColor="#999"
+                                multiline
+                                editable={!sending}
+                            />
+                            <TouchableOpacity style={styles.attachButton}>
+                                <Text style={styles.attachButtonText}>📎</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.sendButton, sending && styles.sendButtonDisabled]}
+                            onPress={sendMessage}
+                            disabled={sending || !message.trim()}
+                        >
+                            {sending ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={styles.sendButtonText}>➤</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                        style={[styles.sendButton, sending && styles.sendButtonDisabled]}
-                        onPress={sendMessage}
-                        disabled={sending || !message.trim()}
-                    >
-                        {sending ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <Text style={styles.sendButtonText}>➤</Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </>
     );
 }
 

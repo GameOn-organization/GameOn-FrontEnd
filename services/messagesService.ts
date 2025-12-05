@@ -45,7 +45,7 @@ export const getMessagesByConversation = async (conversationId: string): Promise
     console.log('🔵 [MESSAGES] Buscando mensagens da conversa:', conversationId)
     
     const { data } = await api.get('/messages', {
-      params: { conversationId }
+      params: { conversationId, orderBy: 'timeStamp', orderDirection: 'asc' }
     })
     console.log('✅ [MESSAGES] Mensagens encontradas:', data.length)
     return data

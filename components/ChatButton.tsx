@@ -23,6 +23,7 @@ export default function ChatButton({
 }: ChatButtonProps) {
     // Se pfp não for fornecido, usar placeholder
     const imageSource = pfp || require("../assets/images/icon.jpeg");
+    console.log("🖼️ URL final da imagem:", imageSource);
 
     return (
         <TouchableOpacity style={styles.chatContainer} onPress={onPress}>

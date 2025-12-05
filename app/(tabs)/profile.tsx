@@ -17,6 +17,7 @@ import {
     ActivityIndicator,
     RefreshControl,
     Alert,
+    ImageBackground,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import Formulario from "../../components/Formulario";
@@ -132,8 +133,8 @@ export default function Profile() {
         try {
             const userPosts = await getMyPosts({
                 orderBy: "createdAt",
-                orderDirection: "desc",
-                limit: 50,
+                orderDirection: "desc"
+                // limit: 50,
             });
             setPosts(userPosts);
         } catch (error: any) {
@@ -274,7 +275,7 @@ export default function Profile() {
             
             {/* Formulário de Editar Perfil*/}
             <Modal
-                backdropColor='#667eea'
+                backdropColor='black'
                 animationType="slide"
                 transparent={modalTransparent}
                 visible={editVisible}
@@ -287,15 +288,15 @@ export default function Profile() {
                     icon="arrow-left"
                     size={24}
                     iconColor="white"
-                    style={{ backgroundColor: "#667eea" }}
+                    style={{ backgroundColor: "black" }}
                     onPress={() => {
                         setEditVisible(!editVisible),
                             setModalTransparent(!modalTransparent);
                     }}
                 />
                 <Formulario 
-                    styleProp={{backgroundColor: '#667eea'}}
-                    colorProp={['#667eea', '#667eea']}
+                    styleProp={{backgroundColor: 'black'}}
+                    colorProp={['black', 'black']}
                     onSubmit={handleProfileEdit}
                     initialData={userProfile ? {
                         nome: userProfile.name,
@@ -363,24 +364,57 @@ export default function Profile() {
                 }
             >
                 {/* Top Section - Seção Superior */}
-                <SafeAreaView style={styles.topSection}>
-                    <SafeAreaView style={styles.topHeader}>
-                        <TouchableOpacity onPress={openDrawer}>
-                            <IconButton
-                                icon="dots-vertical-circle-outline"
-                                size={30}
-                                iconColor="white"
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.navigate("/")}>
-                            <IconButton
-                                icon="logout"
-                                size={24}
-                                iconColor="white"
-                            />
-                        </TouchableOpacity>
-                    </SafeAreaView>
-                </SafeAreaView>
+                {isLoadingProfile ? (
+                    <ActivityIndicator size="large" color="#667eea" style={styles.topSection} />
+                ) : userProfile?.wallpaper ? (
+                    <ImageBackground
+                        source={{ uri: userProfile.wallpaper }}
+                        style={styles.topSection}
+                        resizeMode="cover"
+                    >
+                        <SafeAreaView style={styles.topHeader}>
+                            <TouchableOpacity onPress={openDrawer}>
+                                <IconButton
+                                    icon="dots-vertical-circle-outline"
+                                    size={30}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => router.navigate("/")}>
+                                <IconButton
+                                    icon="logout"
+                                    size={24}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
+                        </SafeAreaView>
+                    </ImageBackground>
+                ) : (
+                    <ImageBackground
+                        source={require("../../assets/images/icon.jpeg")}
+                        style={styles.topSection}
+                        resizeMode="cover"
+                    >
+                        <SafeAreaView style={styles.topHeader}>
+                            <TouchableOpacity onPress={openDrawer}>
+                                <IconButton
+                                    icon="dots-vertical-circle-outline"
+                                    size={30}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => router.navigate("/")}>
+                                <IconButton
+                                    icon="logout"
+                                    size={24}
+                                    iconColor="white"
+                                />
+                            </TouchableOpacity>
+                        </SafeAreaView>
+                    </ImageBackground>
+                )}
 
                 {/* Profile Image - Posicionada de forma absoluta sobre o ScrollView */}
                 <SafeAreaView style={styles.imageContainer}>
