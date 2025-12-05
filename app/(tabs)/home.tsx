@@ -221,11 +221,25 @@ const Home = () => {
 
     return (
         <View style={styles.container}>
-            <SwipeDeck
-                data={profiles}
-                onSwipeRight={handleSwipeRight}
-                onSwipeLeft={handleSwipeLeft}
-            />
+            {profiles.length > 0 ? (
+                <SwipeDeck
+                    data={profiles}
+                    onSwipeRight={handleSwipeRight}
+                    onSwipeLeft={handleSwipeLeft}
+                    onDeckEmpty={() => {
+                        console.log("🏁 [HOME] Deck terminou");
+                        setProfiles([]);      // <-- AQUI esvazia e mostra a mensagem
+                    }}
+                />
+                ) : (
+                    <View style={[styles.container, styles.centerContent]}>
+                        <Text style={styles.emptyText}>
+                            😕 Nenhum usuário disponível no momento
+                        </Text>
+                    </View>
+                )
+            }
+
 
             {/* Modal de Match */}
             <Modal
