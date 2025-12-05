@@ -12,6 +12,7 @@ type Profile = {
     name: string;
     age: number;
     image: any;
+    images?: any[];
     tags: Tag[];
 };
 

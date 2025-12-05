@@ -17,6 +17,7 @@ type Profile = {
     name: string;
     age: number;
     image: any;
+    images?: any[];
     tags: Tag[];
 };
 
@@ -54,6 +55,7 @@ const convertToProfile = (user: UserProfile): Profile => {
         name: user.name,
         age: user.age,
         image: imageSource,
+        images: user.images ? user.images.map(img => ({ uri: img })) : [],
         tags: tags
     };
 };
