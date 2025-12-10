@@ -115,7 +115,7 @@ export default function PostComposer({ onPostCreated, onClose }: PostComposerPro
                             style={styles.image}
                         />
                     )}
-                    <Text style={styles.userName}>{userName}</Text>
+                    <Text style={styles.userName}>{userProfile?.name}</Text>
                 </SafeAreaView>
 
                 {/* Content Input */}

@@ -272,7 +272,10 @@ const Home = () => {
                                 style={[styles.modalButton, styles.chatButton]}
                                 onPress={() => {
                                     console.log("🔵 [MODAL] Botão 'Enviar Mensagem' pressionado");
-                                    handleGoToChat();
+                                    // handleGoToChat();
+                                    handleCloseMatchModal();
+                                    router.navigate("/(tabs)/messages");
+
                                 }}
                                 activeOpacity={0.7}
                             >
