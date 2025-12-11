@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Dimensions, View, StyleSheet, ActivityIndicator, Text, Modal, TouchableOpacity, Image, Alert } from "react-native";
 import { SwipeDeck } from "@/components/SwipeDeck";
 import { listUsers, UserProfile } from "@/services/usersService";
-import { getCurrentUser } from "@/services/authService";
+import { getCurrentUser, getMyProfile } from "@/services/authService";
 import { getTagName } from "@/utils/tagsMap";
 import { likeUser } from "@/services/likesService";
 import { useRouter } from "expo-router";
@@ -70,6 +70,24 @@ const Home = () => {
     const [showMatchModal, setShowMatchModal] = useState(false);
     const [matchedUser, setMatchedUser] = useState<Profile | null>(null);
     const [matchConversationId, setMatchConversationId] = useState<string | null>(null);
+    const [userProfile, setUserProfile] = useState<any>(null);
+
+    // Buscar perfil do usuário ao montar o componente
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const profile = await getMyProfile();
+                if (profile) {
+                    setUserProfile(profile);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar perfil:", error);
+                // Silencioso, o usuário pode não ter foto ainda
+            }
+        };
+        
+        fetchUserProfile();
+    }, []);
 
     // Função para buscar usuários
     const fetchUsers = async () => {
@@ -79,9 +97,14 @@ const Home = () => {
         try {
             const currentUser = getCurrentUser();
             const users = await listUsers({ limit: 50 });
+
+            const userMatches = userProfile?.matches || [];
             
             // Filtrar o usuário atual da lista
-            const filteredUsers = users.filter(user => user.id !== currentUser?.uid);
+            const filteredUsers = users.filter(user =>
+                user.id !== currentUser?.uid &&
+                !userMatches.includes(user.id)
+            );
             
             // Converter para o formato esperado pelo SwipeDeck
             const convertedProfiles = filteredUsers.map(convertToProfile);
@@ -98,7 +121,9 @@ const Home = () => {
 
     // Buscar usuários ao montar o componente
     useEffect(() => {
-        fetchUsers();
+        if (userProfile) {
+            fetchUsers();
+        }
     }, []);
 
     const handleSwipeRight = async (profile: Profile) => {
@@ -272,7 +297,10 @@ const Home = () => {
                                 style={[styles.modalButton, styles.chatButton]}
                                 onPress={() => {
                                     console.log("🔵 [MODAL] Botão 'Enviar Mensagem' pressionado");
-                                    handleGoToChat();
+                                    // handleGoToChat();
+                                    handleCloseMatchModal();
+                                    router.navigate("/(tabs)/messages");
+
                                 }}
                                 activeOpacity={0.7}
                             >
