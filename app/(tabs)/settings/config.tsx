@@ -1,5 +1,5 @@
 import { IconButton } from "react-native-paper";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     StyleSheet,
@@ -11,6 +11,7 @@ import {
     TextInput
 } from 'react-native';
 import MaskInput, { Masks } from "react-native-mask-input";
+import { getMyProfile, updateMyProfile } from "../../../services/authService";
 
 export default function SettingsScreen() {
     const [email, setEmail] = useState('');
@@ -20,6 +21,32 @@ export default function SettingsScreen() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [viewPsw, setViewPsw] = useState(false);
     const [viewConPsw, setViewConPsw] = useState(false);
+
+    const [userProfile, setUserProfile] = useState<any>(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+    // Função para buscar perfil do usuário
+    const fetchProfile = async () => {
+        try {
+            const profile = await getMyProfile();
+            if (profile) {
+                setUserProfile(profile);
+            } else {
+                console.warn("Perfil não encontrado");
+            }
+        } catch (error: any) {
+            console.error("Erro ao buscar perfil:", error);
+            // Não mostrar alerta, apenas logar o erro
+            // O usuário pode não ter perfil ainda
+        } finally {
+            setIsLoadingProfile(false);
+        }
+    };
+
+    // Buscar posts e perfil ao montar o componente
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
     const validateChange = () => {
         if (email === confirmEmail) {
@@ -47,10 +74,11 @@ export default function SettingsScreen() {
                 style={styles.scroll}
                 contentContainerStyle={styles.scrollContent}
             >
+                    
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Alterar E-mail</Text>
                     <View style={styles.card}>
-                        <Text style={styles.currentInfo}>E-mail Atual: dummy@dominio.com</Text>
+                        <Text style={styles.currentInfo}>E-mail Atual: {isLoadingProfile ? "Carregando..." : (userProfile?.email || "Email do Usuário")}</Text>
                         <TextInput
                             placeholder="Novo E-mail"
                             autoComplete="email"
@@ -81,7 +109,7 @@ export default function SettingsScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Alterar Telefone</Text>
                     <View style={styles.card}>
-                        <Text style={styles.currentInfo}>Telefone Atual: +55 (11) 99999-9999</Text>
+                        <Text style={styles.currentInfo}>Telefone Atual: {isLoadingProfile ? "Carregando..." : (userProfile?.phone || "Telefone do Usuário")}</Text>
                         <MaskInput
                             placeholder="Novo Telefone"
                             autoCapitalize="none"

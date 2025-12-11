@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
     SafeAreaView,
     Text,
+    Alert,
     TouchableOpacity,
     StyleSheet,
     Switch,
@@ -9,6 +10,7 @@ import {
 } from "react-native";
 import { Icon, Badge } from "react-native-paper";
 import { useRouter } from "expo-router";
+import * as Linking from 'expo-linking';
 
 export default function MenuProfile({ closeDrawer }: { closeDrawer: () => void }) {
     const router = useRouter();
@@ -27,7 +29,24 @@ export default function MenuProfile({ closeDrawer }: { closeDrawer: () => void }
         { icon: 'lock-outline', text: 'Privacidade e Segurança', onPress: () => handleNavigation("../../settings/privacy") },
         { icon: 'lightning-bolt-outline', text: 'Assinatura', onPress: () => handleNavigation("../../settings/premium") },
         { icon: 'tools', text: 'Configurações', onPress: () => handleNavigation("../../settings/config") },
-        { icon: 'handshake', text: 'Seja um Associado', onPress: () => console.log("Seja um Associado") },
+        { icon: 'handshake', text: 'Seja um Associado', onPress: () => Alert.alert(
+            "Feature em Desenvolvimento",
+            "Quer nos apoiar? Visite o nosso repositório no GitHub e veja como contribuir!",
+            [
+                {
+                    text: "Cancelar",
+                    style: "cancel",
+                },
+                {
+                    text: "Visitar GitHub",
+                    style: "default",
+                    onPress: async () => {
+                        const url = 'https://github.com/GameOn-organization'
+                        await Linking.openURL(url);
+                    },
+                },
+            ])
+        },
     ];
 
     return (
