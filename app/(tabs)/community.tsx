@@ -34,6 +34,8 @@ export default function Community() {
         { label: "Todos", value: "Todos" },
     ]);
 
+    const [isLoadingMaps, setIsLoadingMaps] = useState(true);
+
     // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
     const mapRef = useRef<MapView>(null);
 
@@ -153,8 +155,15 @@ export default function Community() {
                 edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 animated: true,
             });
+            setIsLoadingMaps(false);
         }
     }, []); // O array vazio [] garante que isso rode apenas uma vez
+    
+    useEffect(() => {
+        if (mapRef.current) {
+            setIsLoadingMaps(false);
+        }
+    }); // O array vazio [] garante que isso rode apenas uma vez
 
     const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
 
@@ -303,17 +312,19 @@ export default function Community() {
             </View>
 
             {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
-            <MapView ref={mapRef} style={styles.map}>
-                {filteredPlaces.map((place) => (
-                    <Marker
-                        key={place.id}
-                        coordinate={place.coordinate}
-                        onPress={() => handleMarkerPress(place)}
-                    >
-                        <CustomMarker place={place} />
-                    </Marker>
-                ))}
-            </MapView>
+            {isLoadingMaps ? null : (
+                <MapView ref={mapRef} style={styles.map}>
+                    {filteredPlaces.map((place) => (
+                        <Marker
+                            key={place.id}
+                            coordinate={place.coordinate}
+                            onPress={() => handleMarkerPress(place)}
+                        >
+                            <CustomMarker place={place} />
+                        </Marker>
+                    ))}
+                </MapView>
+            )}
 
             <Modal
                 animationType="none" // A animação é 100% manual agora
