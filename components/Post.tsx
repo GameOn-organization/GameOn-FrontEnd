@@ -1,5 +1,5 @@
 import { IconButton } from "react-native-paper";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Dimensions,
     StyleSheet,
@@ -10,7 +10,7 @@ import {
     Alert,
 } from "react-native";
 import { Post as PostType, likePost, deleteMyPost } from "../services/postsService";
-import { getCurrentUser } from "../services/authService";
+import { getCurrentUser, getMyProfile } from "../services/authService";
 import { formatRelativeDate } from "../utils/firestoreUtils";
 import CommentsModal from "./CommentsModal";
 
@@ -28,9 +28,27 @@ export default function Post({ post, onPostDeleted, onPostLiked }: PostProps) {
     const [isLiking, setIsLiking] = useState(false);
     const [commentsCount, setCommentsCount] = useState(post.comments);
     const [commentsModalVisible, setCommentsModalVisible] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
 
     const currentUser = getCurrentUser();
     const isMyPost = currentUser?.uid === post.authorId;
+
+    // Buscar perfil do usuário ao montar o componente
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const profile = await getMyProfile();
+                if (profile) {
+                    setUserProfile(profile);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar perfil:", error);
+                // Silencioso, o usuário pode não ter foto ainda
+            }
+        };
+        
+        fetchUserProfile();
+    }, []);
 
     // Verificar se o usuário atual já deu like
     React.useEffect(() => {
@@ -107,7 +125,7 @@ export default function Post({ post, onPostDeleted, onPostLiked }: PostProps) {
                             />
                         )}
                         <View style={styles.userInfo}>
-                            <Text style={styles.userName}>{post.authorName}</Text>
+                            <Text style={styles.userName}>{userProfile?.name}</Text>
                             <Text style={styles.postDate}>{formatRelativeDate(post.createdAt)}</Text>
                         </View>
                     </View>
