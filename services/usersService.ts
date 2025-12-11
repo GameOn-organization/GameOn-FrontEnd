@@ -13,6 +13,7 @@ export interface UserProfile {
   localizacao?: string
   wallpaper?: string | null
   tags: string[]
+  matches?: string[]
 }
 
 export interface ListUsersQuery {

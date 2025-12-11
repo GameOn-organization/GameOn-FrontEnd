@@ -21,7 +21,7 @@ import {
     deleteComment,
     likeComment,
 } from "../services/commentsService";
-import { getCurrentUser } from "../services/authService";
+import { getCurrentUser, getMyProfile } from "../services/authService";
 import { formatRelativeDate } from "../utils/firestoreUtils";
 
 interface CommentsModalProps {
@@ -41,8 +41,26 @@ export default function CommentsModal({
     const [isLoading, setIsLoading] = useState(false);
     const [newComment, setNewComment] = useState("");
     const [isPosting, setIsPosting] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
 
     const currentUser = getCurrentUser();
+
+    // Buscar perfil do usuário ao montar o componente
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const profile = await getMyProfile();
+                if (profile) {
+                    setUserProfile(profile);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar perfil:", error);
+                // Silencioso, o usuário pode não ter foto ainda
+            }
+        };
+        
+        fetchUserProfile();
+    }, []);
 
     // Buscar comentários ao abrir o modal
     useEffect(() => {
@@ -143,15 +161,17 @@ export default function CommentsModal({
     };
 
     const renderComment = ({ item }: { item: Comment }) => {
-        const isMyComment = currentUser?.uid === item.authorId;
-        const isLiked = item.likedBy?.includes(currentUser?.uid || "");
+        const isMyComment = userProfile?.id === item.authorId;
+        const isThereAvatar = userProfile?.image != null;
+        const avatarSource = isMyComment && isThereAvatar ? userProfile?.image : null;
+        const isLiked = item.likedBy?.includes(userProfile?.id || "");
 
         return (
             <View style={styles.commentItem}>
                 <View style={styles.commentHeader}>
                     <View style={styles.commentUser}>
                         <Image
-                            source={require("../assets/images/icon.jpeg")}
+                            source={avatarSource ? { uri: avatarSource } : require("../assets/images/icon.jpeg")}
                             style={styles.avatar}
                         />
                         <View>
