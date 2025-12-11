@@ -98,12 +98,12 @@ const Home = () => {
             const currentUser = getCurrentUser();
             const users = await listUsers({ limit: 50 });
 
-            const userMatches = userProfile?.matches || [];
+            // const userMatches = userProfile?.matches || [];
             
             // Filtrar o usuário atual da lista
             const filteredUsers = users.filter(user =>
-                user.id !== currentUser?.uid &&
-                !userMatches.includes(user.id)
+                user.id !== currentUser?.uid
+                // !userMatches.includes(user.id)
             );
             
             // Converter para o formato esperado pelo SwipeDeck
@@ -121,9 +121,7 @@ const Home = () => {
 
     // Buscar usuários ao montar o componente
     useEffect(() => {
-        if (userProfile) {
-            fetchUsers();
-        }
+        fetchUsers();
     }, []);
 
     const handleSwipeRight = async (profile: Profile) => {
