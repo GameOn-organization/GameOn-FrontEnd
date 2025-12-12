@@ -144,6 +144,7 @@ const Home = () => {
                     console.log("✅ Chamar Modal Match");
                     setMatchedUser(profile);
                     setMatchConversationId(result.conversation.id);
+                    console.log("✅ Conversation ID do Match:", result.conversation.id);
                     setShowMatchModal(true);
                 }
             } else {
