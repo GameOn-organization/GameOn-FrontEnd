@@ -30,7 +30,6 @@ export const SwipeDeck = ({ data, onSwipeRight, onSwipeLeft, onDeckEmpty }: Swip
     // Avisar quando o deck acabou
     useEffect(() => {
         if (index >= data.length) {
-            console.log("🏁 Deck acabou! Disparando onDeckEmpty()");
             onDeckEmpty?.();
         }
     }, [index, data.length, onDeckEmpty]);

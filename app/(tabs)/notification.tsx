@@ -16,18 +16,12 @@ export default function NotificationScreen() {
       setLoading(true);
       const query: ListNotificationsQuery = {};
       
-      console.log('🔔 [NOTIFICATION SCREEN] Filtro selecionado:', selectedFilter);
-      
       // Aplicar filtro de categoria apenas se não for "Todos" e se houver um filtro selecionado
-      console.log('🔔 [NOTIFICATION SCREEN] Verificando filtro - selectedFilter:', selectedFilter);
-      console.log('🔔 [NOTIFICATION SCREEN] Tipo do selectedFilter:', typeof selectedFilter);
       
       if (selectedFilter && selectedFilter !== "Todos" && selectedFilter !== null) {
-        console.log('🔔 [NOTIFICATION SCREEN] Entrou no if - filtro válido detectado');
-        const validCategories: ('MATCH' | 'Equipes' | 'Eventos' | 'Comunidade')[] = ['MATCH', 'Equipes', 'Eventos', 'Comunidade'];
+        const validCategories: ('match' | 'Equipes' | 'Eventos' | 'Comunidade')[] = ['MATCH', 'Equipes', 'Eventos', 'Comunidade'];
         if (validCategories.includes(selectedFilter as any)) {
-          query.category = selectedFilter as 'MATCH' | 'Equipes' | 'Eventos' | 'Comunidade';
-          console.log('✅ [NOTIFICATION SCREEN] Filtro category aplicado na query:', query.category);
+          query.category = selectedFilter as 'match' | 'Equipes' | 'Eventos' | 'Comunidade';
         } else {
           console.warn('⚠️ [NOTIFICATION SCREEN] Categoria inválida:', selectedFilter);
         }
@@ -37,9 +31,7 @@ export default function NotificationScreen() {
         console.log('🔔 [NOTIFICATION SCREEN] Razão: selectedFilter é', selectedFilter === null ? 'null' : selectedFilter === "Todos" ? '"Todos"' : selectedFilter);
       }
 
-      console.log('🔔 [NOTIFICATION SCREEN] Query enviada:', JSON.stringify(query, null, 2));
       const data = await getNotifications(query);
-      console.log('🔔 [NOTIFICATION SCREEN] Notificações recebidas:', data.length);
       if (data.length > 0) {
         console.log('🔔 [NOTIFICATION SCREEN] Categorias das notificações:', data.map(n => n.category));
       }
@@ -53,7 +45,6 @@ export default function NotificationScreen() {
   };
 
   useEffect(() => {
-    console.log('🔔 [NOTIFICATION SCREEN] useEffect disparado - selectedFilter mudou para:', selectedFilter);
     loadNotifications();
   }, [selectedFilter]);
 
@@ -78,13 +69,10 @@ export default function NotificationScreen() {
 
   const getDefaultAvatar = () => require("../../assets/images/icon.jpeg");
  
-  const filters = ["Todos", "MATCH", "Equipes", "Eventos", "Comunidade"];
+  const filters = ["Todos", "match", "Equipes", "Eventos", "Comunidade"];
 
   const handleFilterPress = (filter: string) => {
-    console.log('🔔 [NOTIFICATION SCREEN] Botão clicado:', filter);
-    console.log('🔔 [NOTIFICATION SCREEN] Filtro atual antes:', selectedFilter);
     const newFilter = filter === "Todos" ? null : filter;
-    console.log('🔔 [NOTIFICATION SCREEN] Novo filtro que será definido:', newFilter);
     setSelectedFilter(newFilter);
   };
 
@@ -122,7 +110,7 @@ export default function NotificationScreen() {
                   : null,
               ]}
             >
-              {filter}
+              {filter.toUpperCase()}
             </Text>
           </TouchableOpacity>
         ))}

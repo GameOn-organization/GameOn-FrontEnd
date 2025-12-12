@@ -60,23 +60,18 @@ export default function Index() {
         setErrorMessage("");
 
         try {
-            console.log("🔵 [LOGIN] Iniciando login com Google...");
             
             // 1. Fazer login com Google
             await loginWithGoogle();
-            
-            console.log("🔵 [LOGIN] Verificando perfil do usuário...");
             
             // 2. Verificar se o usuário tem perfil completo
             const profile = await getMyProfile();
             
             if (!profile || !hasCompleteProfile(profile)) {
                 // Usuário não tem perfil completo, mostrar formulário
-                console.log("🔵 [LOGIN] Usuário não tem perfil completo, abrindo formulário...");
                 setFormVisible(true);
             } else {
                 // Usuário tem perfil completo, redirecionar para home
-                console.log("✅ [LOGIN] Usuário tem perfil completo, redirecionando...");
                 router.navigate("/(tabs)/home");
             }
         } catch (error: any) {

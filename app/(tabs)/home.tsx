@@ -110,7 +110,6 @@ const Home = () => {
             const convertedProfiles = filteredUsers.map(convertToProfile);
             
             setProfiles(convertedProfiles);
-            console.log('✅ [HOME] Usuários carregados:', convertedProfiles.length);
         } catch (error: any) {
             console.error('❌ [HOME] Erro ao carregar usuários:', error);
             setError(error.message || 'Erro ao carregar usuários');
@@ -125,19 +124,13 @@ const Home = () => {
     }, []);
 
     const handleSwipeRight = async (profile: Profile) => {
-        console.log("💚 Gostou de:", profile.name);
-        
         try {
             // Dar like no usuário
             const result = await likeUser(profile.id);
-            console.log("📊 [HOME] Resultado do like:", result);
             
             if (result.match) {
                 // É um match! Mostrar modal
-                console.log("🎉 É UM MATCH COM:", profile.name);
-                console.log("💬 [HOME] Conversation ID:", result.conversation?.id);
-                console.log("💬 [HOME] Conversation completa:", result.conversation);
-                
+                console.log("✅ Match:", result);
                 // Verificar se tem conversation ID
                 if (!result.conversation?.id) {
                     console.error("❌ [HOME] ERRO: Match sem conversation ID!");
@@ -148,8 +141,10 @@ const Home = () => {
                         [{ text: "OK" }]
                     );
                 } else {
+                    console.log("✅ Chamar Modal Match");
                     setMatchedUser(profile);
                     setMatchConversationId(result.conversation.id);
+                    console.log("✅ Conversation ID do Match:", result.conversation.id);
                     setShowMatchModal(true);
                 }
             } else {
@@ -170,42 +165,6 @@ const Home = () => {
         setShowMatchModal(false);
         setMatchedUser(null);
         setMatchConversationId(null);
-    };
-
-    const handleGoToChat = () => {
-        console.log("🔵 [HOME] handleGoToChat chamado");
-        console.log("🔵 [HOME] matchConversationId:", matchConversationId);
-        console.log("🔵 [HOME] matchedUser:", matchedUser);
-        
-        if (matchConversationId && matchedUser) {
-            // Extrair URI da imagem
-            const imageUri = typeof matchedUser.image === 'object' && matchedUser.image.uri 
-                ? matchedUser.image.uri 
-                : '';
-                
-            console.log("✅ [HOME] Navegando para chat com:", {
-                id: matchConversationId,
-                name: matchedUser.name,
-                image: imageUri
-            });
-            
-            handleCloseMatchModal();
-            
-            router.push({
-                pathname: "/(tabs)/messages/chat",
-                params: {
-                    id: matchConversationId,
-                    name: matchedUser.name,
-                    image: imageUri,
-                },
-            });
-        } else {
-            console.log("❌ [HOME] Não pode navegar - faltam dados:", {
-                hasConversationId: !!matchConversationId,
-                hasMatchedUser: !!matchedUser
-            });
-            Alert.alert("Erro", "Não foi possível abrir a conversa. Por favor, tente novamente.");
-        }
     };
 
     // Estado de loading
@@ -252,7 +211,6 @@ const Home = () => {
                     onSwipeRight={handleSwipeRight}
                     onSwipeLeft={handleSwipeLeft}
                     onDeckEmpty={() => {
-                        console.log("🏁 [HOME] Deck terminou");
                         setProfiles([]);      // <-- AQUI esvazia e mostra a mensagem
                     }}
                 />
@@ -294,11 +252,8 @@ const Home = () => {
                             <TouchableOpacity 
                                 style={[styles.modalButton, styles.chatButton]}
                                 onPress={() => {
-                                    console.log("🔵 [MODAL] Botão 'Enviar Mensagem' pressionado");
-                                    // handleGoToChat();
                                     handleCloseMatchModal();
                                     router.navigate("/(tabs)/messages");
-
                                 }}
                                 activeOpacity={0.7}
                             >
@@ -308,7 +263,6 @@ const Home = () => {
                             <TouchableOpacity 
                                 style={[styles.modalButton, styles.continueButton]}
                                 onPress={() => {
-                                    console.log("🔵 [MODAL] Botão 'Continuar Navegando' pressionado");
                                     handleCloseMatchModal();
                                 }}
                                 activeOpacity={0.7}
