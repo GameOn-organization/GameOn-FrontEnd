@@ -336,6 +336,8 @@ export default function Community() {
             <MapView
                 ref={mapRef}
                 style={styles.map}
+                loadingEnabled={true}
+                onMapReady={() => setIsLoadingMaps(false)}
                 initialRegion={{
                     latitude: -23.550520,
                     longitude: -46.633308,
