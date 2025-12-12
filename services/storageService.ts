@@ -106,3 +106,28 @@ export const uploadSingleImage = async (
   return await uploadImage(uri, path)
 }
 
+/**
+ * Faz upload de uma imagem de evento
+ * @param uri - URI local da imagem
+ * @param eventId - ID do evento (opcional, gera um timestamp se não fornecido)
+ * @returns URL pública da imagem ou null se uri for null
+ */
+export const uploadEventImage = async (
+  uri: string | null,
+  eventId?: string
+): Promise<string | null> => {
+  if (!uri) return null
+
+  // Se já for uma URL (https://), não precisa fazer upload
+  if (uri.startsWith('https://') || uri.startsWith('http://')) {
+    console.log('🔵 [STORAGE] Imagem já é uma URL pública')
+    return uri
+  }
+
+  const timestamp = Date.now()
+  const fileName = `event_${eventId || timestamp}_${timestamp}.jpg`
+  const path = `events/${fileName}`
+
+  return await uploadImage(uri, path)
+}
+

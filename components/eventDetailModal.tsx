@@ -1,18 +1,44 @@
 import React from 'react';
 import {
-  Dimensions,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native'; 
+  View,
+  Image
+} from 'react-native';
 
-const { width } = Dimensions.get('window');
+interface EventDetailModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+  event: {
+    id: string;
+    title: string;
+    rating: string;
+    distance: string;
+    price: string;
+    description: string;
+    imagePlaceholderText: string;
+    imagePlaceholderSubtext: string;
+    priceNote?: string;
+    isSubscribed?: boolean;
+    image?: string;
+  };
+  onSubscribe?: () => void;
+  onUnsubscribe?: () => void;
+}
 
-const EventDetailModal = ({ isVisible, onClose, event }) => {
+const EventDetailModal = ({ isVisible, onClose, event, onSubscribe, onUnsubscribe }: EventDetailModalProps) => {
   if (!event) return null;
+
+  const handleSubscribePress = () => {
+    if (event.isSubscribed) {
+      onUnsubscribe?.();
+    } else {
+      onSubscribe?.();
+    }
+  };
 
   return (
     <Modal
@@ -26,37 +52,57 @@ const EventDetailModal = ({ isVisible, onClose, event }) => {
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Imagem principal do evento */}
             <View style={styles.imageContainer}>
-              <View style={styles.eventImagePlaceholder}>
-                <Text style={styles.imagePlaceholderText}>{event.imagePlaceholderText}</Text>
-                <Text style={styles.imagePlaceholderSubtext}>{event.imagePlaceholderSubtext}</Text>
-              </View>
+              {event.image ? (
+                <Image source={{ uri: event.image }} style={styles.eventImage} />
+              ) : (
+                <View style={styles.eventImagePlaceholder}>
+                  <Text style={styles.imagePlaceholderText}>{event.imagePlaceholderText}</Text>
+                  <Text style={styles.imagePlaceholderSubtext}>{event.imagePlaceholderSubtext}</Text>
+                </View>
+              )}
             </View>
 
-            {/* Informações do evento */}
+            {/* Informacoes do evento */}
             <View style={styles.eventInfo}>
               <Text style={styles.eventTitle}>{event.title}</Text>
               <View style={styles.ratingContainer}>
-                <Text style={styles.rating}>⭐ {event.rating}</Text>
-                <Text style={styles.distance}>📍 {event.distance}</Text>
+                <Text style={styles.rating}>* {event.rating}</Text>
+                <Text style={styles.distance}># {event.distance}</Text>
               </View>
-              
+
               <View style={styles.priceContainer}>
                 <View style={styles.priceSection}>
                   <Text style={styles.price}>{event.price}</Text>
-                  <Text style={styles.priceNote}>{event.priceNote}</Text>
+                  {event.priceNote && (
+                    <Text style={styles.priceNote}>{event.priceNote}</Text>
+                  )}
                 </View>
-                <TouchableOpacity style={styles.subscribeButton}>
-                  <Text style={styles.subscribeText}>Inscrever-se</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.subscribeButton,
+                    event.isSubscribed && styles.unsubscribeButton
+                  ]}
+                  onPress={handleSubscribePress}
+                >
+                  <Text style={styles.subscribeText}>
+                    {event.isSubscribed ? 'Cancelar Inscricao' : 'Inscrever-se'}
+                  </Text>
                 </TouchableOpacity>
               </View>
+
+              {event.isSubscribed && (
+                <View style={styles.subscribedBadge}>
+                  <Text style={styles.subscribedBadgeText}>Voce esta inscrito neste evento</Text>
+                </View>
+              )}
             </View>
 
             {/* Separador */}
             <View style={styles.separator} />
 
-            {/* Descrição */}
+            {/* Descricao */}
             <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionTitle}>Descrição</Text>
+              <Text style={styles.descriptionTitle}>Descricao</Text>
               <Text style={styles.descriptionText}>
                 {event.description}
               </Text>
@@ -119,6 +165,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 20,
     paddingTop: 30,
+  },
+  eventImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 15,
+    resizeMode: 'cover',
   },
   eventImagePlaceholder: {
     width: '100%',
@@ -191,10 +243,24 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
   },
+  unsubscribeButton: {
+    backgroundColor: '#ff4757',
+  },
   subscribeText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  subscribedBadge: {
+    backgroundColor: '#E8F5E9',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 15,
+  },
+  subscribedBadgeText: {
+    color: '#4CAF50',
+    fontSize: 14,
+    textAlign: 'center',
   },
   separator: {
     height: 1,

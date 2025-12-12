@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react"; // <-- MUDANÇA
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
@@ -17,82 +17,109 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import MapView, { Marker } from "react-native-maps";
 import { IconButton } from "react-native-paper";
+import { Event, listEvents } from "../../services/eventsService";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
+
+// Tipo adaptado para exibicao no mapa
+interface MapPlace {
+    id: string;
+    name: string;
+    distance: string;
+    rating: number;
+    reviews: number;
+    type: string;
+    image: string;
+    coordinate: { latitude: number; longitude: number };
+    markerColor: string;
+    description: string;
+    eventType: 'physical' | 'digital';
+    price: string;
+    date?: unknown;
+}
 
 export default function Community() {
-    const [selectedPlace, setSelectedPlace] = useState(null);
+    const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [localSearch, setLocalSearch] = useState("");
     const [detailsVisible, setDetailsVisible] = useState(false);
     const [open1, setOpen1] = useState(false);
-    const [open2, setOpen2] = useState(false);
     const [value1, setValue1] = useState("Todos");
     const [items1, setItems1] = useState([
-        { label: "Eventos Físicos", value: "Eventos Físicos" },
+        { label: "Eventos Fisicos", value: "Eventos Fisicos" },
         { label: "Eventos Digitais", value: "Eventos Digitais" },
         { label: "Todos", value: "Todos" },
     ]);
 
     const [isLoadingMaps, setIsLoadingMaps] = useState(true);
+    const [places, setPlaces] = useState<MapPlace[]>([]);
+    const [isLoadingEvents, setIsLoadingEvents] = useState(true);
 
-    // <-- MUDANÇA: Ref para o MapView para podermos controlá-lo
     const mapRef = useRef<MapView>(null);
 
-    const places = [
-        {
-            id: 1,
-            name: "Chico Mendes",
-            distance: "800 metros",
-            rating: 4.8,
-            reviews: 500,
-            type: "Gratuito",
-            image: "https://images.adsttc.com/media/images/643d/5d58/3e4b/311f/a145/231d/large_jpg/parque-ecologico-chico-mendes-recebe-o-selo-de-qualidade-internacional-green-flag-award_1.jpg?1681743201",
-            coordinate: { latitude: -23.6186, longitude: -46.5472 },
-            markerColor: "#8E44AD",
-            description:
-                "O Parque Ecológico Chico Mendes é uma ótima opção para lazer ao ar livre, com quadras poliesportivas, pistas de caminhada e uma vasta área verde para piqueniques e descanso.",
-        },
-        {
-            id: 2,
-            name: "Centro Esportivo",
-            distance: "1.2 km",
-            rating: 4.5,
-            reviews: 320,
-            type: "Pago",
-            image: "https://www.saocaetanodosul.sp.gov.br/images/secretarias/selj/LAZER_E_ESPORTE_PARA_TODOS_NO_CER_PROSPERIDADE_-_Foto_Divulgacao_PMSCS_-_(1 ).jpg",
-            coordinate: { latitude: -23.6156, longitude: -46.5502 },
-            markerColor: "#E67E22",
-            description:
-                "Complexo esportivo completo com piscinas, academia e quadras para diversas modalidades. Requer matrícula e pagamento de mensalidade.",
-        },
-        {
-            id: 3,
-            name: "Quadra Municipal",
-            distance: "600 metros",
-            rating: 4.2,
-            reviews: 180,
-            type: "Gratuito",
-            image: "https://via.placeholder.com/300x150/FF9800/FFFFFF?text=Quadra+Municipal",
-            coordinate: { latitude: -23.6206, longitude: -46.5432 },
-            markerColor: "#8E44AD",
-            description:
-                "Quadra pública disponível para uso da comunidade, ideal para futebol de salão e basquete.",
-        },
-        {
-            id: 4,
-            name: "Arena Esportiva",
-            distance: "1.5 km",
-            rating: 4.7,
-            reviews: 650,
-            type: "Pago",
-            image: "https://via.placeholder.com/300x150/9C27B0/FFFFFF?text=Arena+Esportiva",
-            coordinate: { latitude: -23.6126, longitude: -46.5532 },
-            markerColor: "#E67E22",
-            description:
-                "Arena moderna para eventos esportivos e shows, com estrutura de alta qualidade.",
-        },
-    ];
+    // Converter evento do backend para formato do mapa
+    const convertEventToMapPlace = (event: Event): MapPlace => {
+        return {
+            id: event.id,
+            name: event.title,
+            distance: event.distance || "Calcular...",
+            rating: event.rating || 0,
+            reviews: event.participants?.length || 0,
+            type: event.price === "Gratis" || event.price === "R$0" ? "Gratuito" : "Pago",
+            image: event.image || `https://via.placeholder.com/300x150/${event.eventType === 'digital' ? '8E44AD' : 'E67E22'}/FFFFFF?text=${encodeURIComponent(event.title)}`,
+            coordinate: {
+                latitude: event.location?.latitude || -23.6186,
+                longitude: event.location?.longitude || -46.5472,
+            },
+            markerColor: event.markerColor || (event.eventType === 'digital' ? '#8E44AD' : '#E67E22'),
+            description: event.description,
+            eventType: event.eventType,
+            price: event.price,
+            date: event.date,
+        };
+    };
+
+    // Carregar eventos do backend
+    const loadEvents = useCallback(async () => {
+        try {
+            setIsLoadingEvents(true);
+            // MODIFIED: Removed orderBy and orderDirection to fetch all active events
+            const events = await listEvents({
+                isActive: true,
+            });
+
+            const mapPlaces = events
+                .filter(e => e.location?.latitude && e.location?.longitude)
+                .map(convertEventToMapPlace);
+
+            setPlaces(mapPlaces);
+        } catch (error) {
+            console.error('[COMMUNITY] Erro ao carregar eventos:', error);
+            // Fallback para dados locais em caso de erro
+            setPlaces([
+                {
+                    id: "1",
+                    name: "Chico Mendes",
+                    distance: "800 metros",
+                    rating: 4.8,
+                    reviews: 500,
+                    type: "Gratuito",
+                    image: "https://images.adsttc.com/media/images/643d/5d58/3e4b/311f/a145/231d/large_jpg/parque-ecologico-chico-mendes-recebe-o-selo-de-qualidade-internacional-green-flag-award_1.jpg?1681743201",
+                    coordinate: { latitude: -23.6186, longitude: -46.5472 },
+                    markerColor: "#8E44AD",
+                    description: "O Parque Ecologico Chico Mendes e uma otima opcao para lazer ao ar livre.",
+                    eventType: 'physical',
+                    price: "Gratis",
+                },
+            ]);
+        } finally {
+            setIsLoadingEvents(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadEvents();
+    });
 
     const pan = useRef(new Animated.ValueXY()).current;
 
@@ -128,42 +155,35 @@ export default function Community() {
         })
     ).current;
 
-    const handleMarkerPress = (place) => {
+    const handleMarkerPress = (place: MapPlace) => {
         setSelectedPlace(place);
         setDetailsVisible(false);
-        setModalVisible(true); // Abre o modal instantaneamente (a animação de entrada cuidará do resto)
+        setModalVisible(true);
     };
 
     const handleSelectPlace = () => setDetailsVisible(true);
 
-    const CustomMarker = ({ place }) => (
+    const CustomMarker = ({ place }: { place: MapPlace }) => (
         <View
             style={[
                 styles.markerContainer,
                 { backgroundColor: place.markerColor },
             ]}
         >
-            <IconButton icon="map-marker" size={20} color="white" />
+            <IconButton icon="map-marker" size={20} iconColor="white" />
         </View>
     );
 
-    // <-- MUDANÇA: Efeito para ajustar o mapa quando o componente é montado
+    // This effect fits the map to the markers when the places array is populated.
     useEffect(() => {
-        if (mapRef.current) {
+        if (mapRef.current && places.length > 0) {
             const coordinates = places.map((p) => p.coordinate);
             mapRef.current.fitToCoordinates(coordinates, {
                 edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 animated: true,
             });
-            setIsLoadingMaps(false);
         }
-    }, []); // O array vazio [] garante que isso rode apenas uma vez
-    
-    useEffect(() => {
-        if (mapRef.current) {
-            setIsLoadingMaps(false);
-        }
-    }); // O array vazio [] garante que isso rode apenas uma vez
+    }, [places]);
 
     const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
 
@@ -271,7 +291,7 @@ export default function Community() {
                     <IconButton
                         icon="search-web"
                         size={20}
-                        color="#666"
+                        iconColor="#666"
                         style={styles.searchIcon}
                         onPress={searchLocation}
                     />
@@ -283,7 +303,7 @@ export default function Community() {
                         onSubmitEditing={searchLocation}
                     />
 
-                    <IconButton icon="pencil" size={18} color="#666" />
+                    <IconButton icon="pencil" size={18} iconColor="#666" />
                 </View>
 
                 <View
@@ -311,12 +331,15 @@ export default function Community() {
                 </View>
             </View>
 
-            {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
             <MapView
                 ref={mapRef}
-                loadingEnabled={true}
-                onMapReady={() => setIsLoadingMaps(false)}
                 style={styles.map}
+                initialRegion={{
+                    latitude: -23.550520,
+                    longitude: -46.633308,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                }}
             >
                 {filteredPlaces.map((place) => (
                     <Marker
@@ -374,7 +397,7 @@ export default function Community() {
                                                     <IconButton
                                                         icon="star"
                                                         size={16}
-                                                        color="#FFD700"
+                                                        iconColor="#FFD700"
                                                     />
                                                     <Text
                                                         style={
