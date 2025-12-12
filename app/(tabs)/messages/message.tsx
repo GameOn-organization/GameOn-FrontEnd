@@ -41,7 +41,6 @@ export default function Message() {
                 throw new Error('Usuário não autenticado')
             }
 
-            console.log('🔵 [MESSAGES] Buscando conversas...')
             const rawConvs = await getMyConversations(currentUser.uid)
             
             // Converter timestamps do Firestore
@@ -76,7 +75,6 @@ export default function Message() {
             )
             
             setConversations(convsWithUsers)
-            console.log('✅ [MESSAGES] Conversas carregadas:', convsWithUsers.length)
         } catch (error: any) {
             console.error('❌ [MESSAGES] Erro ao carregar conversas:', error)
             setError(error.message || 'Erro ao carregar conversas')

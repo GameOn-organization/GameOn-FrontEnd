@@ -312,19 +312,22 @@ export default function Community() {
             </View>
 
             {/* <-- MUDANÇA: Adicionada a ref e removida a initialRegion */}
-            {isLoadingMaps ? null : (
-                <MapView ref={mapRef} style={styles.map}>
-                    {filteredPlaces.map((place) => (
-                        <Marker
-                            key={place.id}
-                            coordinate={place.coordinate}
-                            onPress={() => handleMarkerPress(place)}
-                        >
-                            <CustomMarker place={place} />
-                        </Marker>
-                    ))}
-                </MapView>
-            )}
+            <MapView
+                ref={mapRef}
+                loadingEnabled={true}
+                onMapReady={() => setIsLoadingMaps(false)}
+                style={styles.map}
+            >
+                {filteredPlaces.map((place) => (
+                    <Marker
+                        key={place.id}
+                        coordinate={place.coordinate}
+                        onPress={() => handleMarkerPress(place)}
+                    >
+                        <CustomMarker place={place} />
+                    </Marker>
+                ))}
+            </MapView>
 
             <Modal
                 animationType="none" // A animação é 100% manual agora

@@ -52,7 +52,6 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>(
     // Função para avançar a imagem
     const handleNextImage = () => {
         if (!profile.images || profile.images.length === 0) return;
-        console.log("Current Index before:", currentIndex);
         setCurrentIndex((prev) => (prev + 1) % profile.images.length);
     };
 

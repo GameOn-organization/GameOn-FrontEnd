@@ -26,7 +26,6 @@ export const Notification = ({
   onMessagePress,
 }: NotificationProps) => {
   const handleMessagePress = () => {
-    console.log(`Iniciar conversa com ${username}`);
     if (onMessagePress) {
       onMessagePress();
     }

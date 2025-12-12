@@ -38,8 +38,6 @@ export default function Chat() {
         ? { uri: image }
         : image; // caso já venha { uri: "" }
 
-    console.log("🖼️ URL final da imagem:", imageUrl);
-
 
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
@@ -60,7 +58,6 @@ export default function Chat() {
     const loadMessages = async () => {
         try {
             setLoading(true);
-            console.log('🔵 [CHAT] Buscando mensagens da conversa:', conversationId);
             
             // Buscar usuário atual
             const user = await getCurrentUser();
@@ -96,8 +93,6 @@ export default function Chat() {
                 .map(msg => convertFirestoreObject(msg))
                 .sort((a, b) => parseTime(a.timeStamp) - parseTime(b.timeStamp)); // ASC
 
-            
-            console.log('✅ [CHAT] Mensagens carregadas:', convertedMessages.length);
             setMessages(convertedMessages);
         } catch (error: any) {
             console.error('❌ [CHAT] Erro ao carregar mensagens:', error);
@@ -111,7 +106,6 @@ export default function Chat() {
         if (message.trim() && currentUserId) {
             try {
                 setSending(true);
-                console.log('🔵 [CHAT] Enviando mensagem...');
                 
                 // Enviar mensagem
                 const sentMessage = await sendMessageAPI({
@@ -119,8 +113,6 @@ export default function Chat() {
                     senderId: currentUserId,
                     text: message.trim(),
                 });
-
-                console.log('✅ [CHAT] Mensagem enviada:', sentMessage.id);
                 
                 // Adicionar à lista local
                 const converted = convertFirestoreObject(sentMessage);

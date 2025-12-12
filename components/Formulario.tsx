@@ -141,8 +141,6 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
             quality: 1,
         });
 
-        console.log(result);
-
         if (!result.canceled) {
             const newImages = [...images];
             newImages[index] = result.assets[0].uri;
@@ -168,8 +166,6 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
             aspect: [16, 9], // Proporção mais larga para wallpaper
             quality: 1,
         });
-
-        console.log(result);
 
         if (!result.canceled) {
             setWallpaper(result.assets[0].uri);
@@ -264,14 +260,12 @@ export default function Formulario({styleProp, colorProp, onSubmit, initialData}
 
             let location = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = location.coords;
-            console.log("Coordenadas obtidas:", latitude, longitude);
 
             try {
                 const [address] = await Location.reverseGeocodeAsync({
                     latitude,
                     longitude,
                 });
-                console.log("Endereço retornado:", address);
 
                 if (address) {
                     const cidade =
