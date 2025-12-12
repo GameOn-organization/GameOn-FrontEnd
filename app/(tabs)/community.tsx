@@ -18,6 +18,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import MapView, { Marker } from "react-native-maps";
 import { IconButton } from "react-native-paper";
 import { Event, listEvents } from "../../services/eventsService";
+import { useRouter } from "expo-router";
 
 const { height } = Dimensions.get("window");
 
@@ -39,6 +40,7 @@ interface MapPlace {
 }
 
 export default function Community() {
+    const router = useRouter();
     const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [localSearch, setLocalSearch] = useState("");
@@ -479,6 +481,7 @@ export default function Community() {
                                                         22:00
                                                     </Text>
                                                     <TouchableOpacity
+                                                        onPress={() => {closeWithAnimation(); router.navigate('/events')}}
                                                         style={[
                                                             styles.selectButton,
                                                             {
