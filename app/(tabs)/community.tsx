@@ -119,7 +119,7 @@ export default function Community() {
 
     useEffect(() => {
         loadEvents();
-    });
+    }, [loadEvents]);
 
     const pan = useRef(new Animated.ValueXY()).current;
 
